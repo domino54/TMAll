@@ -122,7 +122,7 @@ Integer Get_EnviroIndex(Text _Enviro)
 
 Text Get_VehicleText(Integer _Index)
 {
-	declare Text[] Vehicles = ["CanyonCar", "StadiumCar", "ValleyCar", "LagoonCar", "IslandCar", "BayCar", "CoastCar", "DesertCar", "SnowCar", "RallyCar", "TrafficCar"];
+	declare Text[] Vehicles = ["CanyonCar", "StadiumCar", "ValleyCar", "LagoonCar", "Vehicles\\IslandCar.Item.Gbx", "Vehicles\\BayCar.Item.Gbx", "Vehicles\\CoastCar.Item.Gbx", "Vehicles\\DesertCar.Item.Gbx", "Vehicles\\SnowCar.Item.Gbx", "Vehicles\\RallyCar.Item.Gbx", "Vehicles\\TrafficCar.Item.Gbx"];
 	if(!Vehicles.existskey(_Index)) return "VehicleNotFound";
 	return Vehicles[_Index];
 }
@@ -224,7 +224,7 @@ Void Load() {
 		G_VehicleChoose = G_EnviroChoose;
 	}
 	G_MapEditorScriptName	= XMLController::Get_MapEditorScriptName();
-	
+
 }
 
 Void Hide() {
