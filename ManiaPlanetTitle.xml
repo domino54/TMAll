@@ -1,20 +1,20 @@
 <maniaplanet_title version="4">
-	<id>TMLagoonMaker@nadeo</id>
-	<name>Lagoon Maker</name>
+	<id>TMAllMaker@domino54</id>
+	<name>Trackmania² Maker</name>
 	<desc></desc>
 	<url></url>
 	<download_url></download_url>
 	<title_version></title_version>
 	<allowed_client_title_version></allowed_client_title_version>
 	<maker></maker>
-	<base>TMLagoon</base>
+	<base>TMAll</base>
 	<player_model></player_model>
 	<scriptcloud_enabled>false</scriptcloud_enabled>
 	<limit_camera_fov>false</limit_camera_fov>
 	<use_hmd>false</use_hmd>
 	<unlock_features>0</unlock_features>
 	<packaging>
-		<image name="Media\MEDIABROWSER_HiddenResources\MakerTM\Images\Background\LagoonMakerPackImage.jpg"/>
+		<image name="Media\MEDIABROWSER_HiddenResources\MakerTM\Images\Background\TMAllMakerPackImage.jpg"/>
 		<logos name="Logos.png"/>
 		<collection></collection>
 		<sortindex>100</sortindex>
@@ -23,7 +23,7 @@
 		<boxcase_manialink url=""/>
 	</packaging>
 	<menu>
-		<background_img name="Media\MEDIABROWSER_HiddenResources\MakerTM\Images\Background\LagoonMaker.jpg"/>
+		<background_img name="Media\MEDIABROWSER_HiddenResources\MakerTM\Images\Background\TMAllMaker.jpg"/>
 		<background_replay name=""/>
 		<header name=""/>
 		<music name=""/>
@@ -107,7 +107,11 @@
 		<folder name="Media\MEDIABROWSER_HiddenResources\Title\" public="false" internal="false"/>
 		<folder name="Media\MEDIABROWSER_HiddenResources\MakerTM\" public="false" internal="false"/>
 		<folder name="Scripts\" public="false" internal="false"/>
+		<folder name="Items\" public="false" internal="false"/>
+		<folder name="Materials\" public="false" internal="false"/>
+		<folder name="Maps\TMAllMaker\" public="false" internal="true"/>
 		<folder name="Media\Font\" public="false" internal="false"/>
+		<folder name="Skins\Models\" public="false" internal="true"/>
 	</folders>
 	<hud_default_module name=""/>
 </maniaplanet_title>

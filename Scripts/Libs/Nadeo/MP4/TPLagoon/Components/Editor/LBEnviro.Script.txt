@@ -51,10 +51,10 @@ Text Build() {
 			Reset();
 MenuButtons_Init();
 
-			declare Text[] EnviroImg = ["{{{C_ImgBase}}}Canyon.dds",
-									  "{{{C_ImgBase}}}Stadium.dds",
-									  "{{{C_ImgBase}}}Valley.dds",
-									  "{{{C_ImgBase}}}Lagoon.dds"
+			declare Text[] EnviroImg = ["{{{C_ImgBase}}}Canyon.jpg",
+									  "{{{C_ImgBase}}}Stadium.jpg",
+									  "{{{C_ImgBase}}}Valley.jpg",
+									  "{{{C_ImgBase}}}Lagoon.jpg"
 									  ];
 
 			declare CMlFrame ButtonsFrame <=> (Page.GetFirstChild("MenuButtons_ButtonsFrame") as CMlFrame);
@@ -87,7 +87,7 @@ MenuButtons_Init();
 			declare Text[] Frame_Habillage = ["TargetMove_Title",
 										"TargetMove_Line",
 										"TargetMove_Angle"];
-				
+
 			declare Integer DecaleTime = _DecaleTime;
 			for(I, 0, Frame_Habillage.count-1)
 			{
@@ -130,10 +130,9 @@ MenuButtons_Init();
 				declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
 				declare CMlFrame ButtonsFrame <=> (Page.GetFirstChild("MenuButtons_ButtonsFrame")               as CMlFrame);
 			}
-			
 
 		}
-		
+
 		main() {
 			Init();
 {{{MenuButtons::IncludeInMain()}}}
@@ -143,7 +142,6 @@ MenuButtons_Init();
 				LibManialink_AnimLoop();
 {{{MenuButtons::IncludeInWhile(False)}}}
 
-				
 				if(G_HideTime < Now && G_HideTime != -1)
 				{
 					HidePage();
@@ -166,7 +164,7 @@ MenuButtons_Init();
 								}
 								case "Show" : {
 									declare PreviousPage = Event.CustomEventData[1];
-									if(PreviousPage == "NewMap" || PreviousPage == "Moods")
+									if(PreviousPage == "NewMap" || PreviousPage == "Moods" || PreviousPage == "Vehicle")
 									{
 										declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
 										declare Real[] PosX;
@@ -195,7 +193,7 @@ MenuButtons_Init();
 								}
 								case "Hide" : {
 									declare NextPage = Event.CustomEventData[1];
-									if(NextPage == "NewMap" || NextPage == "BrowseTracks" || NextPage == "Moods")
+									if(NextPage == "NewMap" || NextPage == "BrowseTracks" || NextPage == "Moods" || NextPage == "Vehicle")
 									{
 										LaunchTransitionHabillage(30., 350, 500, False);
 										HidePage();
@@ -214,6 +212,6 @@ MenuButtons_Init();
 	--></script>
 </manialink>
 	""";
-	
+
 	return MLText;
 }

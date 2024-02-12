@@ -1,8 +1,7 @@
 #Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt"			as Manialink
 #Include "Libs/Nadeo/MP4/Common/Components/MenuButtonsOld/LBMenuButtons.Script.txt"					as MenuButtons
+#Const C_ImgBase	"file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Vehicle/"
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" 			as Font
-
-#Const C_ImgBase	"file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Moods/"
 
 Text Build() {
 
@@ -12,11 +11,16 @@ Text Build() {
 
 	declare Text	MainFont = Font::GetFontName("Main");
 	declare Text MLText = """
-<manialink version="3" name="L_Moods">
-{{{MenuButtons::IncludeInFrameModels(SizeXQuad, SizeYQuad, 7.)}}}
+<manialink version="3" name="L_Vehicle">
+{{{MenuButtons::IncludeInFrameModels(SizeXQuad, SizeYQuad, 7.)}}}""";
+	SizeXQuad = 37.4;
+	SizeYQuad = 21.5; // SizeYQuad *= 4/6.;
+	MenuButtons::SetLabelButtonPosition(<-3.9, -6.4>);
+    MLText ^= """
+{{{MenuButtons::IncludeInFrameModels(SizeXQuad, SizeYQuad, 3.5, "MenuButtons_FrameModelSmall")}}}
 	<frame id="Frame_All">
 		<frame id="TargetMove_Title" pos="30. 0.">
-			<label id="Label_Title" halign="left"  valign="center" text="{{{_("Advanced")}}}" textfont="{{{MainFont}}}" pos="-127.5 27.1" opacity="1." z-index="2" textsize="10." textcolor="fff"/>
+			<label id="Label_Title" halign="left"  valign="center" text="{{{_("|Game|Vehicle")}}}" textfont="{{{MainFont}}}" pos="-127.5 27.1" opacity="1." z-index="2" textsize="10." textcolor="fff"/>
 		</frame>
 		<frame id="TargetMove_Line" pos="30. 0.">
 			<frame id="Habillage_Menu_Line" pos="-127.8 19.2" z-index="0" hidden="0">
@@ -24,9 +28,9 @@ Text Build() {
 				<quad id="Quad_Line1" halign="left" valign="bottom" size="24.0 0.4" pos="0. 0." opacity="1.0" bgcolor="fff" />
 			</frame>
 		</frame>
-{{{MenuButtons::IncludeInManialink()}}}
+{{{MenuButtons::IncludeInManialink([4 => "MenuButtons_FrameModelSmall"])}}}
 		<frame id="TargetMove_Angle" pos="30. 0.">
-			<frame id="Habillage_Menu_Angle" pos="-128.3  -20.3">
+			<frame id="Habillage_Menu_Angle" pos="-128.3  -43.8">
 				<quad id="Quad_Line0" halign="right" valign="bottom" size="2.2 0.7" opacity="1." bgcolor="fff"/>
 				<quad id="Quad_Line1" halign="right" valign="top" size="0.7 1.5" opacity="1." bgcolor="fff"/>
 			</frame>
@@ -34,11 +38,9 @@ Text Build() {
 	</frame>
 
 	<script><!--
-		#Include "TextLib" as Moods_TextLib
+		#Include "TextLib" as Vehicle_TextLib
 {{{Manialink::GetIncludes()}}}
 {{{MenuButtons::Includes()}}}
-
-	declare Boolean[] G_IsButtonActive;
 
 {{{Manialink::Load()}}}
 
@@ -47,32 +49,36 @@ Text Build() {
 {{{MenuButtons::Functions()}}}
 		Void Reset()
 		{
-
 		}
-
 
 		Void Init()
 		{
-			G_IsButtonActive = [True,True,True,False];
 			Reset();
 MenuButtons_Init();
 
-			declare Text[] MoodImg = ["{{{C_ImgBase}}}Sunrise.webp",
-									  "{{{C_ImgBase}}}Day.webp",
-									  "{{{C_ImgBase}}}Sunset.webp",
-									  "{{{C_ImgBase}}}Night.webp"
+			declare Text[] VehicleImg = ["{{{C_ImgBase}}}CanyonCar.webp",
+									  "{{{C_ImgBase}}}StadiumCar.webp",
+									  "{{{C_ImgBase}}}ValleyCar.webp",
+									  "{{{C_ImgBase}}}LagoonCar.webp",
+									  "{{{C_ImgBase}}}IslandCar.webp",
+									  "{{{C_ImgBase}}}BayCar.webp",
+									  "{{{C_ImgBase}}}CoastCar.webp",
+									  "{{{C_ImgBase}}}DesertCar.webp",
+									  "{{{C_ImgBase}}}SnowCar.webp",
+									  "{{{C_ImgBase}}}RallyCar.webp",
+									  "{{{C_ImgBase}}}TrafficCar.webp"
 									  ];
-			
-			MenuButtons_SetExtraParams(MoodImg);
+
 			declare CMlFrame ButtonsFrame <=> (Page.GetFirstChild("MenuButtons_ButtonsFrame") as CMlFrame);
-			for(I, 0, MoodImg.count-1)
+			for(I, 0, VehicleImg.count-1)
 			{
 				declare CMlFrame ButtonFrame     <=> (ButtonsFrame.GetFirstChild("MenuButtons_FrameInstance-"^I) as CMlFrame);
 				if(ButtonFrame == Null) continue;
 				declare CMlQuad MenuButtons_IMG <=> (ButtonFrame.GetFirstChild("MenuButtons_IMG") as CMlQuad);
 				//MenuButtons_IMG.BgColor = <1.,1.,0.>;
 				MenuButtons_IMG.Show();
-				MenuButtons_IMG.ChangeImageUrl(MoodImg[I]);
+				MenuButtons_IMG.ChangeImageUrl(VehicleImg[I]);
+				MenuButtons_IMG.KeepRatio = CMlQuad::EKeepRatioMode::Clip;
 			}
 		}
 
@@ -81,12 +87,12 @@ MenuButtons_Init();
 			G_HideTime = -1;
 			EnableMenuNavigation(True,False,Null,3);
 			Reset();
-			SendCustomEvent("UpdateBarreSection", ["Moods"]);
+			SendCustomEvent("UpdateBarreSection", ["Vehicle"]);
 		}
 
 		Void HidePage()
 		{
-			SendCustomEvent("DetachPage", ["Moods"]);
+			SendCustomEvent("DetachPage", ["Vehicle"]);
 		}
 
 		Void LaunchTransitionHabillage(Real _TargetPosX, Integer _DecaleTime, Integer _Speed, Boolean _FadeIn)
@@ -94,7 +100,7 @@ MenuButtons_Init();
 			declare Text[] Frame_Habillage = ["TargetMove_Title",
 										"TargetMove_Line",
 										"TargetMove_Angle"];
-				
+
 			declare Integer DecaleTime = _DecaleTime;
 			for(I, 0, Frame_Habillage.count-1)
 			{
@@ -137,10 +143,9 @@ MenuButtons_Init();
 				declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
 				declare CMlFrame ButtonsFrame <=> (Page.GetFirstChild("MenuButtons_ButtonsFrame")               as CMlFrame);
 			}
-			
 
 		}
-		
+
 		main() {
 			Init();
 {{{MenuButtons::IncludeInMain()}}}
@@ -150,7 +155,6 @@ MenuButtons_Init();
 				LibManialink_AnimLoop();
 {{{MenuButtons::IncludeInWhile(False)}}}
 
-				
 				if(G_HideTime < Now && G_HideTime != -1)
 				{
 					HidePage();
@@ -166,6 +170,11 @@ MenuButtons_Init();
 								}
 							}
 						}
+            case CMlScriptEvent::Type::KeyPress: {
+              if (Event.KeyName == "T") {
+                SendCustomEvent("Button_Vehicle10", [""]);
+              }
+            }
 						case CMlEvent::Type::PluginCustomEvent: {
 							switch(Event.CustomEventType) {
 								case "Back" : {
@@ -173,29 +182,28 @@ MenuButtons_Init();
 								}
 								case "Show" : {
 									declare PreviousPage = Event.CustomEventData[1];
-									Init();
-									if(PreviousPage == "NewMap" || PreviousPage == "Fields")
+									if(PreviousPage == "NewMap" || PreviousPage == "Moods" || PreviousPage == "Enviro" || PreviousPage == "Fields" || PreviousPage == "Stadium" || PreviousPage == "Valley")
 									{
 										declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
 										declare Real[] PosX;
 										for(I, 0, Page_MenuButtons_ButtonPositions.count-1)
 										{
-											PosX.add(Page_MenuButtons_ButtonPositions[I].X+240.);
-										}
-										SetMenuPosX(PosX);
-										LaunchTransition(True, 0., 350, True);
-										LaunchTransitionHabillage(0., 350, 500, True);
-									}
-									if(PreviousPage == "BrowseTracks" || PreviousPage == "BrowseMods" || PreviousPage == "Enviro" || PreviousPage == "Vehicle" || PreviousPage == "Stadium" || PreviousPage == "Valley")
-									{
-										declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
-										declare Real[] PosX;
-										for(I, 0, Page_MenuButtons_ButtonPositions.count-1)
-										{
-											PosX.add(Page_MenuButtons_ButtonPositions[I].X+240.);
+											PosX.add(Page_MenuButtons_ButtonPositions[I].X-20.);
 										}
 										SetMenuPosX(PosX);
 										LaunchTransition(True, 0., 0, True);
+										LaunchTransitionHabillage(0., 0, 500, True);
+									}
+									else if(PreviousPage == "BrowseTracks")
+									{
+										declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
+										declare Real[] PosX;
+										for(I, 0, Page_MenuButtons_ButtonPositions.count-1)
+										{
+											PosX.add(Page_MenuButtons_ButtonPositions[I].X+240.);
+										}
+										SetMenuPosX(PosX);
+										LaunchTransition(True, 0., 100, True);
 										LaunchTransitionHabillage(0., 0, 500, True);
 									}
 									else                                   LaunchTransition(True, 0., 0);
@@ -203,21 +211,15 @@ MenuButtons_Init();
 								}
 								case "Hide" : {
 									declare NextPage = Event.CustomEventData[1];
-									if(NextPage == "NewMap" || NextPage == "BrowseTracks" || NextPage == "BrowseMods" || NextPage == "Fields" || NextPage == "Vehicle" || NextPage == "Stadium" || NextPage == "Valley")
+									if(NextPage == "NewMap" || NextPage == "BrowseTracks" || NextPage == "Moods" || NextPage == "Enviro" || NextPage == "Fields" || NextPage == "Stadium" || NextPage == "Valley")
 									{
 										LaunchTransitionHabillage(30., 350, 500, False);
 										HidePage();
 									}
 									else
 									{
-										HidePage();
+										HideMenu();
 									}
-								}
-								case "GoToMood" : {
-									
-								}
-								case "GoToNewMap" : {
-
 								}
 							}
 						}
@@ -228,6 +230,6 @@ MenuButtons_Init();
 	--></script>
 </manialink>
 	""";
-	
+
 	return MLText;
 }

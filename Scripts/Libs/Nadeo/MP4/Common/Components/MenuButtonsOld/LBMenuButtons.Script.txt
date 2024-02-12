@@ -23,7 +23,7 @@ Void SetLabelButtonPosition(Vec2 _LabelButtonPos)
 	G_LabelButtonPos = _LabelButtonPos;
 }
 
-Text IncludeInFrameModels(Real _SizeXQuad, Real _SizeYQuad, Real _TextSizeDefault) {
+Text IncludeInFrameModels(Real _SizeXQuad, Real _SizeYQuad, Real _TextSizeDefault, Text _FrameModelId) {
 
 	G_SizeXQuadColor  = C_SizeXQuadColorDefault;
 	if(G_LabelButtonPos == <0.,0.>) G_LabelButtonPos = <C_LabelButtonPosX, C_LabelButtonPosY>;
@@ -31,7 +31,7 @@ Text IncludeInFrameModels(Real _SizeXQuad, Real _SizeYQuad, Real _TextSizeDefaul
 	declare Text MainFont				= Font::GetFontName("Main");
 	declare Text SubFont				= Font::GetFontName("SubTitle");
 	return """
-	<framemodel id="MenuButtons_FrameModel">
+	<framemodel id="{{{_FrameModelId}}}">
 		<quad id="MenuButtons_Quad"   halign="right"  valign="center" size="{{{_SizeXQuad}}} {{{_SizeYQuad}}}"  pos="0 0" z-index="1" opacity="{{{C_Opacity_Quad}}}" bgcolor="000" scriptevents="1" />
 		<quad id="MenuButtons_IMG"    halign="right"  valign="center" size="{{{_SizeXQuad}}} {{{_SizeYQuad}}}"  pos="0 0" z-index="2" opacity="{{{C_Opacity_IMG}}}" hidden="1"/>
 		<quad id="MenuButtons_Color"  halign="left"   valign="center" size="{{{G_SizeXQuadColor}}} {{{_SizeYQuad}}}"  pos="0 0" z-index="1" opacity="{{{C_Opacity_Color}}}" bgcolor="090" scriptevents="1" />
@@ -41,23 +41,33 @@ Text IncludeInFrameModels(Real _SizeXQuad, Real _SizeYQuad, Real _TextSizeDefaul
 	""";
 }
 
+Text IncludeInFrameModels(Real _SizeXQuad, Real _SizeYQuad, Real _TextSizeDefault) {
+	return IncludeInFrameModels(_SizeXQuad, _SizeYQuad, _TextSizeDefault, "MenuButtons_FrameModel");
+}
+
 Text IncludeInFrameModels() {
 	return IncludeInFrameModels(C_SizeXQuadDefault, C_SizeYQuadDefault, C_TextSizeDefault);
 }
 
-Text IncludeInManialink() {
+Text IncludeInManialink(Text[Integer] _ModelOverrides) {
 	//declare Text MLText = "<frame id=\"MenuButtons_ButtonsFrame\">\n";
 	declare Text MLText = """
 	<frame id="MenuButtons_ButtonsFrame">""";
+	declare Text FrameModelName = "MenuButtons_FrameModel";
 	for(ButtonIndex, 0, C_MenuButtons_MaxCount - 1)
 	{
-		MLText ^= """<frameinstance modelid="MenuButtons_FrameModel" id="MenuButtons_FrameInstance-{{{ButtonIndex}}}" hidden="1" pos="300 0"/>
+		if (_ModelOverrides.existskey(ButtonIndex)) FrameModelName = _ModelOverrides[ButtonIndex];
+		MLText ^= """<frameinstance modelid="{{{FrameModelName}}}" id="MenuButtons_FrameInstance-{{{ButtonIndex}}}" hidden="1" pos="300 0"/>
 """;
 	}
 	MLText ^= """
 
 		</frame>""";
 	return MLText;
+}
+
+Text IncludeInManialink() {
+	return IncludeInManialink([]);
 }
 
 Text Includes()

@@ -18,6 +18,9 @@
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/Editor/LBMoods.Script.txt"							as LBMoods
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/Editor/LBFields.Script.txt"						as LBFields
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/Editor/LBEnviro.Script.txt"						as LBEnviro
+#Include "Libs/Nadeo/MP4/TPLagoon/Components/Editor/LBVehicle.Script.txt"						as LBVehicle
+#Include "Libs/Nadeo/MP4/TPLagoon/Components/Editor/LBStadium.Script.txt"						as LBStadium
+#Include "Libs/Nadeo/MP4/TPLagoon/Components/Editor/LBValley.Script.txt"						as LBValley
 
 #Const C_LoadingScreenSimpleDefault "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Moods/Day.webp"
 
@@ -34,8 +37,11 @@ declare Text	G_MapEditorScriptName;
 declare Boolean	G_IsRunning;
 declare Integer	G_PageNumber;
 declare Integer	G_EnviroChoose;
+declare Integer	G_VehicleChoose;
 declare Integer	G_EditorChoose;
 declare Integer G_FieldChoose;
+declare Integer G_StadiumChoose;
+declare Integer G_ValleyChoose;
 declare Text	G_PageToGoBackTo;
 declare Text	G_SettingsXml;
 declare Boolean	G_Advanced;
@@ -55,6 +61,15 @@ Void Build(Text _LayerName, Boolean _Attach) {
 		}
 		case("Enviro"):{
 			MLText = LBEnviro::Build();
+		}
+		case("Vehicle"):{
+			MLText = LBVehicle::Build();
+		}
+		case("Stadium"):{
+			MLText = LBStadium::Build();
+		}
+		case("Valley"):{
+			MLText = LBValley::Build();
 		}
 	}
 
@@ -105,11 +120,37 @@ Integer Get_EnviroIndex(Text _Enviro)
 	return Environments.keyof(_Enviro);
 }
 
+Text Get_VehicleText(Integer _Index)
+{
+	declare Text[] Vehicles = ["CanyonCar", "StadiumCar", "ValleyCar", "LagoonCar", "IslandCar", "BayCar", "CoastCar", "DesertCar", "SnowCar", "RallyCar", "TrafficCar"];
+	if(!Vehicles.existskey(_Index)) return "VehicleNotFound";
+	return Vehicles[_Index];
+}
+
 Text Get_FieldText(Integer _Index)
 {
 	declare Text[] Environments = ["Land", "Water"];
 	if(!Environments.existskey(_Index)) return "FieldNotFound";
 	return Environments[_Index];
+}
+
+Text Get_PreStadium(Integer _Index)
+{
+	declare Text[] Environments = ["", "64x64"];
+	if(!Environments.existskey(_Index)) return "StadiumSizeNotFound";
+	return Environments[_Index];
+}
+
+Text Get_PostValley(Integer _Index)
+{
+	declare Text[] Environments = ["48", "64"];
+	if(!Environments.existskey(_Index)) return "ValleySizeNotFound";
+	return Environments[_Index];
+}
+
+Text Get_Valley64BaseMap(Text _Mood)
+{
+	return """TMAllMaker/Bases/Valley/Valley/ValleyValley{{{_Mood}}}64.Map.Gbx""";
 }
 
 Text Get_PostMood(Integer _Index)
@@ -134,7 +175,7 @@ Void ChangeAllMenus()
 										["Button_Simple", "Button_Advanced"],
 										GetColor());
 	MenuButtons::ChangeData("Moods",	[_("|ArticleName|Sunrise"),	_("|ArticleName|Day"),	_("|ArticleName|Sunset"),	_("|ArticleName|Night")],
-										[<-68.5, -1.3>, <-2.9, -1.3>, <62.6, -1.3>, <128.5, -1.3>],
+										[<-68.5, -1.3>, <-2.8333, -1.3>, <62.8333, -1.3>, <128.5, -1.3>],
 										["Button_Mood0", "Button_Mood1", "Button_Mood2", "Button_Mood3"],
 										GetColor());
 	MenuButtons::ChangeData("Fields",	[_("|ArticleName|Land"),	_("|ArticleName|Water")],
@@ -142,8 +183,20 @@ Void ChangeAllMenus()
 										["Button_Field0", "Button_Field1"],
 										GetColor());
 	MenuButtons::ChangeData("Enviro",	["Canyon",	"Stadium",	"Valley",	"Lagoon"],
-										[<-68.5, -1.3>, <-2.9, -1.3>, <62.6, -1.3>, <128.5, -1.3>],
+										[<-68.5, -1.3>, <-2.8333, -1.3>, <62.8333, -1.3>, <128.5, -1.3>],
 										["Button_Enviro0", "Button_Enviro1", "Button_Enviro2", "Button_Enviro3"],
+										GetColor());
+	MenuButtons::ChangeData("Vehicle",	["Canyon Car", "Stadium Car", "Valley Car", "Lagoon Car", "Island Car", "Bay Car", "Coast Car", "Desert Car", "Snow Car", "Rally Car"], // , "Traffic Car"],
+										[<-68.5, -1.3>, <-2.8333, -1.3>, <62.8333, -1.3>, <128.5, -1.3>, <-90.3888, -31.1>, <-46.6111, -31.1>, <-2.8333, -31.1>, <40.9444, -31.1>, <84.7222, -31.1>, <128.5, -31.1>], // , <128.5, -54.6>],
+										["Button_Vehicle0", "Button_Vehicle1", "Button_Vehicle2", "Button_Vehicle3", "Button_Vehicle4", "Button_Vehicle5", "Button_Vehicle6", "Button_Vehicle7", "Button_Vehicle8", "Button_Vehicle9"], // , "Button_Vehicle10"],
+										GetColor());
+	MenuButtons::ChangeData("Stadium",	[_("|ArticleName|32 x 32"),	_("|ArticleName|64 x 64")],
+										[<-0.5, -1.3>,	<70.2, -1.3>],
+										["Button_Stadium0", "Button_Stadium1"],
+										GetColor());
+	MenuButtons::ChangeData("Valley",	[_("|ArticleName|48 x 48"),	_("|ArticleName|64 x 64")],
+										[<-0.5, -1.3>,	<70.2, -1.3>],
+										["Button_Valley0", "Button_Valley1"],
 										GetColor());
 }
 
@@ -153,14 +206,23 @@ Void Load() {
 	Build("Moods");
 	Build("Fields");
 	Build("Enviro");
+	Build("Vehicle");
+	Build("Stadium");
+	Build("Valley");
 	ChangeAllMenus();
 	Pages::Compose("NewMap",		["NewMap", "BarreSection"]);
 	Pages::Compose("Moods",			["Moods", "BarreSection"]);
 	Pages::Compose("Fields",		["Fields", "BarreSection"]);
 	Pages::Compose("Enviro",		["Enviro", "BarreSection"]);
+	Pages::Compose("Vehicle",		["Vehicle", "BarreSection"]);
+	Pages::Compose("Stadium",		["Stadium", "BarreSection"]);
+	Pages::Compose("Valley",		["Valley", "BarreSection"]);
 	G_SettingsXml     = SettingsController::GetSettingsXmlEditor();
 	declare Text ProjectEnviro for LocalUser;
-	if(ProjectEnviro != "TMAll" && ProjectEnviro != "") G_EnviroChoose = Get_EnviroIndex(ProjectEnviro);
+	if(ProjectEnviro != "TMAll" && ProjectEnviro != "") {
+		G_EnviroChoose = Get_EnviroIndex(ProjectEnviro);
+		G_VehicleChoose = G_EnviroChoose;
+	}
 	G_MapEditorScriptName	= XMLController::Get_MapEditorScriptName();
 	
 }
@@ -273,7 +335,7 @@ Void LaunchEditor(Text _Mood, Text _Thumbnail)
 	declare Text Enviro   = Get_EnviroText(G_EnviroChoose);
 	declare Text Deco     = _Mood ^ Get_PostMood(G_EnviroChoose);
 
-	declare Text PlayerModel        = Enviro^"Car";
+	declare Text PlayerModel        = Get_VehicleText(G_VehicleChoose);
 	declare Text MapType            = ""; // "Race.Script.txt";
 	MapType = "Race.Script.txt";
 	declare Text EditorPluginScript = G_MapEditorScriptName;
@@ -288,8 +350,25 @@ Void LaunchEditor(Text _Mood, Text _Thumbnail)
 		SettingsXml        = "";
 		Deco			   = Get_FieldText(G_FieldChoose) ^ "48x48"^_Mood;
 	}
+	else if (Enviro == "Stadium") {
+		Deco = Get_PreStadium(G_StadiumChoose) ^ _Mood;
+	}
+	if (Enviro == "Valley" && Get_PostValley(G_ValleyChoose) == "64") {
+		declare Text BaseMap = Get_Valley64BaseMap(_Mood);
+		TitleFlow.EditNewMapFromBaseMap(BaseMap, "", PlayerModel, MapType, EditorPluginScript, SettingsXml);
+	}
+	else {
+		TitleFlow.EditNewMap(Enviro, Deco, "", PlayerModel, MapType, EditorPluginScript, SettingsXml);
+	}
 	Hide();
-	TitleFlow.EditNewMap(Enviro, Deco, "", PlayerModel, MapType, EditorPluginScript, SettingsXml);
+}
+
+Void GotoByEnviro(Integer _Index) {
+	switch (_Index) {
+		case 1 : Pages::GotoNext("Stadium");
+		case 2 : Pages::GotoNext("Valley");
+		default : Pages::GotoNext("Moods");
+	}
 }
 
 Void Loop() {
@@ -340,21 +419,96 @@ Void Loop() {
 			case "Button_Enviro0" : {
 				G_PageNumber += 1;
 				G_EnviroChoose = 0;
-				Pages::GotoNext("Moods");
+				Pages::GotoNext("Vehicle");
 			}
 			case "Button_Enviro1" : {
 				G_PageNumber += 1;
 				G_EnviroChoose = 1;
-				Pages::GotoNext("Moods");
+				Pages::GotoNext("Vehicle");
 			}
 			case "Button_Enviro2" : {
 				G_PageNumber += 1;
 				G_EnviroChoose = 2;
-				Pages::GotoNext("Moods");
+				Pages::GotoNext("Vehicle");
 			}
 			case "Button_Enviro3" : {
 				G_PageNumber += 1;
 				G_EnviroChoose = 3;
+				Pages::GotoNext("Vehicle");
+			}
+			case "Button_Vehicle0" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 0;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle1" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 1;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle2" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 2;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle3" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 3;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle4" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 4;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle5" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 5;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle6" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 6;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle7" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 7;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle8" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 8;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle9" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 9;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Vehicle10" : {
+				G_PageNumber += 1;
+				G_VehicleChoose = 10;
+				GotoByEnviro(G_EnviroChoose);
+			}
+			case "Button_Stadium0" : {
+				G_StadiumChoose = 0;
+				G_PageNumber += 1;
+				Pages::GotoNext("Moods");
+			}
+			case "Button_Stadium1" : {
+				G_StadiumChoose = 1;
+				G_PageNumber += 1;
+				Pages::GotoNext("Moods");
+			}
+			case "Button_Valley0" : {
+				G_ValleyChoose = 0;
+				G_PageNumber += 1;
+				Pages::GotoNext("Moods");
+			}
+			case "Button_Valley1" : {
+				G_ValleyChoose = 1;
+				G_PageNumber += 1;
 				Pages::GotoNext("Moods");
 			}
 			case "Button_Advanced" : {

@@ -1,8 +1,7 @@
 #Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt"			as Manialink
 #Include "Libs/Nadeo/MP4/Common/Components/MenuButtonsOld/LBMenuButtons.Script.txt"					as MenuButtons
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" 			as Font
-
-#Const C_ImgBase	"file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Moods/"
+#Const C_ImgBase	"file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Decoration/"
 
 Text Build() {
 
@@ -12,11 +11,11 @@ Text Build() {
 
 	declare Text	MainFont = Font::GetFontName("Main");
 	declare Text MLText = """
-<manialink version="3" name="L_Moods">
+<manialink version="3" name="L_Stadium">
 {{{MenuButtons::IncludeInFrameModels(SizeXQuad, SizeYQuad, 7.)}}}
 	<frame id="Frame_All">
 		<frame id="TargetMove_Title" pos="30. 0.">
-			<label id="Label_Title" halign="left"  valign="center" text="{{{_("Advanced")}}}" textfont="{{{MainFont}}}" pos="-127.5 27.1" opacity="1." z-index="2" textsize="10." textcolor="fff"/>
+			<label id="Label_Title" halign="left"  valign="center" text="{{{_("Size")}}}" textfont="{{{MainFont}}}" pos="-127.5 27.1" opacity="1." z-index="2" textsize="10." textcolor="fff"/>
 		</frame>
 		<frame id="TargetMove_Line" pos="30. 0.">
 			<frame id="Habillage_Menu_Line" pos="-127.8 19.2" z-index="0" hidden="0">
@@ -34,7 +33,7 @@ Text Build() {
 	</frame>
 
 	<script><!--
-		#Include "TextLib" as Moods_TextLib
+		#Include "TextLib" as Stadium_TextLib
 {{{Manialink::GetIncludes()}}}
 {{{MenuButtons::Includes()}}}
 
@@ -57,13 +56,10 @@ Text Build() {
 			Reset();
 MenuButtons_Init();
 
-			declare Text[] MoodImg = ["{{{C_ImgBase}}}Sunrise.webp",
-									  "{{{C_ImgBase}}}Day.webp",
-									  "{{{C_ImgBase}}}Sunset.webp",
-									  "{{{C_ImgBase}}}Night.webp"
+			declare Text[] MoodImg = ["{{{C_ImgBase}}}Stadium32.webp",
+									  "{{{C_ImgBase}}}Stadium64.webp"
 									  ];
-			
-			MenuButtons_SetExtraParams(MoodImg);
+
 			declare CMlFrame ButtonsFrame <=> (Page.GetFirstChild("MenuButtons_ButtonsFrame") as CMlFrame);
 			for(I, 0, MoodImg.count-1)
 			{
@@ -81,12 +77,12 @@ MenuButtons_Init();
 			G_HideTime = -1;
 			EnableMenuNavigation(True,False,Null,3);
 			Reset();
-			SendCustomEvent("UpdateBarreSection", ["Moods"]);
+			SendCustomEvent("UpdateBarreSection", ["Stadium"]);
 		}
 
 		Void HidePage()
 		{
-			SendCustomEvent("DetachPage", ["Moods"]);
+			SendCustomEvent("DetachPage", ["Stadium"]);
 		}
 
 		Void LaunchTransitionHabillage(Real _TargetPosX, Integer _DecaleTime, Integer _Speed, Boolean _FadeIn)
@@ -121,23 +117,32 @@ MenuButtons_Init();
 					if(Frame_Habillage[I] == "TargetMove_Line")
 					{
 						Quad_Line0.Size.X = 0.;
-						LibManialink_SetTargetSize(Quad_Line0, <258., Quad_Line0.Size.Y>);
+						LibManialink_SetTargetSize(Quad_Line0, <132., Quad_Line0.Size.Y>);
 						LibManialink_PresetAnimInsert(Quad_Line0, DecaleTime, _Speed, "EaseOutQuad");
 					}
 				}
 				DecaleTime += 150;
 			}
-			if(_FadeIn)
-			{
-				declare CMlLabel Label_Title <=> (Page.MainFrame.GetFirstChild("Label_Title")	as CMlLabel);
-				Label_Title.Opacity = 0.;
-				LibManialink_SetTargetOpacity(Label_Title, 1.0);
-				LibManialink_PresetAnimInsert(Label_Title, DecaleTime, _Speed+300, "EaseLinear");
-
-				declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
-				declare CMlFrame ButtonsFrame <=> (Page.GetFirstChild("MenuButtons_ButtonsFrame")               as CMlFrame);
-			}
 			
+			declare Real Opacity_Start = 0.;
+			declare Real Opacity_End   = 1.;
+			declare CMlLabel Label_Title <=> (Page.MainFrame.GetFirstChild("Label_Title")	as CMlLabel);
+			if(!_FadeIn)
+			{
+				Opacity_Start = 1.;
+				Opacity_End   = 0.;
+				DecaleTime = 0;
+				//Label_Title.Hide();
+			}
+			else
+			{
+				Label_Title.Show();
+				
+			}
+			Label_Title.Opacity = Opacity_Start;
+			LibManialink_AnimStop(Label_Title);
+			LibManialink_SetTargetOpacity(Label_Title, Opacity_End);
+			LibManialink_PresetAnimInsert(Label_Title, DecaleTime, 300, "EaseLinear");
 
 		}
 		
@@ -174,7 +179,7 @@ MenuButtons_Init();
 								case "Show" : {
 									declare PreviousPage = Event.CustomEventData[1];
 									Init();
-									if(PreviousPage == "NewMap" || PreviousPage == "Fields")
+									if(PreviousPage == "NewMap")
 									{
 										declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
 										declare Real[] PosX;
@@ -183,10 +188,10 @@ MenuButtons_Init();
 											PosX.add(Page_MenuButtons_ButtonPositions[I].X+240.);
 										}
 										SetMenuPosX(PosX);
-										LaunchTransition(True, 0., 350, True);
-										LaunchTransitionHabillage(0., 350, 500, True);
+										LaunchTransition(True, 68.0, 350, True);
+										LaunchTransitionHabillage(68.0, 350, 500, True);
 									}
-									if(PreviousPage == "BrowseTracks" || PreviousPage == "BrowseMods" || PreviousPage == "Enviro" || PreviousPage == "Vehicle" || PreviousPage == "Stadium" || PreviousPage == "Valley")
+									if(PreviousPage == "BrowseTracks" || PreviousPage == "BrowseMods" || PreviousPage == "Moods" || PreviousPage == "Vehicle")
 									{
 										declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
 										declare Real[] PosX;
@@ -195,22 +200,23 @@ MenuButtons_Init();
 											PosX.add(Page_MenuButtons_ButtonPositions[I].X+240.);
 										}
 										SetMenuPosX(PosX);
-										LaunchTransition(True, 0., 0, True);
-										LaunchTransitionHabillage(0., 0, 500, True);
+										LaunchTransition(True, 68., 0, True);
+										LaunchTransitionHabillage(68., 0, 500, True);
 									}
-									else                                   LaunchTransition(True, 0., 0);
+									else        LaunchTransition(True, 0., 0);
 									ShowPage();
 								}
 								case "Hide" : {
 									declare NextPage = Event.CustomEventData[1];
-									if(NextPage == "NewMap" || NextPage == "BrowseTracks" || NextPage == "BrowseMods" || NextPage == "Fields" || NextPage == "Vehicle" || NextPage == "Stadium" || NextPage == "Valley")
+									if(NextPage == "NewMap" || NextPage == "BrowseTracks" || NextPage == "BrowseMods" || NextPage == "Moods" || NextPage == "Vehicle")
 									{
-										LaunchTransitionHabillage(30., 350, 500, False);
+										LaunchTransitionHabillage(100., 350, 500, False);
 										HidePage();
 									}
 									else
 									{
-										HidePage();
+										LaunchTransitionHabillage(0., 0, 500, False);
+										HideMenu();
 									}
 								}
 								case "GoToMood" : {

@@ -86,9 +86,12 @@ Void SaveState(Text _TitlePackXMLAddOn)
 {
 	if (TitleEdition != Null) {
 		declare Text ProjectEnviro for LocalUser;
+		ProjectEnviro = "TMAll";
+		/*
 		if ((TitleEdition.TitleMaker != Null) && (ProjectEnviro == "" || ProjectEnviro == "TMAll")) {
 			ProjectEnviro = TextLib::SubString(TitleEdition.TitleMaker.BaseTitleId, 2, TextLib::Length(TitleEdition.TitleMaker.BaseTitleId) - 2);
 		}
+		*/
 		declare LayerToGet <=> Layers::Get("Resources");
 		TitleEdition.EditedTitleInfo.DisplayName = (LayerToGet.LocalPage.GetFirstChild("ProjectName") as CMlEntry).Value;
 		TitleEdition.EditedTitleInfo.Description = (LayerToGet.LocalPage.GetFirstChild("ProjectDescription") as CMlTextEdit).Value;
