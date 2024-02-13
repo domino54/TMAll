@@ -111,6 +111,7 @@
 		<folder name="Materials\" public="false" internal="false"/>
 		<folder name="Maps\TMAllMaker\" public="false" internal="true"/>
 		<folder name="Media\Font\" public="false" internal="false"/>
+		<folder name="Media\Manialinks\" public="false" internal="false"/>
 		<folder name="Skins\Models\" public="false" internal="true"/>
 	</folders>
 	<hud_default_module name=""/>
