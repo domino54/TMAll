@@ -191,7 +191,7 @@ MenuButtons_Init();
 										LaunchTransition(True, 68.0, 350, True);
 										LaunchTransitionHabillage(68.0, 350, 500, True);
 									}
-									if(PreviousPage == "BrowseTracks" || PreviousPage == "BrowseMods" || PreviousPage == "Moods" || PreviousPage == "Vehicle")
+									if(PreviousPage == "BrowseTracks" || PreviousPage == "BrowseMods" || PreviousPage == "Enviro" || PreviousPage == "Moods" || PreviousPage == "Vehicle")
 									{
 										declare Vec2[] Page_MenuButtons_ButtonPositions	for Page;
 										declare Real[] PosX;
@@ -208,7 +208,7 @@ MenuButtons_Init();
 								}
 								case "Hide" : {
 									declare NextPage = Event.CustomEventData[1];
-									if(NextPage == "NewMap" || NextPage == "BrowseTracks" || NextPage == "BrowseMods" || NextPage == "Moods" || NextPage == "Vehicle")
+									if(NextPage == "NewMap" || NextPage == "BrowseTracks" || NextPage == "BrowseMods" || NextPage == "Enviro" || NextPage == "Moods" || NextPage == "Vehicle")
 									{
 										LaunchTransitionHabillage(100., 350, 500, False);
 										HidePage();
