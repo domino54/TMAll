@@ -1,0 +1,47 @@
+/**
+ * @name CustomSkins_Players.Script.txt
+ * @author domino54
+ * @version 2024-07-17
+ */
+
+#Const Version      "2024-07-17"
+#Const ScriptName   "Libs/domino54/CustomSkins_Players.Script.txt"
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+declare Text[Text][Text] G_LibCustomSkins_PlayerModelIdToSkinId;
+declare Text[][Text] G_LibCustomSkins_PlayerUseCustomOverArchetype;
+
+// ---------------------------------- //
+// Functions
+// ---------------------------------- //
+
+Text GetScriptVersion() {
+  return Version;
+}
+
+Text GetScriptName() {
+  return ScriptName;
+}
+
+Void SetPlayerModelIdToSkinId(Text _Login, Text[Text] _ModelIdToSkinId) {
+  G_LibCustomSkins_PlayerModelIdToSkinId[_Login] = _ModelIdToSkinId;
+}
+
+Void SetPlayerUseCustom(Text _Login, Text[] _ModelIds) {
+  G_LibCustomSkins_PlayerUseCustomOverArchetype[_Login] = _ModelIds;
+}
+
+Text GetPlayerSkinId(Text _Login, Text _ModelId) {
+  if (!G_LibCustomSkins_PlayerModelIdToSkinId.existskey(_Login) || !G_LibCustomSkins_PlayerModelIdToSkinId[_Login].existskey(_ModelId)) {
+    return "";
+  }
+
+  return G_LibCustomSkins_PlayerModelIdToSkinId[_Login][_ModelId];
+}
+
+Boolean GetPlayerUseCustomOverArchetype(Text _Login, Text _ModelId) {
+  return G_LibCustomSkins_PlayerUseCustomOverArchetype.existskey(_Login) && G_LibCustomSkins_PlayerUseCustomOverArchetype[_Login].exists(_ModelId);
+}

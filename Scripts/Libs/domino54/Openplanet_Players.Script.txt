@@ -1,0 +1,108 @@
+/**
+ * @name Openplanet_Players.Script.txt
+ * @author domino54
+ * @version 2024-07-17
+ */
+
+#Const Version      "2024-07-17"
+#Const ScriptName   "Libs/domino54/Openplanet_Players.Script.txt"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_OpenplanetInfo {
+  Text Version;
+  Text Branch;
+  Text BuildName;
+  Text BuildDate;
+}
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare K_OpenplanetInfo[Text] G_LibOpenplanet_PlayerInfo;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Void Private_SetPlayerNetData(Text _Login, Boolean _HasOpenplanet) {
+  // CTmPlayer or CSmPlayer
+  declare Player <=> GetPlayer(_Login);
+
+  if (Player == Null || Player.Score == Null) return;
+
+  declare netwrite Boolean LibOpenplanet_HasOpenplanet for Player.Score;
+
+  LibOpenplanet_HasOpenplanet = _HasOpenplanet;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetScriptVersion() {
+  return Version;
+}
+
+Text GetScriptName() {
+  return ScriptName;
+}
+
+Void SetPlayerOpenplanetInstalled(Text _Login, Text _Version, Text _Branch, Text _BuildName, Text _BuildDate) {
+  if (_Login == "" || _Version == "") return;
+
+  Private_SetPlayerNetData(_Login, True);
+
+  G_LibOpenplanet_PlayerInfo[_Login] = K_OpenplanetInfo {
+    Version = _Version,
+    Branch = _Branch,
+    BuildName = _BuildName,
+    BuildDate = _BuildDate
+  };
+}
+
+Void SetPlayerOpenplanetNotInstalled(Text _Login) {
+  if (_Login == "") return;
+
+  Private_SetPlayerNetData(_Login, False);
+
+  declare Removed = G_LibOpenplanet_PlayerInfo.removekey(_Login);
+}
+
+Boolean HasOpenplanet(Text _Login) {
+  return G_LibOpenplanet_PlayerInfo.existskey(_Login);
+}
+
+Boolean HasOpenplanet(CScore _Score) {
+  if (_Score == Null || _Score.User == Null) return False;
+
+  return HasOpenplanet(_Score.User.Login);
+}
+
+Boolean HasOpenplanet(CUser _User) {
+  if (_User == Null) return False;
+
+  return HasOpenplanet(_User.Login);
+}
+
+Boolean HasOpenplanet(CPlayer _Player) {
+  if (_Player == Null || _Player.User == Null) return False;
+
+  return HasOpenplanet(_Player.User.Login);
+}
+
+Boolean HasOpenplanet(CClient _Client) {
+  if (_Client == Null || _Client.User == Null) return False;
+
+  return HasOpenplanet(_Client.User.Login);
+}
+
+Boolean HasOpenplanet(CUIConfig _UI) {
+  if (_UI == Null) return False;
+
+  return HasOpenplanet(GetPlayer(_UI));
+}
+

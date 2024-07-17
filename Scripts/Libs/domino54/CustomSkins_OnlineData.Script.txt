@@ -1,0 +1,115 @@
+/**
+ * @name CustomSkins_OnlineData.Script.txt
+ * @author domino54
+ * @version 2024-07-17
+ */
+
+#Const Version      "2024-07-17"
+#Const ScriptName   "Libs/domino54/CustomSkins_OnlineData.Script.txt"
+
+#Include "Libs/Nadeo/Layers2.Script.txt" as Layers
+#Include "Libs/domino54/CustomSkins_LocalData.Script.txt" as CSLocalData
+#Include "Libs/domino54/CustomSkins_Players.Script.txt" as CSPlayers
+#Include "Libs/domino54/ModeLocalUser.Script.txt" as MLU
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_LibCustomSkins_ManialinkLayerId    "customskins:onlinedata"
+#Const C_LibCustomSkins_PlayerDataUpdateId  "customskins:playerdata"
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Text Private_CreateManialinkLayer() {
+  return """
+<manialink version="3" name="{{{C_LibCustomSkins_ManialinkLayerId}}}">
+
+<label pos="0 -90" halign="center" valign="bottom" style="CardButtonSmallS" manialink="file://Media/Apps/TempSkins.Script.txt">Temp Skins</label>
+
+<script><!--
+
+main() {
+  // Without this, the server cannot find us through via GetPlayer(Event.UI)
+  wait(InputPlayer != Null && Players.existskey(InputPlayer.Id));
+
+  declare persistent Integer Persistent_LibCustomSkins_LastUpdate for LocalUser;
+  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for LocalUser;
+  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for LocalUser;
+
+  declare PrevUpdate = -1;
+
+  while (True) {
+    wait(PrevUpdate != Persistent_LibCustomSkins_LastUpdate);
+
+    PrevUpdate = Persistent_LibCustomSkins_LastUpdate;
+
+    declare EventData = [
+      Persistent_LibCustomSkins_ModelIdToSkinId.tojson(),
+      Persistent_LibCustomSkins_UseCustomOverArchetype.tojson()
+    ];
+
+    SendCustomEvent("{{{C_LibCustomSkins_PlayerDataUpdateId}}}", EventData);
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetScriptVersion() {
+  return Version;
+}
+
+Text GetScriptName() {
+  return ScriptName;
+}
+
+Void Unload() {
+  CSLocalData::Unload();
+
+  Layers::Detach(C_LibCustomSkins_ManialinkLayerId);
+  Layers::Destroy(C_LibCustomSkins_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  CSLocalData::Load();
+
+  Layers::Create(C_LibCustomSkins_ManialinkLayerId, Private_CreateManialinkLayer());
+  Layers::Attach(C_LibCustomSkins_ManialinkLayerId);
+}
+
+Void Yield() {
+  CSLocalData::Yield();
+
+  foreach (Event in UIManager.PendingEvents) {
+    if (Event.Type != CUIConfigEvent::EType::OnLayerCustomEvent || Event.CustomEventType != C_LibCustomSkins_PlayerDataUpdateId || Event.CustomEventData.count < 2) {
+      continue;
+    }
+
+    // Ambiguous CTmPlayer or CSmPlayer.
+    declare Player <=> GetPlayer(Event.UI);
+
+    if (Player == Null) {
+      continue;
+    }
+
+    declare Text[Text] ModelIdToSkinId;
+    declare Text[] UseCustomOverArchetype;
+
+    declare Copied0 = ModelIdToSkinId.fromjson(Event.CustomEventData[0]);
+    declare Copied1 = UseCustomOverArchetype.fromjson(Event.CustomEventData[1]);
+
+    CSPlayers::SetPlayerModelIdToSkinId(Player.User.Login, ModelIdToSkinId);
+    CSPlayers::SetPlayerUseCustom(Player.User.Login, UseCustomOverArchetype);
+  }
+}

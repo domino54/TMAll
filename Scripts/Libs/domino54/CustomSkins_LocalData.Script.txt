@@ -1,0 +1,59 @@
+/**
+ * @name CustomSkins_LocalData.Script.txt
+ * @author domino54
+ * @version 2024-07-17
+ */
+
+#Const Version      "2024-07-17"
+#Const ScriptName   "Libs/domino54/CustomSkins_LocalData.Script.txt"
+
+#Include "Libs/domino54/CustomSkins_Players.Script.txt" as CSPlayers
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Void Private_ReadPlayerSkinSettings(CUser _User) {
+  if (_User == Null) return;
+
+  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for _User;
+  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for _User;
+
+  CSPlayers::SetPlayerModelIdToSkinId(_User.Login, Persistent_LibCustomSkins_ModelIdToSkinId);
+  CSPlayers::SetPlayerUseCustom(_User.Login, Persistent_LibCustomSkins_UseCustomOverArchetype);
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetScriptVersion() {
+  return Version;
+}
+
+Text GetScriptName() {
+  return ScriptName;
+}
+
+Void Unload() {
+  foreach (User in Users) {
+    declare Integer LibCustomSkins_PrevUpdate for User;
+    LibCustomSkins_PrevUpdate = -1;
+  }
+}
+
+Void Load() {
+  Unload();
+}
+
+Void Yield() {
+  foreach (User in Users) {
+    declare persistent Integer Persistent_LibCustomSkins_LastUpdate for User;
+    declare Integer LibCustomSkins_PrevUpdate for User;
+
+    if (LibCustomSkins_PrevUpdate == Persistent_LibCustomSkins_LastUpdate) continue;
+    LibCustomSkins_PrevUpdate = Persistent_LibCustomSkins_LastUpdate;
+
+    Private_ReadPlayerSkinSettings(User);
+  }
+}

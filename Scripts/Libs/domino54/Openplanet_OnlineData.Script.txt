@@ -1,0 +1,114 @@
+/**
+ * @name Openplanet_OnlineData.Script.txt
+ * @author domino54
+ * @version 2024-07-17
+ */
+
+#Const Version      "2024-07-17"
+#Const ScriptName   "Libs/domino54/Openplanet_OnlineData.Script.txt"
+
+#Include "Libs/Nadeo/Layers2.Script.txt" as Layers
+#Include "Libs/domino54/Openplanet_Players.Script.txt" as OPPlayers
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_LibCustomSkins_ManialinkLayerId     "openplanet:onlinedata"
+#Const C_LibCustomSkins_PlayerDataUpdateId   "openplanet:playerdata"
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Text Private_CreateManialinkLayer() {
+    return """
+<manialink version="3" name="{{{C_LibCustomSkins_ManialinkLayerId}}}">
+<script><!--
+
+#Include "TextLib" as TL
+
+Void Log(Text _Message) {
+  // Log a'la Nadeo scripts
+  log("[LOG]"^Now^"> [Openplanet_OnlineData] "^_Message);
+}
+
+main() {
+  // Without this, the server cannot find us through GetPlayer(Event.UI)
+  wait(InputPlayer != Null && Players.existskey(InputPlayer.Id));
+
+  declare Match = TL::RegexMatch("^Openplanet ([\\w\\.-]+(?:[\\w\\.-]+)+) \\((\\w+), (\\w+), ([\\d-]+)\\)", System.ExtraTool_Info, "");
+
+  // Expecting [match, version, branch, build name, build date]
+  if (Match.count == 5) {
+    declare OpVersion = Match[1];
+    declare OpBranch = Match[2];
+    declare OpBuildName = Match[3];
+    declare OpBuildDate = Match[4];
+
+    Log("Openplanet found > Version: "^OpVersion^" | Branch: "^OpBranch^" | Build name: "^OpBuildName^" | Build date: "^OpBuildDate);
+
+    SendCustomEvent("{{{C_LibCustomSkins_PlayerDataUpdateId}}}", [OpVersion, OpBranch, OpBuildName, OpBuildDate]);
+  }
+
+  // Notify the server about Openplanet absence in case it got uninstalled
+  else {
+    SendCustomEvent("{{{C_LibCustomSkins_PlayerDataUpdateId}}}", []);
+  }
+}
+
+--></script>
+</manialink>
+    """;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetScriptVersion() {
+  return Version;
+}
+
+Text GetScriptName() {
+  return ScriptName;
+}
+
+Void Unload() {
+  Layers::Detach(C_LibCustomSkins_ManialinkLayerId);
+  Layers::Destroy(C_LibCustomSkins_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_LibCustomSkins_ManialinkLayerId, Private_CreateManialinkLayer());
+  Layers::Attach(C_LibCustomSkins_ManialinkLayerId);
+}
+
+Void Yield() {
+  foreach (Event in UIManager.PendingEvents) {
+    if (Event.Type != CUIConfigEvent::EType::OnLayerCustomEvent || Event.CustomEventType != C_LibCustomSkins_PlayerDataUpdateId) {
+      continue;
+    }
+
+    // Ambiguous CTmPlayer or CSmPlayer.
+    declare Player <=> GetPlayer(Event.UI);
+
+    if (Player == Null) {
+      continue;
+    }
+
+    if (Event.CustomEventData.count >= 4) {
+      declare OpVersion = Event.CustomEventData[0];
+      declare OpBranch = Event.CustomEventData[1];
+      declare OpBuildName = Event.CustomEventData[2];
+      declare OpBuildDate = Event.CustomEventData[3];
+
+      OPPlayers::SetPlayerOpenplanetInstalled(Player.User.Login, OpVersion, OpBranch, OpBuildName, OpBuildDate);
+    }
+    else {
+      OPPlayers::SetPlayerOpenplanetNotInstalled(Player.User.Login);
+    }
+  }
+}

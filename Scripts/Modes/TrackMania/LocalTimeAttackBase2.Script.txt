@@ -2,7 +2,7 @@
  *	Local TimeAttack Base
  */
 
-#Extends "Modes/TrackMania/ModeBase.Script.txt"
+#Extends "Modes/TrackMania/Base/LocalModeTMAllMaker.Script.txt"
 
 #Const	CompatibleMapTypes	["RaceCE", "Race"]
 #Const	Version				"2018-11-09"
@@ -182,7 +182,6 @@ declare Integer                                G_PlayerRanking;
 declare Integer                                G_PlayerCount;
 declare Integer                                G_TimeMaxToWaitTask;
 
-
 // ---------------------------------- //
 
 Void WaitRaceAndRespawn(CTmPlayer _Player)
@@ -284,7 +283,6 @@ G_BestMedal 			= TMC_MEDAL_PLAYER;
 G_ThePlayerId 			= Players[0].Id;
 G_NbHighestMedalHad		= 0;
 
-
 // CampaignSpawnPlayer();
 Game::SetPlayerId(G_ThePlayerId);
 
@@ -328,7 +326,6 @@ if(PlayerGhost != Null)
 }
 */
 
-
 G_MedalsByTypeByEnviroDiff 	= ParseIntArray(S_MedalsByTypeByEnviroDiff);
 G_MedalsByTypeByDiff 		= ParseIntArray(S_MedalsByTypeByDiff);
 
@@ -341,13 +338,11 @@ if(S_Opponent != "") {
 
 InitMedalsNb();
 
-
 if(NoGhostOnMap) {
 	G_TimesOnMap 					= Medals::GetTimesOnMap();
 } else {
 	G_TimesOnMap[TMC_MEDAL_AUTHOR]	= Medals::GetMedalTime(TMC_MEDAL_AUTHOR);
 }
-
 
 if(Map.TMObjective_IsLapRace) {
 	NbLaps = Map.TMObjective_NbLaps;
@@ -481,8 +476,6 @@ if(G_GamePhase == C_GAMEPHASE_CHALLENGE)
 			Game::WaitTime(1000);
 			WaitForChallengeChoice();
 			
-	
-			
 			if(G_OpponentChosen == TMC_MEDAL_RECORDCENTER) {
 				G_WorldRecordMode 			= True;
 				G_AskRecordCenterRestart 	= False;
@@ -567,7 +560,6 @@ if(G_GamePhase == C_GAMEPHASE_GAME)
 		Game::SetStandbyMusic();
 		G_TimerStandBy = Now + 10000;
 		
-		
 	}
 	
 	if(G_TimeSetGamePhaseToPostGame < Now && G_TimeSetGamePhaseToPostGame != -1)
@@ -647,7 +639,7 @@ if(G_GamePhase == C_GAMEPHASE_GAME)
 		{	
 			if(Game::IsRacing(Event.Player)) {
 				+++EventGiveUp+++
-				WaitRaceAndRespawn(Event.Player);
+				CampaignWaitRace();
 				SetGamePhase(C_GAMEPHASE_PREPARATION);
 				PassOn(Event);
 			} else {
@@ -781,7 +773,6 @@ if(UICampaign::PlayerWantsToQuit()) G_PlayerWantsToQuit = True;
 	// Game::WaitTime(1000);
 	// G_PlayerWantsToQuit = True;
 // }
-
 
 if(G_PlayerWantsToQuit) {
 	UICampaign::SetStartMenuVisibility(False);
@@ -979,22 +970,15 @@ Void InitMedalsNb() {
 	Net_AuthorMedalNb 	= TL::ToInteger(S_NumberOfAuthor);
 }
 
-
-
-
-
 Void SetModelCar(Boolean _Random) {
 	//+++SetCarsModels+++
 }
-
 
 Void RaceTransition() {
 	UICampaign::SetFinalMenuVisibility(False);
 	Game::WaitTime(250);
 	Game::WaitRace(Players[G_ThePlayerId]);
 }
-
-
 
 Void SetGamePhase(Integer _Phase) {
 	G_GamePhase = _Phase;
@@ -1005,11 +989,21 @@ Void SetGamePhase(Integer _Phase) {
 
 Void CampaignSpawnPlayer() {
 	if(!Players[G_ThePlayerId].IsSpawned) {
-		Players[G_ThePlayerId].AccelCoef   = S_Gameplay_Acceleration;
-		Players[G_ThePlayerId].ControlCoef = S_Gameplay_Control;
-		Players[G_ThePlayerId].GravityCoef = S_Gameplay_Gravity;
+		// Players[G_ThePlayerId].AccelCoef   = S_Gameplay_Acceleration;
+		// Players[G_ThePlayerId].ControlCoef = S_Gameplay_Control;
+		// Players[G_ThePlayerId].GravityCoef = S_Gameplay_Gravity;
+		TMAll_SetPlayerAutoGameplay(Players[G_ThePlayerId]);
 		Players[G_ThePlayerId].IsSpawned   = True;
 	}
+}
+
+Void CampaignWaitRace() {
+	Game::WaitRace(Players[G_ThePlayerId]);
+
+	// in order to avoid leaving the camera undefined, respawn now:
+	CampaignSpawnPlayer();
+	declare UI <=> UIManager.GetUI(Players[G_ThePlayerId]);
+	if (UI != Null) UI.UISequence = CUIConfig::EUISequence::Playing;
 }
 
 Void InitGhost() {	
@@ -1099,7 +1093,6 @@ Void ShowOpponents(Boolean _IsReplay) {
 			}
 			*/
 		
-				
 			//Game::SetOpponentName(C_MedalsName[G_OpponentChosen]);
 			LoadGhostOnTrack(GhostToLoad, G_OpponentChosen, False);
 			if(Ghosts::IsGhostReady(GhostToLoad)) {
@@ -1151,7 +1144,6 @@ Void ShowOpponents(Boolean _IsReplay) {
 	}
 }
 
-
 Integer GetMedalPlayer() {
 	declare Integer PlayerTimeOnMap = 999999999999999999;
 	if(G_TimesOnMap.existskey(TMC_MEDAL_PLAYER))
@@ -1192,7 +1184,6 @@ Void SetMedalPlayer() {
 	Net_TimeToNextMedal = 0;
 	Net_IsNewMedal      = False;
 	G_OldMedal          = G_BestMedal;
-
 
 	if(MyPlayer.CurRace.Time <= G_TimesOnMap[TMC_MEDAL_AUTHOR]) {
 		Net_CurMedal 	= TMC_MEDAL_AUTHOR;
@@ -1265,7 +1256,6 @@ Void SetMedalPlayer() {
 		Net_IsNewMedal = True;
 		Prev_BestMedal = G_BestMedal;
 	}
-
 
 	if(G_HasNewMedal) {
 		G_NbMedalWon	+= G_OldMedal - G_BestMedal;
@@ -1484,7 +1474,6 @@ Void SoloYield() {
 
 	ReplayAndStandByLoop();
 	
-	
 	if(UICampaign::PlayerWantsToQuit()) {
 		G_PlayerWantsToQuit = True;
 	}
@@ -1519,7 +1508,6 @@ Void SetNewRecord(Text _Context) {
 	BestTimePlayer = TL::TimeToText(G_BestTimePlayer, True);
 	BestTimePlayer ^= TL::SubText(G_BestTimePlayer  ^"", (TL::Length(G_BestTimePlayer^"")-1), 1);
 
-
 	if(G_PlayerGhost != Null)
 	{
 		G_TaskNewRecord = ScoreMgr.Map_SetNewRecord(Players[0].Id, MapList[NextMapIndex].MapUid, _Context, G_PlayerGhost);
@@ -1533,7 +1521,6 @@ Void SetNewRecord(Text _Context) {
 		SoloYield();
 	}
 	
-
 	if(G_TaskNewRecord != Null && G_TaskNewRecord.HasSucceeded)
 	{
 		ScoreMgr.TaskResult_Release(G_TaskNewRecord.Id);
@@ -1681,7 +1668,6 @@ Void WorldRecordSequence() {
 		LoadSelectedGhosts(WorldRecordChoices, WorldRecordChoices_FileName, WorldRecordChoices_Replay);
 	}
 }
-
 
 Void RecordCenterSequence() {
 	G_CurrentFrameDisplay = TMC_WINDOWFRAMESTEP_RESTARTRECORD;

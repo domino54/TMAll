@@ -1,0 +1,92 @@
+/**
+ * @name PlayerModels_Structs.Script.txt
+ * @author domino54
+ * @version 2024-07-17
+ */
+
+#Const Version      "2024-07-17"
+#Const ScriptName   "Libs/domino54/PlayerModels_Structs.Script.txt"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_PlayerModel {
+  Text Id;
+  Text Type;
+  Text Name;
+  Boolean IsHidden;
+  Text Archetype;
+  Text ItemPath;
+  Text LoadAs;
+  Text[Text] Assets;
+}
+
+#Struct K_ModelSkin {
+  Text Id;
+  Text Name;
+  Text AppliesTo;
+  Boolean IsDefault;
+  Boolean IsHidden;
+  Text SkinPath;
+  Text[] Authors;
+  Integer Rarity;
+  Integer SortIndex;
+  Text[Text] Assets;
+}
+
+#Struct K_ModelOverlay {
+  Text Id;
+  Text Name;
+  Text Extends;
+  Text ItemPath;
+  Text[Text] Assets;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetScriptVersion() {
+  return Version;
+}
+
+Text GetScriptName() {
+  return ScriptName;
+}
+
+Text Manialink() {
+  return """
+#Struct K_PlayerModel {
+  Text Id;
+  Text Type;
+  Text Name;
+  Boolean IsHidden;
+  Text Archetype;
+  Text ItemPath;
+  Text LoadAs;
+  Text[Text] Assets;
+}
+
+#Struct K_ModelSkin {
+  Text Id;
+  Text Name;
+  Text AppliesTo;
+  Boolean IsDefault;
+  Boolean IsHidden;
+  Text SkinPath;
+  Text[] Authors;
+  Integer Rarity;
+  Integer SortIndex;
+  Text[Text] Assets;
+}
+
+#Struct K_ModelOverlay {
+  Text Id;
+  Text Name;
+  Text Extends;
+  Text ItemPath;
+  Text[Text] Assets;
+}
+  """;
+}

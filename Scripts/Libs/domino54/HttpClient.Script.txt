@@ -1,0 +1,353 @@
+/**
+ * @name HttpClient.Script.txt
+ * @author domino54
+ * @version 2024-07-17
+ *
+ * @example ```ts
+ * Void Load() {
+ *   // Creates HTTP GET request to the resource with associated id.
+ *   HttpClient::Get("my_lib:very_important_data", "file://Media/Data/waifu-list.json");
+ * }
+ *
+ * Boolean IsLoading() {
+ *   // Will be True as soon as any request in the namespace is resolved.
+ *   while (HttpClient::HasPendingEvents("my_lib")) {
+ *     // Returns a result of previously made request.
+ *     // This can be a response, a timeout, an error code.
+ *     // The Client handles request disposal for you.
+ *     declare Event = HttpClient::GetFirstEvent("my_lib");
+ *
+ *     if (Event.StatusCode == 200 && Event.Id == "my_lib:very_important_data") {
+ *       // Prints a list of your favorite waifus.
+ *       log(Event.ResponseBody);
+ *     }
+ *   }
+ *
+ *   return HttpClient::HasPendingRequests("my_lib");
+ * }
+ * ```
+ */
+
+#Const Version      "2024-07-17"
+#Const ScriptName   "Libs/domino54/HttpClient.Script.txt"
+
+#Include "TextLib" as TL
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_LibHttpClient_DefaultTimeout      5000
+#Const C_LibHttpClient_DefaultUseCache     False
+#Const C_LibHttpClient_DefaultHeaders      ""
+#Const C_LibHttpClient_EHttpMethodGet      "GET"
+#Const C_LibHttpClient_EHttpMethodPost     "POST"
+#Const C_LibHttpClient_TimeoutStatusCode   0
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_QueuedHttpRequest {
+  Text Namespace;
+  Text Id;
+  Text Method;
+  Text Url;
+  Text Payload;
+  Integer Timeout;
+  Text Headers;
+  Boolean UseCache;
+}
+
+#Struct K_HttpClientEvent {
+  Text Namespace;
+  Text Id;
+  Text Url;
+  Integer StatusCode;
+  Text ResponseBody;
+}
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare K_QueuedHttpRequest[] G_LibHttpClient_RequestsQueue;
+declare K_HttpClientEvent[] G_LibHttpClient_PendingEvents;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Text Private_GetNamespace(Text _Id) {
+  declare Namespace = TL::Split(":", _Id)[0];
+
+  assert(Namespace != _Id, "All requests must use a namespaced id, for example: \"my_lib:player_data\".");
+
+  return Namespace;
+}
+
+Void Private_AssignRequestMetadata(CHttpRequest _Request, Text _Namespace, Text _Id, Integer _Timeout) {
+  declare Text LibHttpClient_Namespace for _Request;
+  declare Text LibHttpClient_PrivateId for _Request;
+  declare Integer LibHttpClient_Timeout for _Request;
+
+  LibHttpClient_Namespace = _Namespace;
+  LibHttpClient_PrivateId = _Id;
+  LibHttpClient_Timeout = Now + _Timeout;
+}
+
+Void Private_QueueGet(Text _Namespace, Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache, Text _Headers) {
+  declare Request = K_QueuedHttpRequest{
+    Namespace = _Namespace,
+    Id = _Id,
+    Method = C_LibHttpClient_EHttpMethodGet,
+    Url = _Url,
+    Timeout = _Timeout,
+    UseCache = _UseCache,
+    Headers = _Headers
+  };
+
+  G_LibHttpClient_RequestsQueue.add(Request);
+}
+
+Void Private_CreateGet(Text _Namespace, Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache, Text _Headers) {
+  declare Request = Http.CreateGet(_Url, _UseCache, _Headers);
+
+  Private_AssignRequestMetadata(Request, _Namespace, _Id, _Timeout);
+}
+
+Void Private_QueuePost(Text _Namespace, Text _Id, Text _Url, Text _Payload, Integer _Timeout, Text _Headers) {
+  declare Request = K_QueuedHttpRequest{
+    Namespace = _Namespace,
+    Id = _Id,
+    Method = C_LibHttpClient_EHttpMethodPost,
+    Url = _Url,
+    Payload = _Payload,
+    Timeout = _Timeout,
+    Headers = _Headers
+  };
+
+  G_LibHttpClient_RequestsQueue.add(Request);
+}
+
+Void Private_CreatePost(Text _Namespace, Text _Id, Text _Url, Text _Payload, Integer _Timeout, Text _Headers) {
+  declare Request = Http.CreatePost(_Url, _Payload, _Headers);
+
+  Private_AssignRequestMetadata(Request, _Namespace, _Id, _Timeout);
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetScriptVersion() {
+  return Version;
+}
+
+Text GetScriptName() {
+  return ScriptName;
+}
+
+/**
+ * This method should be called at the end of your script's execution context.
+ * For game modes it can be done inside the `***MB_Private_UnloadLibraries***` label.
+ */
+Void Unload() {
+  G_LibHttpClient_RequestsQueue.clear();
+  G_LibHttpClient_PendingEvents.clear();
+
+  declare Ident[] RequestsToDestroy = [];
+
+  foreach (Request in Http.Requests) {
+    declare Text LibHttpClient_PrivateId for Request;
+
+    if (LibHttpClient_PrivateId != "") {
+      RequestsToDestroy.add(Request.Id);
+    }
+  }
+
+  foreach (RequestId in RequestsToDestroy) {
+    Http.Destroy(Http.Requests[RequestId]);
+  }
+}
+
+/**
+ * This method should be called at the beginning of your script's execution context.
+ * For game modes it can be done inside the `***MB_Private_LoadLibraries***` label.
+ */
+Void Load() {
+  Unload();
+}
+
+/**
+ * This method MUST be called after every `yield;` keyword in your script's execution context.
+ * This can be done for example in your gamemode's `***MB_Private_Yield***` label.
+ */
+Void Yield() {
+  while (G_LibHttpClient_RequestsQueue.count > 0 && Http.SlotsAvailable > 0) {
+    declare Request = G_LibHttpClient_RequestsQueue[0];
+    declare Removed = G_LibHttpClient_RequestsQueue.removekey(0);
+
+    switch (Request.Method) {
+       case C_LibHttpClient_EHttpMethodGet: {
+          Private_CreateGet(Request.Namespace, Request.Id, Request.Url, Request.Timeout, Request.UseCache, Request.Headers);
+       }
+       case C_LibHttpClient_EHttpMethodPost: {
+          Private_CreatePost(Request.Namespace, Request.Id, Request.Url, Request.Payload, Request.Timeout, Request.Headers);
+       }
+    }
+  }
+
+  declare Ident[] RequestsToDestroy = [];
+
+  foreach (Request in Http.Requests) {
+    declare Text LibHttpClient_PrivateId for Request;
+
+    if (LibHttpClient_PrivateId == "") {
+      continue;
+    }
+
+    declare Text LibHttpClient_Namespace for Request;
+    declare Integer LibHttpClient_Timeout for Request;
+
+    if (Request.IsCompleted) {
+      declare Event = K_HttpClientEvent{
+        Namespace = LibHttpClient_Namespace,
+        Id = LibHttpClient_PrivateId,
+        Url = Request.Url,
+        StatusCode = Request.StatusCode,
+        ResponseBody = Request.Result
+      };
+
+      G_LibHttpClient_PendingEvents.add(Event);
+      RequestsToDestroy.add(Request.Id);
+    }
+
+    else if (Now >= LibHttpClient_Timeout) {
+      declare Event = K_HttpClientEvent{
+        Namespace = LibHttpClient_Namespace,
+        Id = LibHttpClient_PrivateId,
+        Url = Request.Url,
+        StatusCode = C_LibHttpClient_TimeoutStatusCode
+      };
+
+      G_LibHttpClient_PendingEvents.add(Event);
+      RequestsToDestroy.add(Request.Id);
+    }
+  }
+
+  foreach (RequestId in RequestsToDestroy) {
+    Http.Destroy(Http.Requests[RequestId]);
+  }
+}
+
+Boolean IsValidUrl(Text _Url) {
+  return Http.IsValidUrl(_Url);
+}
+
+Boolean HasPendingRequests(Text _Namespace) {
+  foreach (Request in G_LibHttpClient_RequestsQueue) {
+    if (Request.Namespace == _Namespace) {
+      return True;
+    }
+  }
+
+  foreach (Request in Http.Requests) {
+    declare Text LibHttpClient_Namespace for Request;
+
+    if (LibHttpClient_Namespace == _Namespace) {
+      return True;
+    }
+  }
+
+  return False;
+}
+
+Boolean HasPendingEvents(Text _Namespace) {
+  foreach (Event in G_LibHttpClient_PendingEvents) {
+    if (Event.Namespace == _Namespace) {
+      return True;
+    }
+  }
+
+  return False;
+}
+
+K_HttpClientEvent GetFirstEvent(Text _Namespace) {
+  declare Index = -1;
+  declare FirstEvent = K_HttpClientEvent{};
+
+  foreach (I => Event in G_LibHttpClient_PendingEvents) {
+    if (Event.Namespace == _Namespace) {
+      FirstEvent = Event;
+      Index = I;
+      break;
+    }
+  }
+
+  if (Index >= 0) {
+    declare Removed = G_LibHttpClient_PendingEvents.removekey(Index);
+  }
+
+  return FirstEvent;
+}
+
+Void Get(Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache, Text _Headers) {
+  declare Namespace = Private_GetNamespace(_Id);
+
+  if (Http.SlotsAvailable > 0) {
+    Private_CreateGet(Namespace, _Id, _Url, _Timeout, _UseCache, _Headers);
+  } else {
+    Private_QueueGet(Namespace, _Id, _Url, _Timeout, _UseCache, _Headers);
+  }
+}
+
+Void Get(Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache) {
+  Get(_Id, _Url, _Timeout, _UseCache, C_LibHttpClient_DefaultHeaders);
+}
+
+Void Get(Text _Id, Text _Url, Integer _Timeout, Text _Headers) {
+  Get(_Id, _Url, _Timeout, C_LibHttpClient_DefaultUseCache, _Headers);
+}
+
+Void Get(Text _Id, Text _Url, Integer _Timeout) {
+  Get(_Id, _Url, _Timeout, C_LibHttpClient_DefaultUseCache);
+}
+
+Void Get(Text _Id, Text _Url, Boolean _UseCache, Text _Headers) {
+  Get(_Id, _Url, C_LibHttpClient_DefaultTimeout, _UseCache, _Headers);
+}
+
+Void Get(Text _Id, Text _Url, Boolean _UseCache) {
+  Get(_Id, _Url, _UseCache, C_LibHttpClient_DefaultHeaders);
+}
+
+Void Get(Text _Id, Text _Url, Text _Headers) {
+  Get(_Id, _Url, C_LibHttpClient_DefaultUseCache, _Headers);
+}
+
+Void Get(Text _Id, Text _Url) {
+  Get(_Id, _Url, C_LibHttpClient_DefaultTimeout);
+}
+
+Void Post(Text _Id, Text _Url, Text _Payload, Integer _Timeout, Text _Headers) {
+  declare Namespace = Private_GetNamespace(_Id);
+
+  if (Http.SlotsAvailable > 0) {
+    Private_CreatePost(Namespace, _Id, _Url, _Payload, _Timeout, _Headers);
+  } else {
+    Private_QueuePost(Namespace, _Id, _Url, _Payload, _Timeout, _Headers);
+  }
+}
+
+Void Post(Text _Id, Text _Url, Text _Payload, Integer _Timeout) {
+  Post(_Id, _Url, _Payload, _Timeout, C_LibHttpClient_DefaultHeaders);
+}
+
+Void Post(Text _Id, Text _Url, Text _Payload, Text _Headers) {
+  Post(_Id, _Url, _Payload, C_LibHttpClient_DefaultTimeout, _Headers);
+}
+
+Void Post(Text _Id, Text _Url, Text _Payload) {
+  Post(_Id, _Url, _Payload, C_LibHttpClient_DefaultTimeout);
+}

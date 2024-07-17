@@ -1,0 +1,101 @@
+/**
+ * Base for a local game mode inside Trackmania Multienvironment.
+ */
+#Extends "Modes/TrackMania/ModeBase.Script.txt"
+
+#Const MB_TMAll_Version     "2017-08-11"
+#Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
+
+#Include "Libs/Nadeo/Env.Script.txt" as Env
+#Include "Libs/Nadeo/Log.Script.txt" as Log
+#Include "Libs/domino54/CustomSkins_LocalData.Script.txt" as CustomSkins_LocalData
+#Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
+#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
+#Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+
+/// Environment in which the script runs
+#Setting S_ScriptEnvironment "development" as "<hidden>"
+
+// ---------------------------------- //
+// Extends
+// ---------------------------------- //
+***LogVersion***
+***
+MB_LogVersion(MB_TMAll_ScriptName, MB_TMAll_Version);
+MB_LogVersion(Env::GetScriptName(), Env::GetScriptVersion());
+MB_LogVersion(Log::GetScriptName(), Log::GetScriptVersion());
+MB_LogVersion(CustomSkins_LocalData::GetScriptName(), CustomSkins_LocalData::GetScriptVersion());
+MB_LogVersion(HttpClient::GetScriptName(), HttpClient::GetScriptVersion());
+MB_LogVersion(PlayerModels_Data::GetScriptName(), PlayerModels_Data::GetScriptVersion());
+MB_LogVersion(PlayerModels_Server::GetScriptName(), PlayerModels_Server::GetScriptVersion());
+***
+
+// ---------------------------------- //
+// Init server
+// ---------------------------------- //
+***InitServer***
+***
+Env::Load();
+Env::Set(S_ScriptEnvironment);
+Log::Load();
+HttpClient::Load();
+CustomSkins_LocalData::Load();
+PlayerModels_Server::StrictCompatibilityMode();
+PlayerModels_Data::Load();
+
+while (PlayerModels_Data::Loading()) {
+  MB_Yield();
+}
+***
+
+// ---------------------------------- //
+// Before load map
+// ---------------------------------- //
+***BeforeLoadMap***
+***
+ItemList_Begin();
+PlayerModels_Server::Load(This);
++++ItemList+++
+ItemList_End();
+***
+
+// ---------------------------------- //
+// Init map
+// ---------------------------------- //
+***InitMap***
+***
+PlayerModels_Server::SetMapProperties(Map.CollectionName, MapPlayerModelName);
+***
+
+// ---------------------------------- //
+// Yield
+// ---------------------------------- //
+***Yield***
+***
+HttpClient::Yield();
+CustomSkins_LocalData::Yield();
+***
+
+// ---------------------------------- //
+// End server
+// ---------------------------------- //
+***EndServer***
+***
+HttpClient::Unload();
+PlayerModels_Server::Unload(This);
+CustomSkins_LocalData::Unload();
+PlayerModels_Data::Unload();
+Log::Unload();
+Env::Unload();
+***
+
+// ---------------------------------- //
+// Functions
+// ---------------------------------- //
+
+/**
+ * Automatically assign all custom gameplay properties to a player.
+ */
+Void TMAll_SetPlayerAutoGameplay(CTmPlayer _Player) {
+  PlayerModels_Server::AssignPlayerModel(_Player);
+}

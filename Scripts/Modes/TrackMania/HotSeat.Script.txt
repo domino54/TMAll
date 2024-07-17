@@ -2,7 +2,7 @@
  *	Time Attack mode
  */
 
-#Extends "Modes/TrackMania/ModeBase.Script.txt"
+#Extends "Modes/TrackMania/Base/LocalModeTMAllMaker.Script.txt"
 
 #Const	CompatibleMapTypes	["RaceCE","Race"]
 #Const	Version		"2016-01-20"
@@ -162,10 +162,10 @@ declare Integer StartTime;
 ***BeforeLoadMap***
 ***
 G_EnviroName 		= MapList[NextMapIndex].CollectionName;
-CarsModels::StartItemList();
-G_CarModels 		= CarsModels::LoadCarsModels(G_EnviroName, "Hotseat", False);
-G_CarDoubleModels	= CarsModels::LoadCarsModels(G_EnviroName, "Hotseat", True);
-CarsModels::EndItemList();
+//CarsModels::StartItemList();
+//G_CarModels 		= CarsModels::LoadCarsModels(G_EnviroName, "Hotseat", False);
+//G_CarDoubleModels	= CarsModels::LoadCarsModels(G_EnviroName, "Hotseat", True);
+//CarsModels::EndItemList();
 //ClientManiaAppUrl = "file://Media/Manialinks/Nadeo/TMConsole/Ingame/UILocalManiaApp.Script.txt";
 
 ***
@@ -386,6 +386,7 @@ if(G_GamePhase == C_GAMEPHASE_PLAYERSSELEC) {
 		if(Game::IsWaiting(Player)) {
 			G_SurvivingTimer = 1000;
 			G_CustomRaceTime = 0;
+			TMAll_SetPlayerAutoGameplay(Players[G_ThePlayerId]);
 			Game::StartRace(Player);
 			G_StartThroughInitTime = False;
 		} else {
@@ -813,6 +814,7 @@ Void SetModelCar(Boolean _Default) {
 }
 
 Void CustomSpawnPlayer() {
+	TMAll_SetPlayerAutoGameplay(Players[G_ThePlayerId]);
 	Players[G_ThePlayerId].IsSpawned = True;
 }
 
