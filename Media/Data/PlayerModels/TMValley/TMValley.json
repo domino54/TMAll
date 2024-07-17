@@ -1,0 +1,88 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tmvalley:default",
+  "Name": "Trackmania² Valley default skins",
+  "Skins": [
+    {
+      "Id": "tmvalley:azurswift",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "AzurSwift",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/AzurSwift.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:grass99tm",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "Grass99TM",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/Grass99TM.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:kingmustard",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "KingMustard",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/KingMustard.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:redturn",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "RedTurn",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/RedTurn.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:shadowmantis",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "ShadowMantis",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/ShadowMantis.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:straightblue",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "StraightBlue",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/StraightBlue.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:thewasp",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "TheWasp",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/TheWasp.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:trigen",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "TriGen",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/TriGen.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:whitelegend",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "WhiteLegend",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/WhiteLegend.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmvalley:windleaf",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "Windleaf",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/ValleyCar/Windleaf.zip",
+      "Authors": ["NADEO"]
+    }
+  ]
+}

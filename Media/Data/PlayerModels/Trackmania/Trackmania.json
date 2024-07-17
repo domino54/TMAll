@@ -1,0 +1,186 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "trackmania:vehicles",
+  "Name": "Trackmania vehicles",
+  "Models": [
+    {
+      "Id": "trackmania:canyoncar",
+      "Type": "Vehicle",
+      "Name": "Canyon Car",
+      "Archetype": "CanyonCar",
+      "ItemPath": "Vehicles/CanyonCar.Item.Gbx",
+      "LoadAs": "ItemAndArchetype"
+    },
+    {
+      "Id": "trackmania:stadiumcar",
+      "Type": "Vehicle",
+      "Name": "Stadium Car",
+      "Archetype": "StadiumCar",
+      "ItemPath": "Vehicles/StadiumCar.Item.Gbx",
+      "LoadAs": "ItemAndArchetype"
+    },
+    {
+      "Id": "trackmania:valleycar",
+      "Type": "Vehicle",
+      "Name": "Valley Car",
+      "Archetype": "ValleyCar",
+      "ItemPath": "Vehicles/ValleyCar.Item.Gbx",
+      "LoadAs": "ItemAndArchetype"
+    },
+    {
+      "Id": "trackmania:lagooncar",
+      "Type": "Vehicle",
+      "Name": "Lagoon Car",
+      "Archetype": "LagoonCar",
+      "ItemPath": "Vehicles/LagoonCar.Item.Gbx",
+      "LoadAs": "ItemAndArchetype"
+    },
+    {
+      "Id": "trackmania:islandcar",
+      "Type": "Vehicle",
+      "Name": "Island Car",
+      "Archetype": "IslandCar",
+      "ItemPath": "Vehicles/IslandCar.Item.Gbx",
+      "LoadAs": "Item"
+    },
+    {
+      "Id": "trackmania:baycar",
+      "Type": "Vehicle",
+      "Name": "Bay Car",
+      "Archetype": "BayCar",
+      "ItemPath": "Vehicles/BayCar.Item.Gbx",
+      "LoadAs": "Item"
+    },
+    {
+      "Id": "trackmania:coastcar",
+      "Type": "Vehicle",
+      "Name": "Coast Car",
+      "Archetype": "CoastCar",
+      "ItemPath": "Vehicles/CoastCar.Item.Gbx",
+      "LoadAs": "Item"
+    },
+    {
+      "Id": "trackmania:desertcar",
+      "Type": "Vehicle",
+      "Name": "Desert Car",
+      "Archetype": "DesertCar",
+      "ItemPath": "Vehicles/DesertCar.Item.Gbx",
+      "LoadAs": "Item"
+    },
+    {
+      "Id": "trackmania:snowcar",
+      "Type": "Vehicle",
+      "Name": "Snow Car",
+      "Archetype": "SnowCar",
+      "ItemPath": "Vehicles/SnowCar.Item.Gbx",
+      "LoadAs": "Item"
+    },
+    {
+      "Id": "trackmania:rallycar",
+      "Type": "Vehicle",
+      "Name": "Rally Car",
+      "Archetype": "RallyCar",
+      "ItemPath": "Vehicles/RallyCar.Item.Gbx",
+      "LoadAs": "Item"
+    },
+    {
+      "Id": "trackmania:trafficcar",
+      "Type": "Vehicle",
+      "Name": "Traffic Car",
+      "Archetype": "TrafficCar",
+      "ItemPath": "Vehicles/TrafficCar.Item.Gbx",
+      "LoadAs": "Item"
+    }
+  ],
+  "Skins": [
+    {
+      "Id": "trackmania:canyoncar_default",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:stadiumcar_default",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:valleycar_default",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:lagooncar_default",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:islandcar_default",
+      "AppliesTo": "trackmania:islandcar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:baycar_default",
+      "AppliesTo": "trackmania:baycar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:coastcar_default",
+      "AppliesTo": "trackmania:coastcar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:desertcar_default",
+      "AppliesTo": "trackmania:desertcar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:snowcar_default",
+      "AppliesTo": "trackmania:snowcar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:rallycar_default",
+      "AppliesTo": "trackmania:rallycar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "trackmania:trafficcar_default",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "(empty)",
+      "IsDefault": true,
+      "Rarity": 1,
+      "Authors": ["NADEO"]
+    }
+  ]
+}

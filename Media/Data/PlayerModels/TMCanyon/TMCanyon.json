@@ -1,0 +1,128 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tmcanyon:default",
+  "Name": "Trackmania² Canyon default skins",
+  "Skins": [
+    {
+      "Id": "tmcanyon:ace",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Ace",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/Ace.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:defrag",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Defrag",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/Defrag.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:duke",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Duke",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/Duke.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:exd",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "EXD",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/EXD.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:fortone",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "ForTOne",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/ForTOne.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:fusi5n",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Fusi5n",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/Fusi5n.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:gramberg",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Gramberg",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/Gramberg.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:gt500",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "GT500",
+      "Rarity": 2,
+      "SkinPath": "Models/CanyonCar/GT500.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:justforward",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "JustForward",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/JustForward.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:liberty",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Liberty",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/Liberty.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:magma",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Magma",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/Magma.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:mp",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "MP",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/MP.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:nteam",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "NTeam",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/NTeam.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:safetycar",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "SafetyCar",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/SafetyCar.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmcanyon:tecnivals",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Tecnivals",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/CanyonCar/Tecnivals.zip",
+      "Authors": ["NADEO"]
+    }
+  ]
+}

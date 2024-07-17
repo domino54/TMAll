@@ -1,0 +1,18 @@
+{
+  "$schema": "./index.schema.json",
+  "SourceUrls": [
+    "file://Media/Data/PlayerModels/Trackmania/Trackmania.json",
+    "file://Media/Data/PlayerModels/TMCanyon/TMCanyon.json",
+    "file://Media/Data/PlayerModels/TMValley/TMValley.json",
+    "file://Media/Data/PlayerModels/TMLagoon/TMLagoon.json"
+  ],
+  "SortOverrides": [
+    "trackmania:islandcar",
+    "trackmania:baycar",
+    "trackmania:coastcar",
+    "trackmania:desertcar",
+    "trackmania:snowcar",
+    "trackmania:rallycar",
+    "trackmania:trafficcar"
+  ]
+}

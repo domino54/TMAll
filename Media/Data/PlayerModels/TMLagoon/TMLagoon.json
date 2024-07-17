@@ -1,0 +1,104 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tmlagoon:default",
+  "Name": "Trackmania² Lagoon default skins",
+  "Skins": [
+    {
+      "Id": "tmlagoon:aloha",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Aloha",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Aloha.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:coral",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Coral",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Coral.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:farewell",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Farewell",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Farewell.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:jellyfish",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Jellyfish",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/jellyfish.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:ocean",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Ocean",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Ocean.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:orchid",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Orchid",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Orchid.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:r3d",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "R3D",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/R3D.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:ray",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Ray",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Ray.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:samurai",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Samurai",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Samurai.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:shark",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Shark",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Shark.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:thunder",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Thunder",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Thunder.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmlagoon:wave",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Wave",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/LagoonCar/Wave.zip",
+      "Authors": ["NADEO"]
+    }
+  ]
+}

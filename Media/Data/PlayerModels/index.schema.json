@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "An index file for loading player models. This is the central and sole definition of all models and skins present in the title pack. The file must be located in the directory corresponsing to path `file://Media/Data/PlayerModels/index.json`.",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "SourceUrls": {
+      "type": "array",
+      "title": "List of all definition files to load, in the given order, with every file having priority over the previous ones. Optimally, the listed files should be structured as `file://Media/Data/PlayerModels/<namespace>/<namespace>.json`, where the <namespace> folder also contains subdirectories or a flat list of all image assets related to the defined models.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "SortOverrides": {
+      "type": "array",
+      "title": "Optional sorting override, which defines the order in which the player models appear in the skin selection interface. Any models not listed here will appear at the end, in order as they are were loaded by the source files.",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_]+:[a-z0-9_]+$"
+      }
+    }
+  },
+  "required": ["SourceUrls"]
+}

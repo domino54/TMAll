@@ -1,0 +1,728 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tmstadium:default",
+  "Name": "Trackmania² Stadium default skins",
+  "Skins": [
+    {
+      "Id": "tmstadium:alg",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "ALG",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/ALG.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ang",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "ANG",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/ANG.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:arg",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "ARG",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/ARG.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:aus",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "AUS",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/AUS.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:aut",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "AUT",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/AUT.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ban",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "BAN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/BAN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:bel",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "BEL",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/BEL.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:bih",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "BIH",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/BIH.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:blr",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "BLR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/BLR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:bol",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "BOL",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/BOL.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:bra",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "BRA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/BRA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:brn",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "BRN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/BRN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:bul",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "BUL",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/BUL.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:can",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CAN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CAN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:cgo",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CGO",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CGO.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:chi",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CHI",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CHI.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:chn",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CHN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CHN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:civ",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CIV",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CIV.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:cmr",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CMR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CMR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:col",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "COL",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/COL.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:cro",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CRO",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CRO.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:cyp",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CYP",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CYP.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:cze",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "CZE",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/CZE.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:den",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "DEN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/DEN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ecu",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "ECU",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/ECU.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:egy",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "EGY",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/EGY.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:esp",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "ESP",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/ESP.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:est",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "EST",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/EST.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:fin",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "FIN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/FIN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:fra",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "FRA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/FRA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:gbr",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "GBR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/GBR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ger",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "GER",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/GER.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:gre",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "GRE",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/GRE.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:gua",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "GUA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/GUA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:hun",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "HUN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/HUN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ina",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "INA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/INA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ind",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "IND",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/IND.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:iri",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "IRI",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/IRI.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:irl",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "IRL",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/IRL.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:irq",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "IRQ",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/IRQ.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:isr",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "ISR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/ISR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ita",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "ITA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/ITA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:jpn",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "JPN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/JPN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:kaz",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "KAZ",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/KAZ.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:kor",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "KOR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/KOR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ksa",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "KSA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/KSA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:kuw",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "KUW",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/KUW.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:lao",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "LAO",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/LAO.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:lat",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "LAT",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/LAT.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:lba",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "LBA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/LBA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:lib",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "LIB",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/LIB.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ltu",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "LTU",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/LTU.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:lux",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "LUX",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/LUX.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:mar",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "MAR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/MAR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:mas",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "MAS",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/MAS.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:mex",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "MEX",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/MEX.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:mgl",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "MGL",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/MGL.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:mkd",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "MKD",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/MKD.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ned",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "NED",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/NED.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ngr",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "NGR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/NGR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:nor",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "NOR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/NOR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:nzl",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "NZL",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/NZL.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:oma",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "OMA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/OMA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:other",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "Other",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/Other.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:pak",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "PAK",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/PAK.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:pan",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "PAN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/PAN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:per",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "PER",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/PER.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:phi",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "PHI",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/PHI.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:pol",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "POL",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/POL.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:por",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "POR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/POR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:qat",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "QAT",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/QAT.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:rou",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "ROU",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/ROU.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:rsa",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "RSA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/RSA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:rus",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "RUS",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/RUS.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:sen",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "SEN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/SEN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:slo",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "SLO",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/SLO.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:srb",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "SRB",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/SRB.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:sui",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "SUI",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/SUI.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:svk",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "SVK",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/SVK.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:swe",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "SWE",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/SWE.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:syr",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "SYR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/SYR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:tha",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "THA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/THA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:tun",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "TUN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/TUN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:tur",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "TUR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/TUR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ukr",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "UKR",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/UKR.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:uru",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "URU",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/URU.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:usa",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "USA",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/USA.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:uzb",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "UZB",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/UZB.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:ven",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "VEN",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/VEN.zip",
+      "Authors": ["NADEO"]
+    },
+    {
+      "Id": "tmstadium:vie",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "VIE",
+      "Rarity": 2,
+      "SkinPath": "Skins/Models/StadiumCar/VIE.zip",
+      "Authors": ["NADEO"]
+    }
+  ]
+}
