@@ -1,0 +1,40 @@
+<titlePackXML projectenviro="TMAll">
+	<global>
+		<News color="f00"/>
+		<Logo path="file://Media\Images\TMAllLogo.dds" />
+		<Background path="" />
+		<BackgroundImage path="file://Media\Images\MenuBg.jpg" />
+		<Music path="file://Media\Nadeo\Musics\CanyonMenu.ogg" />
+		<Style MainTitlePolice="TextTitle3" SectionsPolice="TextRaceMessageBig" />
+	</global>
+
+	<Multiplayer logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_Online.dds" activated="True" color="c39" allowallmodes="False" displaytitleserversonly="True">
+			<asset id="Modes/TrackMania/TimeAttack" isdefault="yes" titlename="Time Attack" isvisibleinmaker="True"/>
+	<asset id="Modes/TrackMania/Rounds" isdefault="yes" titlename="Rounds" isvisibleinmaker="True"/>
+	<asset id="Modes/TrackMania/Cup" isdefault="yes" titlename="Cup" isvisibleinmaker="True"/>
+	<asset id="Modes/TrackMania/Laps" isdefault="yes" titlename="Laps" isvisibleinmaker="True"/>
+	<asset id="Modes/TrackMania/Team" isdefault="yes" titlename="Team" isvisibleinmaker="True"/>
+	<asset id="Modes/TrackMania/Chase" isdefault="yes" titlename="Chase" isvisibleinmaker="True"/>
+
+	</Multiplayer>
+	<LocalPlay logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_LocalPlay.dds" activated="True" color="0f8">
+			<asset id="SingleMap" isdefault="yes" titlename="Single Map" isvisibleinmaker="True"/>
+	<asset id="VersusReplay" isdefault="yes" titlename="Versus Replay" isvisibleinmaker="True"/>
+	<asset id="HotSeat" isdefault="yes" titlename="Hotseat" isvisibleinmaker="True"/>
+	<asset id="LocalNetwork" isdefault="yes" titlename="Local Network" isvisibleinmaker="True"/>
+
+	</LocalPlay>
+	<Editors logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_Editor.dds" activated="True" color="48e" mapeditor="">
+	<asset id="NewMap" isdefault="yes" titlename=""/>
+	<asset id="EditReplay" isdefault="yes" titlename=""/>
+	<asset id="PaintCar" isdefault="yes" titlename=""/>
+	<asset id="TitleTools" isdefault="yes" titlename=""/>
+
+	</Editors>
+<Resources flashurl="domino54"/>
+	<Ingame accelcoef="1." controlcoef="1." gravitycoef="1.">
+	</Ingame>
+	<Profile>
+		<param id="0" MonParam="aaa" />
+	</Profile>
+</titlePackXML>

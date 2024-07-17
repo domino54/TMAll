@@ -1,0 +1,192 @@
+<titlePackXML projectenviro="TMAll" titlewasmadeonce="yes">
+	<global>
+		<News color="f00"/>
+		<Logo path="file://Media\Images\TMAllLogo.dds" />
+		<Background path="" />
+		<BackgroundImage path="file://Media\Images\MenuBg.jpg" />
+		<Music path="file://Media\Nadeo\Musics\CanyonMenu.ogg" />
+		<Style MainTitlePolice="TextTitle3" SectionsPolice="TextRaceMessageBig" />
+		<Station stationlogos="file://Media\Images\Logos.png" stationimage="file://Media\Images\PackImage.jpg"/>
+	</global>
+<Solo activated="False" color="FF0" logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_Solo.dds" allowevaluate="False" contextname="" scriptname="">
+<campaign type="Mini">
+	<unlockcriterias>
+		<unlockcriteria id="1" name="semi-open"/>
+		<unlockcriteria id="2" name="progressive"/>
+	</unlockcriterias>
+	<categories>
+	<category name="White">
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="0" medaltype="Bronze"/>
+			<unlock id="2" medalnb="0" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="0" medaltype="Bronze"/>
+			<unlock id="2" medalnb="0" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="0" medaltype="Bronze"/>
+			<unlock id="2" medalnb="0" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="0" medaltype="Bronze"/>
+			<unlock id="2" medalnb="0" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="0" medaltype="Bronze"/>
+			<unlock id="2" medalnb="0" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="5" medaltype="Bronze"/>
+			<unlock id="2" medalnb="5" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="5" medaltype="Bronze"/>
+			<unlock id="2" medalnb="5" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="5" medaltype="Bronze"/>
+			<unlock id="2" medalnb="5" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="5" medaltype="Bronze"/>
+			<unlock id="2" medalnb="5" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="5" medaltype="Bronze"/>
+			<unlock id="2" medalnb="5" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="10" medaltype="Bronze"/>
+			<unlock id="2" medalnb="10" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="10" medaltype="Bronze"/>
+			<unlock id="2" medalnb="10" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="10" medaltype="Bronze"/>
+			<unlock id="2" medalnb="10" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="10" medaltype="Bronze"/>
+			<unlock id="2" medalnb="10" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="10" medaltype="Bronze"/>
+			<unlock id="2" medalnb="10" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="15" medaltype="Bronze"/>
+			<unlock id="2" medalnb="15" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="15" medaltype="Bronze"/>
+			<unlock id="2" medalnb="15" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="15" medaltype="Bronze"/>
+			<unlock id="2" medalnb="15" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="15" medaltype="Bronze"/>
+			<unlock id="2" medalnb="15" medaltype="Bronze"/>
+		</track>
+		<track>
+			<path></path>
+			<name></name>
+			<thumbnail></thumbnail>
+			<unlock id="1" medalnb="15" medaltype="Bronze"/>
+			<unlock id="2" medalnb="15" medaltype="Bronze"/>
+		</track>
+	</category>
+	</categories>
+</campaign>
+</Solo>
+	<Multiplayer logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_Online.dds" activated="True" color="c39" allowallmodes="False" displaytitleserversonly="True">
+			<asset id="Modes/TrackMania/TimeAttack" isdefault="yes" titlename="Time Attack" makername="Time Attack" isvisibleinmaker="True" isactivated="True"/>
+	<asset id="Modes/TrackMania/Rounds" isdefault="yes" titlename="Rounds" makername="Rounds" isvisibleinmaker="True" isactivated="True"/>
+	<asset id="Modes/TrackMania/Cup" isdefault="yes" titlename="Cup" makername="Cup" isvisibleinmaker="True" isactivated="True"/>
+	<asset id="Modes/TrackMania/Laps" isdefault="yes" titlename="Laps" makername="Laps" isvisibleinmaker="True" isactivated="True"/>
+	<asset id="Modes/TrackMania/Team" isdefault="yes" titlename="Team" makername="Team" isvisibleinmaker="True" isactivated="True"/>
+	<asset id="Modes/TrackMania/Chase" isdefault="yes" titlename="Chase" makername="Chase" isvisibleinmaker="True" isactivated="True"/>
+
+	</Multiplayer>
+	<LocalPlay logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_LocalPlay.dds" activated="True" color="0f8">
+			<asset id="SingleMap" isdefault="yes" titlename="Single Map" makername="Single Map" isvisibleinmaker="True" isactivated="True"/>
+	<asset id="VersusReplay" isdefault="yes" titlename="Versus Replay" makername="Versus Replay" isvisibleinmaker="True" isactivated="True"/>
+	<asset id="HotSeat" isdefault="yes" titlename="Hotseat" makername="Hot Seat" isvisibleinmaker="True" isactivated="True"/>
+	<asset id="LocalNetwork" isdefault="yes" titlename="Local Network" makername="Local Network" isvisibleinmaker="True" isactivated="True"/>
+
+	</LocalPlay>
+	<Editors logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_Editor.dds" activated="True" color="48e" mapeditor="">
+	<asset id="" isdefault="yes" titlename="NewMap" isactivated="True"/>
+	<asset id="" isdefault="yes" titlename="EditReplay" isactivated="True"/>
+	<asset id="" isdefault="yes" titlename="PaintCar" isactivated="True"/>
+	<asset id="" isdefault="yes" titlename="TitleTools" isactivated="True"/>
+
+	</Editors>
+<Resources flashurlcustom="domino54" flashurlfocus="1"/>
+	<Ingame accelcoef="1." controlcoef="1." gravitycoef="1.">
+	</Ingame>
+	<Profile>
+		<param id="0" MonParam="aaa" />
+	</Profile>
+</titlePackXML>
