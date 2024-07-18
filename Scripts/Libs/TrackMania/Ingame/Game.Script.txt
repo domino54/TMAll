@@ -65,6 +65,7 @@ declare Boolean					G_IsMultiPairing;
 declare Boolean					G_IsUgcTrack;
 declare Boolean					G_HeadsetHasBeenMounted;
 declare Boolean					G_HeadsetHasBeenUnmounted;
+declare Boolean					G_KeepPlayersSpawned;
 
 declare Integer[Integer]		G_Duo_SortSlotId;
 declare Integer[Integer]		G_Duo_SortPadPlayingId;
@@ -759,7 +760,7 @@ Void WaitRace(CTmPlayer _Player) {
 	if (UI != Null) UI.UISequence = CUIConfig::EUISequence::None;
 	if (libTMC_SpawnStatus == C_SpawnStatus_Outro) Private_OutroStop(_Player);
 	
-	_Player.IsSpawned = False;
+	_Player.IsSpawned = G_KeepPlayersSpawned;
 	_Player.RaceStartTime = -1;
 	libTMC_SpawnStatus = C_SpawnStatus_Waiting;
 	SetUIPlayerStatus(_Player, C_SpawnStatus_Waiting);
@@ -1110,6 +1111,10 @@ Void PlayerHasNewMedal(Integer _Medal) {
 
 Void SetRespawnFeedbackActive(Boolean _Show) {
 	G_RestartReminderActive = _Show;
+}
+
+Void SetKeepPlayersSpawned(Boolean _KeepPlayersSpawned) {
+	G_KeepPlayersSpawned = _KeepPlayersSpawned;
 }
 
 Void FlushRewardAnswer(CTmPlayer _Player) {

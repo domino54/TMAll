@@ -52,6 +52,9 @@ declare Integer G_LibPlayerModels_CompatibilityMode;
 /// Lookup table for text-based model ID to loaded item Ident.
 declare Ident[Text] G_LibPlayerModels_LoadedItemIdByLookupId;
 
+/// Lookup ID allowlist for specific models to be loaded exclusively.
+declare Text[] G_LibPlayerModels_PlayerModelIdAllowlist;
+
 // ---------------------------------- //
 // Private functions
 // ---------------------------------- //
@@ -88,7 +91,13 @@ Text Private_GetItemPath(Text _ItemPath) {
   return _ItemPath;
 }
 
-Void Private_LoadPlayerModelItems(CMode _Context) {
+Boolean Private_GetIsAllowlisted(Text _ModelId) {
+  return G_LibPlayerModels_PlayerModelIdAllowlist.count <= 0 || G_LibPlayerModels_PlayerModelIdAllowlist.exists(_ModelId);
+}
+
+Void Private_LoadPlayerModelItems(CMode _Context, Text[] _Allowlist) {
+  G_LibPlayerModels_PlayerModelIdAllowlist = _Allowlist;
+
   // Dictionary of tuples. This is used later to call ItemList_Add.
   // [UniqueId => [ItemPath, SkinPath]]
   declare Text[][Text] ItemsToLoad = [];
@@ -98,6 +107,8 @@ Void Private_LoadPlayerModelItems(CMode _Context) {
 
   // Prepare base player models.
   foreach (PlayerModelId => PlayerModel in PMData::GetAllPlayerModels()) {
+    if (!Private_GetIsAllowlisted(PlayerModelId)) continue; 
+
     declare AsItemId = Private_GetLookupId(PlayerModelId);
 
     BaseModelItemPath[AsItemId] = PlayerModel.ItemPath;
@@ -130,7 +141,10 @@ Void Private_LoadPlayerModelItems(CMode _Context) {
     }
   }
 
+  // Load skins for base models.
   foreach (BaseModelId => Skins in SkinsByBaseModelId) {
+    if (!Private_GetIsAllowlisted(BaseModelId)) continue;
+
     foreach (ModelSkinId => SkinPath in Skins) {
       // CarCommon wildcard: Load the skin for every base player model available.
       if (BaseModelId == PMData::C_LibPlayerModels_CarCommonWildcard) {
@@ -152,6 +166,8 @@ Void Private_LoadPlayerModelItems(CMode _Context) {
 
   // Prepare overlays.
   foreach (ModelOverlayId => ModelOverlay in PMData::GetAllModelOverlays()) {
+    if (!Private_GetIsAllowlisted(ModelOverlayId)) continue;
+
     declare BaseModelLookupId = Private_GetLookupId(ModelOverlayId);
 
     ItemsToLoad[BaseModelLookupId] = [Private_GetItemPath(ModelOverlay.ItemPath)];
@@ -257,6 +273,7 @@ Text GetScriptName() {
 
 Void Unload(CMode _Context) {
   G_LibPlayerModels_LoadedItemIdByLookupId.clear();
+  G_LibPlayerModels_PlayerModelIdAllowlist.clear();
 }
 
 Void DisableCompatibilityMode() {
@@ -271,14 +288,22 @@ Void AllowArchetypesCompatibilityMode() {
   G_LibPlayerModels_CompatibilityMode = C_LibPlayerModels_CompatibilityMode_AllowArchetypes;
 }
 
+Void Load(CMode _Context, Text[] _Allowlist) {
+  Private_LoadPlayerModelItems(_Context, _Allowlist);
+}
+
 Void Load(CMode _Context) {
-  Private_LoadPlayerModelItems(_Context);
+  Load(_Context, []);
 }
 
 Void SetMapProperties(Text _Environment, Text _MapPlayerModelName) {
   G_LibPlayerModels_CurrentMapEnvironmentName = _Environment;
   G_LibPlayerModels_CurrentMapPlayerModelName = _MapPlayerModelName;
   G_LibPlayerModels_CurrentMapPlayerModelId = PMData::GetPlayerModelIdByItemPath(_MapPlayerModelName);
+}
+
+Text GetMapPlayerModelId() {
+  return G_LibPlayerModels_CurrentMapPlayerModelId;
 }
 
 /**

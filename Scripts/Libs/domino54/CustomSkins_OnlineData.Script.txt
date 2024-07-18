@@ -25,9 +25,6 @@
 Text Private_CreateManialinkLayer() {
   return """
 <manialink version="3" name="{{{C_LibCustomSkins_ManialinkLayerId}}}">
-
-<label pos="0 -90" halign="center" valign="bottom" style="CardButtonSmallS" manialink="file://Media/Apps/TempSkins.Script.txt">Temp Skins</label>
-
 <script><!--
 
 main() {

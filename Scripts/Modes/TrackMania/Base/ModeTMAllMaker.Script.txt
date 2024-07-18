@@ -123,8 +123,6 @@ Void TMAll_SetPlayerAutoGameplay(CTmPlayer _Player) {
   PlayerModels_Server::AssignPlayerModel(_Player);
 
   +++TMAll_AfterAutoGameplay+++
-
-  log(Player);
 }
 
 Void TMAll_StartRace(CTmPlayer _Player, Integer _StartTime, Boolean _RegisterOnLadder) {

@@ -24,7 +24,10 @@
 #Include "Libs/Nadeo/MP4/TitlePackMaker/MapEditor/UI/Validation.Script.txt"		as UI_Validation
 #Include "Libs/Nadeo/Common/Core/MenuLayers.Script.txt"							as Layers
 #Include "Libs/Nadeo/Common/Core/Logger.Script.txt"								as Logger
-
+#Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
+#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
+#Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+#Include "Libs/domino54/CustomSkins_LocalData.Script.txt" as CustomSkins_LocalData
 
 // ---------------------------------- //
 // Constants
@@ -48,11 +51,18 @@ declare CAudioSource G_SoundSnap;
 
 declare CGhost 		G_BestPlayerGhost;
 declare Integer[] 	G_BestCheckpointsTimes;
+declare Boolean		G_ProbedMapPlayerModelName;
 
 // ---------------------------------- //
 // Functions
 // ---------------------------------- //
 // ---------------------------------- //
+
+Void Yield() {
+	HttpClient::Yield();
+	CustomSkins_LocalData::Yield();
+	yield;
+}
 
 // ---------------------------------- //
 /// Check if the map is valid
@@ -156,11 +166,10 @@ Void Synchro_DoBarrier() {
 	//wait(Mode.Synchro_BarrierReached(Barrier) || Mode.ServerShutdownRequested);
 
 	// HACK WORKAROUND
-	yield;
-	yield;
-	yield;
+	Yield();
+	Yield();
+	Yield();
 }
-
 
 // ---------------------------------- //
 /** Copy the checkpoints times into an array
@@ -189,7 +198,6 @@ Void InitUIIngame()
 	GameUI::IsTrackbuilder(True); ///< Force the map name to be hidden again
 }
 
-
 Void SetDefaultUIToHide(Boolean _Hide)
 {
 	Mode.UIManager.UIAll.OverlayHideBackground           = _Hide;
@@ -209,6 +217,19 @@ Void SetDefaultUIToHide(Boolean _Hide)
 	Mode.UIManager.UIAll.OverlayChatHideAvatar           = _Hide;
 }
 
+Void ProbeMapPlayerModelName() {
+	if (G_ProbedMapPlayerModelName) return;
+
+	MapType::EnterPlayground(1);
+	PlayerModels_Server::SetMapProperties(Mode.Map.CollectionName, Mode.MapPlayerModelName);
+	MapType::LeavePlayground();
+
+	G_ProbedMapPlayerModelName = True;
+}
+
+Void ApplyGameplay(CTmPlayer _Player) {
+	PlayerModels_Server::AssignPlayerModel(_Player);
+}
 
 // ---------------------------------- //
 /** Do a run on the map to validate it
@@ -216,6 +237,10 @@ Void SetDefaultUIToHide(Boolean _Hide)
  *	@param	_Validation				True if it's a validation, False if it's a only test
  */
 Void StartValidation(Boolean _Validation) {
+	if (!_Validation && !EnableMapTypeStartTest) return;
+	
+	ValidationEndNoConfirm = !_Validation;
+	
 	if (_Validation) {
 		UpdateValidability();
 		
@@ -229,19 +254,20 @@ Void StartValidation(Boolean _Validation) {
 	// Hide default UI
 	SetDefaultUIToHide(True);
 
-
-
 	//if (UserMgr != Null) Mode.ClientManiaAppUrl = C_ManiaAppUrl;
-	
+
+	ProbeMapPlayerModelName();
+
 	// Load skins
 	declare SkinPath = "Skins\\Models\\"^Map.CollectionName^"CarCE\\";
 	Mode.ItemList_Begin();
+	PlayerModels_Server::Load(Mode, [PlayerModels_Server::GetMapPlayerModelId()]);
 	//declare TrackbuilderSkin = Mode.ItemList_AddWithSkin("DefaultPlayerModel", SkinPath^"Default.zip");
 	Mode.ItemList_End();
 	
 	// on prend cet enum plutot que d'en rajouter un juste pour ce cas particulier
 	Mode.UIManager.UIAll.UISequence = CUIConfig::EUISequence::RollingBackgroundIntro;
-	Synchro_DoBarrier();
+	//Synchro_DoBarrier();
 	
 	// Start validation and spawn player
 	MapType::EnterPlayground(1);
@@ -260,11 +286,12 @@ Void StartValidation(Boolean _Validation) {
 	
 	declare Player <=> Mode.AllPlayers[0];
 	//Player.ForceModelId = TrackbuilderSkin;
+	ApplyGameplay(Player);
 	Player.RaceStartTime = -1;
 	Player.IsSpawned = True;
 	Player.Score.Clear();
 	
-	Synchro_DoBarrier();
+	//Synchro_DoBarrier();
 	
 	//G_SoundCamera.Stop();
 	//G_SoundCamera.Play();
@@ -272,9 +299,12 @@ Void StartValidation(Boolean _Validation) {
 	//Intro
 	//if (/*_Validation && */!ManiaPlanet.HMD_IsActive) {
 	//}
-	Mode.UIManager.UIAll.UISequence = CUIConfig::EUISequence::Intro;
-	while (!Mode.UIManager.UIAll.UISequenceIsCompleted) {
-		yield;
+	if (_Validation) {
+		Mode.UIManager.UIAll.UISequence = CUIConfig::EUISequence::Intro;
+		while (!Mode.UIManager.UIAll.UISequenceIsCompleted) {
+				Yield();
+			}
+		}
 	}
 
 	UI_Validation::Load(_Validation);
@@ -291,12 +321,13 @@ Void StartValidation(Boolean _Validation) {
 	declare Length = 0.;
 	declare ValidateMap = True;
 	UI_Validation::SetTime(BestTime, -1);
+	Game::SetKeepPlayersSpawned(True);
 	
 	+++ValidationStart+++
 
 	while (ValidateMap) {
-		yield;
-		
+		Yield();
+
 		+++ValidationLoop+++
 
 		Game::Loop();
@@ -304,6 +335,7 @@ Void StartValidation(Boolean _Validation) {
 		if (Player.RaceStartTime <= 0 && Game::IsWaiting(Player)) {
 			InitUIIngame();
 			if (_Validation) {
+				ApplyGameplay(Player);
 				Game::StartRace(Player, Mode.Now + Game::GetSpawnDuration(), False);
 				if (G_BestCheckpointsTimes.count != 0) {
 					Game::SetOpponent(0, G_BestCheckpointsTimes);
@@ -313,6 +345,7 @@ Void StartValidation(Boolean _Validation) {
 					}
 				}
 			} else {
+				ApplyGameplay(Player);
 				Game::StartRace(Player, Mode.Now, False, False);
 			}
 		}
@@ -356,7 +389,7 @@ Void StartValidation(Boolean _Validation) {
 					Audio.LimitSceneSoundVolumedB = -100.;
 					Mode.UIManager.UIAll.UISequence = CUIConfig::EUISequence::UIInteraction;
 					while (True) {
-						yield;
+						Yield();
 						
 						foreach (Event in Mode.PendingEvents) {
 							Mode.Discard(Event);
@@ -401,7 +434,6 @@ Void StartValidation(Boolean _Validation) {
 			}
 		}
 		
-		
 		// Confirm leave editor
 		if (ValidationEndRequested && ValidateMap) {
 			ValidateMap = False;
@@ -414,9 +446,10 @@ Void StartValidation(Boolean _Validation) {
 	Game::WaitRace(Player);
 	Game::Unload();
 	
-	Synchro_DoBarrier();
+	//Synchro_DoBarrier();
 	UI_Validation::Unload();
 	Mode.UIManager.UILayerDestroyAll();
+	PlayerModels_Server::Unload(Mode);
 	
 	// New best author time, save it
 	if (BestTime > 0 && (Map.TMObjective_AuthorTime <= 0 || BestTime < Map.TMObjective_AuthorTime)) {
@@ -438,23 +471,32 @@ Void StartValidation(Boolean _Validation) {
 	SetDefaultUIToHide(False);
 }
 
-
 // ---------------------------------- //
 // Main
 // ---------------------------------- //
 main() {
+	HttpClient::Load();
 	Buttons::Load();
 	UpdateValidability();
+	CustomSkins_LocalData::Load();
+	PlayerModels_Server::AllowArchetypesCompatibilityMode();
+	PlayerModels_Data::Load();
+	EnableMapTypeStartTest = True;
+	
 	if (ValidationStatus != CMapType::ValidationStatus::Validated) {
 		MapType::ResetObjectives();
 	}
 
 	declare Integer PrevUpdateSetings;
 	
+	while (PlayerModels_Data::Loading()) {
+		Yield();
+	}
+	
 	+++MapTypeStart+++
 
 	while(True) {
-		yield;
+		Yield();
 		
 		+++MapTypeLoop+++
 		
@@ -487,4 +529,8 @@ main() {
 	+++MapTypeEnd+++
 	
 	UILayerDestroyAll();
+
+	HttpClient::Unload();
+	CustomSkins_LocalData::Unload();
+	PlayerModels_Data::Unload();
 }

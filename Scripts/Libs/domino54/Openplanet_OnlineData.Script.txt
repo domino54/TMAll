@@ -62,6 +62,31 @@ main() {
     """;
 }
 
+CScore Private_GetScore(CPlayer _Player) {
+  if (_Player == Null) return Null;
+
+  switchtype (_Player) {
+    case CTmPlayer: {
+      return (_Player as CTmPlayer).Score;
+    }
+    case CSmPlayer: {
+      return (_Player as CSmPlayer).Score;
+    }
+  }
+
+  return Null;
+}
+
+Void Private_SetPlayerNetData(CPlayer _Player, Boolean _HasOpenplanet) {
+  declare Score <=> Private_GetScore(_Player);
+
+  if (Score == Null) return;
+
+  declare netwrite Boolean LibOpenplanet_HasOpenplanet for Score;
+
+  LibOpenplanet_HasOpenplanet = _HasOpenplanet;
+}
+
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
@@ -98,6 +123,8 @@ Void Yield() {
     if (Player == Null) {
       continue;
     }
+
+    Private_SetPlayerNetData(Player, Event.CustomEventData.count >= 4);
 
     if (Event.CustomEventData.count >= 4) {
       declare OpVersion = Event.CustomEventData[0];

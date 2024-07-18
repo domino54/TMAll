@@ -28,15 +28,19 @@ declare K_OpenplanetInfo[Text] G_LibOpenplanet_PlayerInfo;
 // Private functions
 // ---------------------------------- //
 
-Void Private_SetPlayerNetData(Text _Login, Boolean _HasOpenplanet) {
-  // CTmPlayer or CSmPlayer
-  declare Player <=> GetPlayer(_Login);
+CPlayer Private_GetPlayer(CUIConfig _UI) {
+  declare CNod Context = This;
 
-  if (Player == Null || Player.Score == Null) return;
+  switchtype (Context) {
+    case CTmMode: {
+      return (Context as CTmMode).GetPlayer(_UI);
+    }
+    case CSmMode: {
+      return (Context as CSmMode).GetPlayer(_UI);
+    }
+  }
 
-  declare netwrite Boolean LibOpenplanet_HasOpenplanet for Player.Score;
-
-  LibOpenplanet_HasOpenplanet = _HasOpenplanet;
+  return Null;
 }
 
 // ---------------------------------- //
@@ -54,8 +58,6 @@ Text GetScriptName() {
 Void SetPlayerOpenplanetInstalled(Text _Login, Text _Version, Text _Branch, Text _BuildName, Text _BuildDate) {
   if (_Login == "" || _Version == "") return;
 
-  Private_SetPlayerNetData(_Login, True);
-
   G_LibOpenplanet_PlayerInfo[_Login] = K_OpenplanetInfo {
     Version = _Version,
     Branch = _Branch,
@@ -66,8 +68,6 @@ Void SetPlayerOpenplanetInstalled(Text _Login, Text _Version, Text _Branch, Text
 
 Void SetPlayerOpenplanetNotInstalled(Text _Login) {
   if (_Login == "") return;
-
-  Private_SetPlayerNetData(_Login, False);
 
   declare Removed = G_LibOpenplanet_PlayerInfo.removekey(_Login);
 }
@@ -103,6 +103,6 @@ Boolean HasOpenplanet(CClient _Client) {
 Boolean HasOpenplanet(CUIConfig _UI) {
   if (_UI == Null) return False;
 
-  return HasOpenplanet(GetPlayer(_UI));
+  return HasOpenplanet(Private_GetPlayer(_UI));
 }
 
