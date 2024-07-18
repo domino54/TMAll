@@ -3,7 +3,7 @@
  */
 #Extends "Modes/TrackMania/ModeBase.Script.txt"
 
-#Const MB_TMAll_Version     "2017-08-11"
+#Const MB_TMAll_Version     "2024-07-18"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
 #Include "Libs/Nadeo/Env.Script.txt" as Env

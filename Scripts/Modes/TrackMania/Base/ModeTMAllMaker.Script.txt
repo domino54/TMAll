@@ -1,0 +1,146 @@
+/**
+ * Base for an online game mode inside Trackmania Multienvironment.
+ */
+#Extends "Modes/TrackMania/Base/ModeTrackmania.Script.txt"
+
+#Const MB_TMAll_Version     "2024-07-18"
+#Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
+
+#Include "Libs/domino54/CustomSkins_OnlineData.Script.txt" as CustomSkins_OnlineData
+#Include "Libs/domino54/CustomSkins_Players.Script.txt" as CustomSkins_Players
+#Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
+#Include "Libs/domino54/Openplanet_OnlineData.Script.txt" as Openplanet_OnlineData
+#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
+#Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+/// Automatically assign player model before the intro sequence.
+declare Boolean TMAll_Settings_AutoIntroSequenceModel;
+
+// ---------------------------------- //
+// Extends
+// ---------------------------------- //
+***MB_Private_LogVersions***
+***
+Log::RegisterScript(MB_TMAll_ScriptName, MB_TMAll_Version);
+Log::RegisterScript(CustomSkins_OnlineData::GetScriptName(), CustomSkins_OnlineData::GetScriptVersion());
+Log::RegisterScript(CustomSkins_Players::GetScriptName(), CustomSkins_Players::GetScriptVersion());
+Log::RegisterScript(HttpClient::GetScriptName(), HttpClient::GetScriptVersion());
+Log::RegisterScript(Openplanet_OnlineData::GetScriptName(), Openplanet_OnlineData::GetScriptVersion());
+Log::RegisterScript(PlayerModels_Data::GetScriptName(), PlayerModels_Data::GetScriptVersion());
+Log::RegisterScript(PlayerModels_Server::GetScriptName(), PlayerModels_Server::GetScriptVersion());
+***
+
+***MB_Private_Settings***
+***
+TMAll_Settings_AutoIntroSequenceModel = True;
+***
+
+// ---------------------------------- //
+// Load libraries
+// ---------------------------------- //
+***MB_Private_LoadLibraries***
+***
+HttpClient::Load();
+Openplanet_OnlineData::Load();
+CustomSkins_OnlineData::Load();
+PlayerModels_Server::AllowArchetypesCompatibilityMode();
+PlayerModels_Data::Load();
+
+while (PlayerModels_Data::Loading()) {
+  MB_Yield();
+}
+***
+
+// ---------------------------------- //
+// Start server
+// ---------------------------------- //
+***MB_Private_StartServer***
+***
+ItemList_Begin();
+PlayerModels_Server::Load(This);
++++TMAll_ItemList+++
+ItemList_End();
+***
+
+// ---------------------------------- //
+// Init map
+// ---------------------------------- //
+***MB_Private_InitMap***
+***
+PlayerModels_Server::SetMapProperties(Map.CollectionName, MapPlayerModelName);
+***
+
+// ---------------------------------- //
+// Before intro sequence
+// ---------------------------------- //
+***MB_Private_BeforeIntroSequence***
+***
+if (TMAll_Settings_AutoIntroSequenceModel) {
+  foreach (Player in Players) {
+    TMAll_SetPlayerAutoGameplay(Player);
+  }
+}
+***
+
+// ---------------------------------- //
+// Mode yield
+// ---------------------------------- //
+***MB_Private_Yield***
+***
+HttpClient::Yield();
+Openplanet_OnlineData::Yield();
+CustomSkins_OnlineData::Yield();
+***
+
+// ---------------------------------- //
+// Unload libraries
+// ---------------------------------- //
+***MB_Private_UnloadLibraries***
+***
+HttpClient::Unload();
+Openplanet_OnlineData::Unload();
+CustomSkins_OnlineData::Unload();
+PlayerModels_Server::Unload(This);
+PlayerModels_Data::Unload();
+***
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+/**
+ * Automatically assign all custom gameplay properties to a player.
+ */
+Void TMAll_SetPlayerAutoGameplay(CTmPlayer _Player) {
+  declare Player <=> _Player;
+
+  +++TMAll_BeforeAutoGameplay+++
+
+  PlayerModels_Server::AssignPlayerModel(_Player);
+
+  +++TMAll_AfterAutoGameplay+++
+
+  log(Player);
+}
+
+Void TMAll_StartRace(CTmPlayer _Player, Integer _StartTime, Boolean _RegisterOnLadder) {
+  TMAll_SetPlayerAutoGameplay(_Player);
+
+  TM::StartRace(_Player, _StartTime, _RegisterOnLadder);
+}
+
+Void TMAll_StartRace(CTmPlayer _Player, Integer _StartTime) {
+  TMAll_SetPlayerAutoGameplay(_Player);
+
+  TM::StartRace(_Player, _StartTime);
+}
+
+Void TMAll_StartRace(CTmPlayer _Player) {
+  TMAll_SetPlayerAutoGameplay(_Player);
+
+  TM::StartRace(_Player);
+}
