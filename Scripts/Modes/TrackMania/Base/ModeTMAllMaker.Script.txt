@@ -3,7 +3,7 @@
  */
 #Extends "Modes/TrackMania/Base/ModeTrackmania.Script.txt"
 
-#Const MB_TMAll_Version     "2024-07-18"
+#Const MB_TMAll_Version     "2024-07-19"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
 #Include "Libs/domino54/CustomSkins_OnlineData.Script.txt" as CustomSkins_OnlineData
@@ -47,7 +47,7 @@ TMAll_Settings_AutoIntroSequenceModel = True;
 HttpClient::Load();
 Openplanet_OnlineData::Load();
 CustomSkins_OnlineData::Load();
-PlayerModels_Server::AllowArchetypesCompatibilityMode();
+PlayerModels_Server::StrictCompatibilityMode();
 PlayerModels_Data::Load();
 
 while (PlayerModels_Data::Loading()) {

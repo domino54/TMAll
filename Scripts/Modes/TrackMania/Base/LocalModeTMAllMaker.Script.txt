@@ -3,13 +3,14 @@
  */
 #Extends "Modes/TrackMania/ModeBase.Script.txt"
 
-#Const MB_TMAll_Version     "2024-07-18"
+#Const MB_TMAll_Version     "2024-07-19"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
 #Include "Libs/Nadeo/Env.Script.txt" as Env
 #Include "Libs/Nadeo/Log.Script.txt" as Log
 #Include "Libs/domino54/CustomSkins_LocalData.Script.txt" as CustomSkins_LocalData
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
+#Include "Libs/domino54/Openplanet_LocalData.Script.txt" as Openplanet_LocalData
 #Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
 
@@ -26,6 +27,7 @@ MB_LogVersion(Env::GetScriptName(), Env::GetScriptVersion());
 MB_LogVersion(Log::GetScriptName(), Log::GetScriptVersion());
 MB_LogVersion(CustomSkins_LocalData::GetScriptName(), CustomSkins_LocalData::GetScriptVersion());
 MB_LogVersion(HttpClient::GetScriptName(), HttpClient::GetScriptVersion());
+MB_LogVersion(Openplanet_LocalData::GetScriptName(), Openplanet_LocalData::GetScriptVersion());
 MB_LogVersion(PlayerModels_Data::GetScriptName(), PlayerModels_Data::GetScriptVersion());
 MB_LogVersion(PlayerModels_Server::GetScriptName(), PlayerModels_Server::GetScriptVersion());
 ***
@@ -40,6 +42,9 @@ Env::Set(S_ScriptEnvironment);
 Log::Load();
 HttpClient::Load();
 CustomSkins_LocalData::Load();
+// Yield only once, because only the selected skins will be loaded.
+CustomSkins_LocalData::Yield();
+Openplanet_LocalData::Load();
 PlayerModels_Server::StrictCompatibilityMode();
 PlayerModels_Data::Load();
 
@@ -54,7 +59,8 @@ while (PlayerModels_Data::Loading()) {
 ***BeforeLoadMap***
 ***
 ItemList_Begin();
-PlayerModels_Server::Load(This);
+// Ensure that we only load the skins that are absolutely necessary.
+PlayerModels_Server::Load(This, [], PlayerModels_Server::GetLocalPlayerSkinIds());
 +++ItemList+++
 ItemList_End();
 ***
@@ -73,7 +79,6 @@ PlayerModels_Server::SetMapProperties(Map.CollectionName, MapPlayerModelName);
 ***Yield***
 ***
 HttpClient::Yield();
-CustomSkins_LocalData::Yield();
 ***
 
 // ---------------------------------- //

@@ -18,7 +18,7 @@
       "Name": "Stadium Car",
       "Archetype": "StadiumCar",
       "ItemPath": "Vehicles/StadiumCar.Item.Gbx",
-      "LoadAs": "ItemAndArchetype"
+      "LoadAs": "Archetype"
     },
     {
       "Id": "trackmania:valleycar",

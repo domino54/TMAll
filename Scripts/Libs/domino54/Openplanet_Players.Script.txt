@@ -1,11 +1,13 @@
 /**
  * @name Openplanet_Players.Script.txt
  * @author domino54
- * @version 2024-07-17
+ * @version 2024-07-19
  */
 
-#Const Version      "2024-07-17"
+#Const Version      "2024-07-19"
 #Const ScriptName   "Libs/domino54/Openplanet_Players.Script.txt"
+
+#Include "TextLib" as TL
 
 // ---------------------------------- //
 // Structs
@@ -55,15 +57,32 @@ Text GetScriptName() {
   return ScriptName;
 }
 
-Void SetPlayerOpenplanetInstalled(Text _Login, Text _Version, Text _Branch, Text _BuildName, Text _BuildDate) {
-  if (_Login == "" || _Version == "") return;
+K_OpenplanetInfo TestForOpenplanet(Text _Value) {
+  declare Match = TL::RegexMatch("^Openplanet ([\\w\\.-]+(?:[\\w\\.-]+)+) \\((\\w+), (\\w+), ([\\d-]+)\\)", _Value, "");
 
-  G_LibOpenplanet_PlayerInfo[_Login] = K_OpenplanetInfo {
+  if (Match.count < 5) return K_OpenplanetInfo {};
+
+  return K_OpenplanetInfo {
+    Version = Match[1],
+    Branch = Match[2],
+    BuildName = Match[3],
+    BuildDate = Match[4]
+  };
+}
+
+Void SetPlayerOpenplanetInstalled(Text _Login, K_OpenplanetInfo _OpenplanetInfo) {
+  if (_Login == "" || _OpenplanetInfo.Version == "") return;
+
+  G_LibOpenplanet_PlayerInfo[_Login] = _OpenplanetInfo;
+}
+
+Void SetPlayerOpenplanetInstalled(Text _Login, Text _Version, Text _Branch, Text _BuildName, Text _BuildDate) {
+  SetPlayerOpenplanetInstalled(_Login, K_OpenplanetInfo {
     Version = _Version,
     Branch = _Branch,
     BuildName = _BuildName,
     BuildDate = _BuildDate
-  };
+  });
 }
 
 Void SetPlayerOpenplanetNotInstalled(Text _Login) {
