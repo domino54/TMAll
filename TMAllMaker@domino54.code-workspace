@@ -1,13 +1,13 @@
 {
-    "folders": [
-        {
-            "name": "TM All Maker",
-            "path": "./"
-        }
-    ],
-    "settings": {
-        "files.trimTrailingWhitespace": false,
-        "editor.tabSize": 4,
-        "workbench.colorTheme": "Visual Studio 2019 Dark"
+  "folders": [
+    {
+      "name": "TM All Maker",
+      "path": "./"
     }
+  ],
+  "settings": {
+    "files.trimTrailingWhitespace": false,
+    "editor.tabSize": 2,
+    "editor.detectIndentation": true
+  }
 }

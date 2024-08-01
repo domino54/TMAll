@@ -3,9 +3,10 @@
  */
 #Extends "Modes/TrackMania/Base/ModeTrackmania.Script.txt"
 
-#Const MB_TMAll_Version     "2024-07-19"
+#Const MB_TMAll_Version     "2024-08-01"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
+#Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
 #Include "Libs/domino54/CustomSkins_OnlineData.Script.txt" as CustomSkins_OnlineData
 #Include "Libs/domino54/CustomSkins_Players.Script.txt" as CustomSkins_Players
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
@@ -28,6 +29,7 @@ declare Boolean TMAll_Settings_AutoIntroSequenceModel;
 Log::RegisterScript(MB_TMAll_ScriptName, MB_TMAll_Version);
 Log::RegisterScript(CustomSkins_OnlineData::GetScriptName(), CustomSkins_OnlineData::GetScriptVersion());
 Log::RegisterScript(CustomSkins_Players::GetScriptName(), CustomSkins_Players::GetScriptVersion());
+Log::RegisterScript(GameplayCoefs_Server::GetScriptName(), GameplayCoefs_Server::GetScriptVersion());
 Log::RegisterScript(HttpClient::GetScriptName(), HttpClient::GetScriptVersion());
 Log::RegisterScript(Openplanet_OnlineData::GetScriptName(), Openplanet_OnlineData::GetScriptVersion());
 Log::RegisterScript(PlayerModels_Data::GetScriptName(), PlayerModels_Data::GetScriptVersion());
@@ -47,6 +49,7 @@ TMAll_Settings_AutoIntroSequenceModel = True;
 HttpClient::Load();
 Openplanet_OnlineData::Load();
 CustomSkins_OnlineData::Load();
+GameplayCoefs_Server::Load();
 PlayerModels_Server::StrictCompatibilityMode();
 PlayerModels_Data::Load();
 
@@ -71,6 +74,7 @@ ItemList_End();
 // ---------------------------------- //
 ***MB_Private_InitMap***
 ***
+GameplayCoefs_Server::ReadValuesFromMap(Map);
 PlayerModels_Server::SetMapProperties(Map.CollectionName, MapPlayerModelName);
 ***
 
@@ -104,6 +108,7 @@ CustomSkins_OnlineData::Yield();
 HttpClient::Unload();
 Openplanet_OnlineData::Unload();
 CustomSkins_OnlineData::Unload();
+GameplayCoefs_Server::Unload();
 PlayerModels_Server::Unload(This);
 PlayerModels_Data::Unload();
 ***
@@ -120,6 +125,7 @@ Void TMAll_SetPlayerAutoGameplay(CTmPlayer _Player) {
 
   +++TMAll_BeforeAutoGameplay+++
 
+  GameplayCoefs_Server::AssignPlayerCoefs(_Player);
   PlayerModels_Server::AssignPlayerModel(_Player);
 
   +++TMAll_AfterAutoGameplay+++

@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Data.Script.txt
  * @author domino54
- * @version 2024-07-17
+ * @version 2024-08-01
  */
 
-#Const Version      "2024-07-17"
+#Const Version      "2024-08-01"
 #Const ScriptName   "Libs/domino54/PlayerModels_Data.Script.txt"
 
 #Include "MathLib" as ML
@@ -27,11 +27,13 @@
 #Const C_LibPlayerModels_LoadAs_Item              "Item"
 #Const C_LibPlayerModels_LoadAs_ItemAndArchetype  "ItemAndArchetype"
 #Const C_LibPlayerModels_CarCommonWildcard        "*"
-#Const C_LibPlayerModels_SkinRarity_Common        1
-#Const C_LibPlayerModels_SkinRarity_Uncommon      2
-#Const C_LibPlayerModels_SkinRarity_Rare          3
-#Const C_LibPlayerModels_SkinRarity_Epic          4
-#Const C_LibPlayerModels_SkinRarity_Legendary     5
+#Const C_LibPlayerModels_CarCommonDirectory       "CarCommon"
+#Const C_LibPlayerModels_UserSkinsDirectories     ["Temp"] // ["Models", "Vehicles"]
+#Const C_LibPlayerModels_UserSkinsNamespace       "userdata"
+#Const C_LibPlayerModels_RegexFileNameFull        "[^\\/\\\\]+$"
+#Const C_LibPlayerModels_RegexItemName            "([^\\/\\\\]+)\\.Item\\.Gbx$"
+#Const C_LibPlayerModels_RegexReplacedSlashes     "[\\/\\\\]"
+#Const C_LibPlayerModels_RegexMatchUserSkinPath   "^[^\\\\]+\\\\([^\\\\]+)\\\\(?:[^\\\\]+\\\\)?([^\\\\]+)\\.zip$"
 
 // ---------------------------------- //
 // Structs
@@ -61,10 +63,13 @@
 // Global variables
 // ---------------------------------- //
 
+declare Text G_LibPlayerModels_CurrentIndexFileUrl;
 declare Integer G_LibPlayerModels_LoadingStartTime;
 declare Text[] G_LibPlayerModels_SourceFilesOrder;
 declare Text[] G_LibPlayerModels_ExtraSourceFilesUrls;
 declare K_SourceFile[] G_LibPlayerModels_SourceFilesToProcess;
+declare CTaskResult_FileList[Ident] G_LibPlayerModels_PendingTasks;
+declare Text[] G_LibPlayerModels_SkinPathsToProcess;
 
 declare Text G_LibPlayerModels_ModelTypeCategory;
 declare Text[] G_LibPlayerModels_SortingOverrides;
@@ -74,7 +79,9 @@ declare K_ModelSkin[Text] G_LibPlayerModels_ModelSkinById;
 declare K_ModelOverlay[Text] G_LibPlayerModels_ModelOverlayById;
 
 /// Stores the custom model id by the respective item path.
-/// Example: ["canyoncar" => "trackmania:canyoncar"]
+/// ["canyoncar" => "trackmania:canyoncar"]
+/// ["vehicles/trafficcar.item.gbx" => "trackmania:trafficcar"]
+/// ["valleycar4x" => "tmall:valleycar4x"]
 declare Text[Text] G_LibPlayerModels_PlayerModelIdByItemPath;
 
 // ---------------------------------- //
@@ -83,6 +90,18 @@ declare Text[Text] G_LibPlayerModels_PlayerModelIdByItemPath;
 
 Void Private_Log(Text _Message) {
   Log::Log("""[PlayerModels_Data] {{{_Message}}}""");
+}
+
+Text Private_GetBaseUrl(Text _Url) {
+  return TL::RegexReplace(C_LibPlayerModels_RegexFileNameFull, _Url, "i", "");
+}
+
+/**
+ * Glue a relative path to the base url.
+ * Assumes that `_RelativePath` starts with "./" as the first 2 characters are skipped.
+ */
+Text Private_FromBaseUrl(Text _BaseUrl, Text _RelativePath) {
+  return _BaseUrl ^ TL::SubString(_RelativePath, 2, TL::Length(_RelativePath) - 2);
 }
 
 /**
@@ -94,11 +113,21 @@ Void Private_Log(Text _Message) {
  * `Vehicles/IslandCar.Item.Gbx` -> `islandcar`
  */
 Text Private_NormalizeItemName(Text _ItemPath) {
-  declare Match = TL::RegexMatch("([^/\\\\]+)\\.Item\\.Gbx", _ItemPath, "i");
+  declare Match = TL::RegexMatch(C_LibPlayerModels_RegexItemName, _ItemPath, "i");
 
-  if (Match.count < 2 || Match[1] == "") return TL::ToLowerCase(_ItemPath);
+  if (Match.count < 2 || Match[1] == "") {
+    return TL::ToLowerCase(_ItemPath);
+  }
 
   return TL::ToLowerCase(Match[1]);
+}
+
+/**
+ * Normalizes the item path to a simplified path.
+ * @example `Vehicles\\CanyonCar.Item.Gbx` -> `vehicles/canyoncar.item.gbx`
+ */
+Text Private_NormalizeItemPath(Text _ItemPath) {
+  return TL::ToLowerCase(TL::RegexReplace(C_LibPlayerModels_RegexReplacedSlashes, _ItemPath, "i", "/"));
 }
 
 /**
@@ -121,7 +150,15 @@ Void Private_LoadIndexFileJson(Text _Body) {
 
   G_LibPlayerModels_SourceFilesOrder.clear();
 
-  foreach (SourceUrl in IndexFile.SourceUrls) {
+  declare BaseUrl = Private_GetBaseUrl(G_LibPlayerModels_CurrentIndexFileUrl);
+
+  foreach (RawSourceUrl in IndexFile.SourceUrls) {
+    declare SourceUrl = RawSourceUrl;
+
+    if (TL::StartsWith("./", SourceUrl)) {
+      SourceUrl = Private_FromBaseUrl(BaseUrl, SourceUrl);
+    }
+
     if (!HttpClient::IsValidUrl(SourceUrl)) {
       continue;
     }
@@ -151,13 +188,79 @@ Void Private_LoadSourceFileJson(Text _Url, Text _Body) {
 }
 
 /**
+ * HTTP requests loading loop.
+ */
+ Boolean Private_LoadingHttpRequests() {
+  while (HttpClient::HasPendingEvents(C_LibPlayerModels_Namespace)) {
+    declare Event = HttpClient::GetFirstEvent(C_LibPlayerModels_Namespace);
+
+    if (Event.StatusCode != 200) {
+      Private_Log("""Failed to load resource {{{Event.Url}}}""");
+    }
+
+    else {
+      switch (Event.Id) {
+        case C_LibPlayerModels_EventId_GetIndexFile: {
+          Private_LoadIndexFileJson(Event.ResponseBody);
+        }
+        case C_LibPlayerModels_EventId_GetSourceFile: {
+          Private_LoadSourceFileJson(Event.Url, Event.ResponseBody);
+        }
+      }
+    }
+  }
+
+  return HttpClient::HasPendingRequests(C_LibPlayerModels_Namespace);
+}
+
+/**
+ * Starts a trak, which fetches user data file names from a given directory.
+ */
+CTaskResult_FileList Private_CreateUserDataTask(Text _Path) {
+  return DataFileMgr.Media_GetFilteredGameList(CDataFileMgr::EMediaType::Skins, 4, _Path, True);
+}
+
+/**
+ * Awaiting for processed tasks loop.
+ */
+Boolean Private_LoadingTaskResults() {
+  if (G_LibPlayerModels_PendingTasks.count <= 0) return False;
+
+  declare Ident[] TasksToRemove;
+
+  foreach (TaskId => Task in G_LibPlayerModels_PendingTasks) {
+    if (Task.IsProcessing) continue;
+
+    foreach (File in Task.Files) {
+      G_LibPlayerModels_SkinPathsToProcess.add(File);
+    }
+
+    TasksToRemove.add(TaskId);
+  }
+
+  while (TasksToRemove.existskey(0)) {
+    declare TaskId = TasksToRemove[0];
+    declare Removed1 = TasksToRemove.removekey(0);
+    declare Removed2 = G_LibPlayerModels_PendingTasks.removekey(TaskId);
+
+    DataFileMgr.TaskResult_Release(TaskId);
+  }
+
+  return G_LibPlayerModels_PendingTasks.count > 0;
+}
+
+/**
  * Pretty much a spread operator in a `{ ...target, ...source }` fashion.
  */
-Text[Text] Private_AppendAssets(Text[Text] _Target, Text[Text] _Source) {
+Text[Text] Private_AppendAssets(Text[Text] _Target, Text[Text] _Source, Text _BaseUrl) {
   declare Result = _Target;
 
   foreach (Key => Value in _Source) {
-    Result[Key] = Value;
+    if (TL::StartsWith("./", Value)) {
+      Result[Key] = Private_FromBaseUrl(_BaseUrl, Value);
+    } else {
+      Result[Key] = Value;
+    }
   }
 
   return Result;
@@ -166,94 +269,97 @@ Text[Text] Private_AppendAssets(Text[Text] _Target, Text[Text] _Source) {
 /**
  * Register a new player model, or replace existing fields if a value is given.
  */
-Void Private_AppendPlayerModel(K_PlayerModel _PlayerModel) {
+Void Private_AppendPlayerModel(K_PlayerModel _PlayerModel, Text _BaseUrl) {
   if (!G_LibPlayerModels_PlayerModelById.existskey(_PlayerModel.Id)) {
     G_LibPlayerModels_PlayerModelById[_PlayerModel.Id] = _PlayerModel;
-    return;
   }
 
-  if (_PlayerModel.Name != "") {
-    G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].Name = _PlayerModel.Name;
-  }
+  else {
+    if (_PlayerModel.Name != "") {
+      G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].Name = _PlayerModel.Name;
+    }
 
-  if (_PlayerModel.Archetype != "") {
-    G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].Archetype = _PlayerModel.Archetype;
-  }
+    if (_PlayerModel.Archetype != "") {
+      G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].Archetype = _PlayerModel.Archetype;
+    }
 
-  if (_PlayerModel.ItemPath != "") {
-    G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].ItemPath = _PlayerModel.ItemPath;
-  }
+    if (_PlayerModel.ItemPath != "") {
+      G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].ItemPath = _PlayerModel.ItemPath;
+    }
 
-  if (_PlayerModel.LoadAs != "") {
-    G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].LoadAs = _PlayerModel.LoadAs;
+    if (_PlayerModel.LoadAs != "") {
+      G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].LoadAs = _PlayerModel.LoadAs;
+    }
   }
 
   if (_PlayerModel.Assets.count > 0) {
-    G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].Assets = Private_AppendAssets(G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].Assets, _PlayerModel.Assets);
+    G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].Assets = Private_AppendAssets(G_LibPlayerModels_PlayerModelById[_PlayerModel.Id].Assets, _PlayerModel.Assets, _BaseUrl);
   }
 }
 
 /**
  * Register a new skin, or replace existing fields if a value is given.
  */
-Void Private_AppendModelSkin(K_ModelSkin _ModelSkin) {
+Void Private_AppendModelSkin(K_ModelSkin _ModelSkin, Text _BaseUrl) {
   if (!G_LibPlayerModels_ModelSkinById.existskey(_ModelSkin.Id)) {
     G_LibPlayerModels_ModelSkinById[_ModelSkin.Id] = _ModelSkin;
-    return;
   }
 
-  if (_ModelSkin.Name != "") {
-    G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Name = _ModelSkin.Name;
-  }
+  else {
+    if (_ModelSkin.Name != "") {
+      G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Name = _ModelSkin.Name;
+    }
 
-  if (_ModelSkin.AppliesTo != "") {
-    G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].AppliesTo = _ModelSkin.AppliesTo;
-  }
+    if (_ModelSkin.AppliesTo != "") {
+      G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].AppliesTo = _ModelSkin.AppliesTo;
+    }
 
-  if (_ModelSkin.SkinPath != "") {
-    G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].SkinPath = _ModelSkin.SkinPath;
-  }
+    if (_ModelSkin.SkinPath != "") {
+      G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].SkinPath = _ModelSkin.SkinPath;
+    }
 
-  if (_ModelSkin.Authors.count > 0) {
-    G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Authors = _ModelSkin.Authors;
-  }
+    if (_ModelSkin.Authors.count > 0) {
+      G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Authors = _ModelSkin.Authors;
+    }
 
-  if (_ModelSkin.Rarity > 0) {
-    G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Rarity = _ModelSkin.Rarity;
-  }
+    if (_ModelSkin.Rarity > 0) {
+      G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Rarity = _ModelSkin.Rarity;
+    }
 
-  if (_ModelSkin.SortIndex != 0) {
-    G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Rarity = _ModelSkin.SortIndex;
+    if (_ModelSkin.SortIndex != 0) {
+      G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Rarity = _ModelSkin.SortIndex;
+    }
   }
 
   if (_ModelSkin.Assets.count > 0) {
-    G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Assets = Private_AppendAssets(G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Assets, _ModelSkin.Assets);
+    G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Assets = Private_AppendAssets(G_LibPlayerModels_ModelSkinById[_ModelSkin.Id].Assets, _ModelSkin.Assets, _BaseUrl);
   }
 }
 
 /**
  * Register a new gameplay overlay or replace existing fields if a value is given.
  */
-Void Private_AppendModelOverlay(K_ModelOverlay _ModelOverlay) {
+Void Private_AppendModelOverlay(K_ModelOverlay _ModelOverlay, Text _BaseUrl) {
   if (!G_LibPlayerModels_ModelOverlayById.existskey(_ModelOverlay.Id)) {
     G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id] = _ModelOverlay;
-    return;
   }
 
-  if (_ModelOverlay.Name != "") {
-    G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].Name = _ModelOverlay.Name;
-  }
+  else {
+    if (_ModelOverlay.Name != "") {
+      G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].Name = _ModelOverlay.Name;
+    }
 
-  if (_ModelOverlay.Extends != "") {
-    G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].Extends = _ModelOverlay.Extends;
-  }
+    if (_ModelOverlay.Extends != "") {
+      G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].Extends = _ModelOverlay.Extends;
+    }
 
-  if (_ModelOverlay.ItemPath != "") {
-    G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].ItemPath = _ModelOverlay.ItemPath;
+    if (_ModelOverlay.ItemPath != "") {
+      G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].ItemPath = _ModelOverlay.ItemPath;
+    }
   }
 
   if (_ModelOverlay.Assets.count > 0) {
-    G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].Assets = Private_AppendAssets(G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].Assets, _ModelOverlay.Assets);
+    G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].Assets = Private_AppendAssets(G_LibPlayerModels_ModelOverlayById[_ModelOverlay.Id].Assets, _ModelOverlay.Assets, _BaseUrl);
   }
 }
 
@@ -284,15 +390,22 @@ Void Private_FinalizeSourceFiles() {
   declare NbCharacters = 0;
   declare NbVehicles = 0;
 
+  // Used to resolve user skins.
+  declare Text[Text] ModelIdFromSkinDirectory;
+
   // Source files are iterated two separate times, and that is intended.
   // We want to be absolutely sure that all base models are loaded before everything else.
   foreach (SourceFile in SortedSourceFiles) {
+    declare BaseUrl = Private_GetBaseUrl(SourceFile.Url);
+
     foreach (PlayerModel in SourceFile.Models) {
       if (PlayerModel.Id == "") {
         continue;
       }
 
-      Private_AppendPlayerModel(PlayerModel);
+      ModelIdFromSkinDirectory[PlayerModel.SkinDirectory] = PlayerModel.Id;
+
+      Private_AppendPlayerModel(PlayerModel, BaseUrl);
 
       switch (PlayerModel.Type) {
         case C_LibPlayerModels_ModelType_Character: {
@@ -307,12 +420,14 @@ Void Private_FinalizeSourceFiles() {
 
   // Append skins and overlays.
   foreach (SourceFile in SortedSourceFiles) {
+    declare BaseUrl = Private_GetBaseUrl(SourceFile.Url);
+
     foreach (ModelSkin in SourceFile.Skins) {
       if (ModelSkin.Id == "" || (!G_LibPlayerModels_PlayerModelById.existskey(ModelSkin.AppliesTo) && ModelSkin.Id != C_LibPlayerModels_CarCommonWildcard)) {
         continue;
       }
 
-      Private_AppendModelSkin(ModelSkin);
+      Private_AppendModelSkin(ModelSkin, BaseUrl);
     }
 
     foreach (ModelOverlay in SourceFile.Overlays) {
@@ -320,13 +435,39 @@ Void Private_FinalizeSourceFiles() {
         continue;
       }
 
-      Private_AppendModelOverlay(ModelOverlay);
+      Private_AppendModelOverlay(ModelOverlay, BaseUrl);
     }
   }
 
+  // Creates dummy skin entries from the user Skins directory files.
+  foreach (File in G_LibPlayerModels_SkinPathsToProcess) {
+    declare Match = TL::RegexMatch(C_LibPlayerModels_RegexMatchUserSkinPath, File, "i");
+
+    if (Match.count != 3) {
+      continue;
+    }
+
+    declare SkinDirectory = Match[1];
+
+    if (!ModelIdFromSkinDirectory.existskey(SkinDirectory)) {
+      continue;
+    }
+
+    declare ModelSkin = K_ModelSkin {
+      Id = """{{{C_LibPlayerModels_UserSkinsNamespace}}}:{{{File}}}""",
+      AppliesTo = ModelIdFromSkinDirectory[SkinDirectory],
+      Name = Match[2],
+      SkinPath = "file://Skins/" ^ TL::Replace(File, "\\", "/")
+    };
+
+    Private_AppendModelSkin(ModelSkin, "");
+  }
+
+  // Create player model aliases.
   foreach (PlayerModelId => PlayerModel in G_LibPlayerModels_PlayerModelById) {
     declare Archetype = Private_NormalizeItemName(PlayerModel.Archetype);
-    declare ItemPath = Private_NormalizeItemName(PlayerModel.ItemPath);
+    declare ItemPath = Private_NormalizeItemPath(PlayerModel.ItemPath);
+    declare ItemName = Private_NormalizeItemName(PlayerModel.ItemPath);
 
     if (Archetype != "" && !G_LibPlayerModels_PlayerModelIdByItemPath.existskey(Archetype)) {
       G_LibPlayerModels_PlayerModelIdByItemPath[Archetype] = PlayerModelId;
@@ -335,13 +476,23 @@ Void Private_FinalizeSourceFiles() {
     if (ItemPath != "" && !G_LibPlayerModels_PlayerModelIdByItemPath.existskey(ItemPath)) {
       G_LibPlayerModels_PlayerModelIdByItemPath[ItemPath] = PlayerModelId;
     }
+
+    if (ItemName != "" && !G_LibPlayerModels_PlayerModelIdByItemPath.existskey(ItemName)) {
+      G_LibPlayerModels_PlayerModelIdByItemPath[ItemName] = PlayerModelId;
+    }
   }
 
+  // Create model overlay aliases.
   foreach (ModelOverlayId => ModelOverlay in G_LibPlayerModels_ModelOverlayById) {
     declare ItemPath = Private_NormalizeItemName(ModelOverlay.ItemPath);
+    declare ItemName = Private_NormalizeItemName(ModelOverlay.ItemPath);
 
     if (ItemPath != "" && !G_LibPlayerModels_PlayerModelIdByItemPath.existskey(ItemPath)) {
       G_LibPlayerModels_PlayerModelIdByItemPath[ItemPath] = ModelOverlayId;
+    }
+
+    if (ItemName != "" && !G_LibPlayerModels_PlayerModelIdByItemPath.existskey(ItemName)) {
+      G_LibPlayerModels_PlayerModelIdByItemPath[ItemName] = ModelOverlayId;
     }
   }
 
@@ -375,10 +526,17 @@ Text GetScriptName() {
 }
 
 Void Unload() {
+  foreach (TaskId => __ in G_LibPlayerModels_PendingTasks) {
+    DataFileMgr.TaskResult_Release(TaskId);
+  }
+
+  G_LibPlayerModels_CurrentIndexFileUrl = "";
   G_LibPlayerModels_LoadingStartTime = -1;
   G_LibPlayerModels_SourceFilesOrder.clear();
   G_LibPlayerModels_ExtraSourceFilesUrls.clear();
   G_LibPlayerModels_SourceFilesToProcess.clear();
+  G_LibPlayerModels_PendingTasks.clear();
+  G_LibPlayerModels_SkinPathsToProcess.clear();
   G_LibPlayerModels_ModelTypeCategory = "";
   G_LibPlayerModels_SortingOverrides.clear();
   G_LibPlayerModels_PlayerModelById.clear();
@@ -401,6 +559,13 @@ Void Load(Text _IndexFileUrl, Text[] _ExtraSourceUrls) {
     return;
   }
 
+  foreach (Directory in C_LibPlayerModels_UserSkinsDirectories) {
+    declare Task <=> Private_CreateUserDataTask(Directory);
+
+    G_LibPlayerModels_PendingTasks[Task.Id] = Task;
+  }
+
+  G_LibPlayerModels_CurrentIndexFileUrl = _IndexFileUrl;
   G_LibPlayerModels_LoadingStartTime = Now;
   G_LibPlayerModels_ExtraSourceFilesUrls = _ExtraSourceUrls;
 }
@@ -421,32 +586,17 @@ Void Load() {
  * @returns True while data is being loaded.
  */
 Boolean Loading() {
-  while (HttpClient::HasPendingEvents(C_LibPlayerModels_Namespace)) {
-    declare Event = HttpClient::GetFirstEvent(C_LibPlayerModels_Namespace);
+  // Must call outside of the OR operator for all the loops to execute concurrently.
+  declare IsLoadingHttp = Private_LoadingHttpRequests();
+  declare IsLoadingTasks = Private_LoadingTaskResults();
 
-    if (Event.StatusCode != 200) {
-      Private_Log("""Failed to load resource {{{Event.Url}}}""");
-    }
+  declare IsLoading = IsLoadingHttp || IsLoadingTasks;
 
-    else {
-      switch (Event.Id) {
-        case C_LibPlayerModels_EventId_GetIndexFile: {
-          Private_LoadIndexFileJson(Event.ResponseBody);
-        }
-        case C_LibPlayerModels_EventId_GetSourceFile: {
-          Private_LoadSourceFileJson(Event.Url, Event.ResponseBody);
-        }
-      }
-    }
-  }
-
-  declare HasPendingRequests = HttpClient::HasPendingRequests(C_LibPlayerModels_Namespace);
-
-  if (!HasPendingRequests) {
+  if (!IsLoading) {
     Private_FinalizeSourceFiles();
   }
 
-  return HasPendingRequests;
+  return IsLoading;
 }
 
 /**
@@ -460,8 +610,12 @@ Text ModelTypeCategory() {
  * @returns Custom model id resolved from the item path.
  * @example `Vehicles/IslandCar.Item.Gbx` -> `trackmania:islandcar`
  */
-Text GetPlayerModelIdByItemPath(Text _ItemPath) {
-  declare ItemPath = Private_NormalizeItemName(_ItemPath);
+Text ResolvePlayerModelId(Text _ItemPath) {
+  if (G_LibPlayerModels_PlayerModelIdByItemPath.exists(_ItemPath)) {
+    return _ItemPath;
+  }
+
+  declare ItemPath = Private_NormalizeItemPath(_ItemPath);
 
   if (G_LibPlayerModels_PlayerModelIdByItemPath.existskey(ItemPath)) {
     return G_LibPlayerModels_PlayerModelIdByItemPath[ItemPath];

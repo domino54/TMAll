@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2024-07-19
+ * @version 2024-08-01
  */
 
-#Const Version      "2024-07-19"
+#Const Version      "2024-08-01"
 #Const ScriptName   "Libs/domino54/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
@@ -116,7 +116,7 @@ Ident Private_ItemListAdd(CMode _Context, Text[] _ItemProps) {
   return ResultId;
 }
 
-Void Private_LoadPlayerModelItems(CMode _Context, Text[] _ModelAllowlist, Text[] _SkinAllowlist) {
+Void Private_LoadPlayerModelItems(CMode _Context, Text[] _ModelAllowlist, Text[] _SkinAllowlist, Boolean _LoadOverlays) {
   G_LibPlayerModels_PlayerModelIdAllowlist = _ModelAllowlist;
   G_LibPlayerModels_ModelSkinIdAllowlist = _SkinAllowlist;
 
@@ -195,6 +195,7 @@ Void Private_LoadPlayerModelItems(CMode _Context, Text[] _ModelAllowlist, Text[]
 
   // Prepare overlays.
   foreach (ModelOverlayId => ModelOverlay in PMData::GetAllModelOverlays()) {
+    if (!_LoadOverlays) break;
     if (!Private_IsModelAllowlisted(ModelOverlayId)) continue;
 
     declare BaseModelLookupId = Private_GetLookupId(ModelOverlayId);
@@ -228,13 +229,11 @@ Void Private_LoadPlayerModelItems(CMode _Context, Text[] _ModelAllowlist, Text[]
 
     // If we get the same [Model+Skin], don't load the same item twice, reuse an existing Ident.
     if (CachedItemIds.existskey(ReusableIndex)) {
-      log(PlayerModelId^" -> "^ItemProps^" (SKIPPED)");
       G_LibPlayerModels_LoadedItemIdByLookupId[PlayerModelId] = CachedItemIds[ReusableIndex];
       continue;
     }
 
     declare ResultId = Private_ItemListAdd(_Context, ItemProps);
-    log(PlayerModelId^" -> "^ItemProps);
     CachedItemIds[ReusableIndex] = ResultId;
     G_LibPlayerModels_LoadedItemIdByLookupId[PlayerModelId] = ResultId;
   }
@@ -278,13 +277,13 @@ Ident Private_GetPlayerModelLookupId(Text _ModelId, Text _SkinId, Boolean _Prefe
   return NullId;
 }
 
-Void Private_AssignPlayerModel(CPlayer _Player, Ident _ModelId) {
+Void Private_AssignPlayerModel(CPlayer _Player, Ident _ItemId) {
   switchtype (_Player) {
     case CSmPlayer: {
-      (_Player as CSmPlayer).ForceModelId = _ModelId;
+      (_Player as CSmPlayer).ForceModelId = _ItemId;
     }
     case CTmPlayer: {
-      (_Player as CTmPlayer).ForceModelId = _ModelId;
+      (_Player as CTmPlayer).ForceModelId = _ItemId;
     }
     default: {
       assert(False, "Attempted to assign player model to unsupported player class instance.");
@@ -293,9 +292,10 @@ Void Private_AssignPlayerModel(CPlayer _Player, Ident _ModelId) {
 }
 
 Void Private_AssignPlayerModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
-  declare ModelId = Private_GetPlayerModelLookupId(_ModelId, _SkinId, _PreferCustom);
+  declare ModelId = PMData::ResolvePlayerModelId(_ModelId);
+  declare ItemId = Private_GetPlayerModelLookupId(ModelId, _SkinId, _PreferCustom);
 
-  Private_AssignPlayerModel(_Player, ModelId);
+  Private_AssignPlayerModel(_Player, ItemId);
 }
 
 // ---------------------------------- //
@@ -328,8 +328,12 @@ Void AllowArchetypesCompatibilityMode() {
   G_LibPlayerModels_CompatibilityMode = C_LibPlayerModels_CompatibilityMode_AllowArchetypes;
 }
 
+Void Load(CMode _Context, Text[] _ModelAllowlist, Text[] _SkinAllowlist, Boolean _LoadOverlays) {
+  Private_LoadPlayerModelItems(_Context, _ModelAllowlist, _SkinAllowlist, _LoadOverlays);
+}
+
 Void Load(CMode _Context, Text[] _ModelAllowlist, Text[] _SkinAllowlist) {
-  Private_LoadPlayerModelItems(_Context, _ModelAllowlist, _SkinAllowlist);
+  Load(_Context, _ModelAllowlist, _SkinAllowlist, True);
 }
 
 Void Load(CMode _Context, Text[] _ModelAllowlist) {
@@ -343,7 +347,7 @@ Void Load(CMode _Context) {
 Void SetMapProperties(Text _Environment, Text _MapPlayerModelName) {
   G_LibPlayerModels_CurrentMapEnvironmentName = _Environment;
   G_LibPlayerModels_CurrentMapPlayerModelName = _MapPlayerModelName;
-  G_LibPlayerModels_CurrentMapPlayerModelId = PMData::GetPlayerModelIdByItemPath(_MapPlayerModelName);
+  G_LibPlayerModels_CurrentMapPlayerModelId = PMData::ResolvePlayerModelId(_MapPlayerModelName);
 }
 
 Text GetMapPlayerModelId() {

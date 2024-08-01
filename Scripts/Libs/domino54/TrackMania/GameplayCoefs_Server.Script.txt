@@ -1,0 +1,197 @@
+/**
+ * @name GameplayCoefs_Server.Script.txt
+ * @author domino54
+ * @version 2024-08-01
+ */
+
+#Const Version      "2024-08-01"
+#Const ScriptName   "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt"
+
+#Include "MathLib" as ML
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const G_LibGameplayCoefs_DefaultAccelBase    1.0
+#Const G_LibGameplayCoefs_DefaultControlBase  1.0
+#Const G_LibGameplayCoefs_DefaultGravityBase  1.0
+#Const G_LibGameplayCoefs_DefaultMulti        1.0
+#Const G_LibGameplayCoefs_Uninitialized       -1.0
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Real G_LibGameplayCoefs_AccelBase;
+declare Real G_LibGameplayCoefs_AccelMulti;
+declare Real G_LibGameplayCoefs_ControlBase;
+declare Real G_LibGameplayCoefs_ControlMulti;
+declare Real G_LibGameplayCoefs_GravityBase;
+declare Real G_LibGameplayCoefs_GravityMulti;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+/**
+ * Check if the value is between 0.0 and 1.0, inclusive. If yes, return it, otherwise return default.
+ */
+Real Private_ReadMapCoefValue(Real _Value, Real _Default) {
+  if (_Value < 0.0 || _Value > 1.0) {
+    return _Default;
+  }
+
+  return _Value;
+}
+
+Void Private_RestoreDefaultBaseCoefs() {
+  G_LibGameplayCoefs_AccelBase = G_LibGameplayCoefs_DefaultAccelBase;
+  G_LibGameplayCoefs_ControlBase = G_LibGameplayCoefs_DefaultControlBase;
+  G_LibGameplayCoefs_GravityBase = G_LibGameplayCoefs_DefaultGravityBase;
+}
+
+Void Private_UpdateAccelCoefIfSet(Real _AccelCoef) {
+  G_LibGameplayCoefs_AccelBase = Private_ReadMapCoefValue(_AccelCoef, G_LibGameplayCoefs_AccelBase);
+}
+
+Void Private_UpdateControlCoefIfSet(Real _ControlCoef) {
+  G_LibGameplayCoefs_ControlBase = Private_ReadMapCoefValue(_ControlCoef, G_LibGameplayCoefs_ControlBase);
+}
+
+Void Private_UpdateGravityCoefIfSet(Real _GravityCoef) {
+  G_LibGameplayCoefs_GravityBase = Private_ReadMapCoefValue(_GravityCoef, G_LibGameplayCoefs_GravityBase);
+}
+
+/**
+ * TrackMania 2 Multienvironment compatibility.
+ */
+Void Private_CompatTMAllMaker(CMap _Map) {
+  declare metadata Real Meta_LibGameplayCoefs_AccelCoef for _Map = G_LibGameplayCoefs_Uninitialized;
+  declare metadata Real Meta_LibGameplayCoefs_ControlCoef for _Map = G_LibGameplayCoefs_Uninitialized;
+  declare metadata Real Meta_LibGameplayCoefs_GravityCoef for _Map = G_LibGameplayCoefs_Uninitialized;
+
+  Private_UpdateAccelCoefIfSet(Meta_LibGameplayCoefs_AccelCoef);
+  Private_UpdateControlCoefIfSet(Meta_LibGameplayCoefs_ControlCoef);
+  Private_UpdateGravityCoefIfSet(Meta_LibGameplayCoefs_GravityCoef);
+}
+
+/**
+ * TrackMania 2 Galaxy compatibility.
+ */
+Void Private_CompatGalaxy(CMap _Map) {
+  declare metadata Real Pursuit_VehicleGravityCoef for _Map = G_LibGameplayCoefs_Uninitialized;
+
+  Private_UpdateGravityCoefIfSet(Pursuit_VehicleGravityCoef);
+}
+
+/**
+ * ExtraWorld compatibility.
+ */
+Void Private_CompatExtraWorld(CMap _Map) {
+  declare metadata Real MapCarAccelCoef for Map = G_LibGameplayCoefs_Uninitialized;
+  declare metadata Real MapCarControlCoef for Map = G_LibGameplayCoefs_Uninitialized;
+  declare metadata Real MapCarGravityCoef for Map = G_LibGameplayCoefs_Uninitialized;
+
+  Private_UpdateAccelCoefIfSet(MapCarAccelCoef);
+  Private_UpdateControlCoefIfSet(MapCarControlCoef);
+  Private_UpdateGravityCoefIfSet(MapCarGravityCoef);
+}
+
+/**
+ * KEKL map effects compatibility.
+ */
+Void Private_CompatKEKL(CMap _Map) {
+  declare metadata Boolean LowGravity for _Map = False;
+
+  if (LowGravity) {
+    G_LibGameplayCoefs_GravityBase *= 0.5;
+  }
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetScriptVersion() {
+  return Version;
+}
+
+Text GetScriptName() {
+  return ScriptName;
+}
+
+Void Unload() {
+  Private_RestoreDefaultBaseCoefs();
+
+  G_LibGameplayCoefs_AccelMulti = G_LibGameplayCoefs_DefaultMulti;
+  G_LibGameplayCoefs_ControlMulti = G_LibGameplayCoefs_DefaultMulti;
+  G_LibGameplayCoefs_GravityMulti = G_LibGameplayCoefs_DefaultMulti;
+}
+
+Void Load() {
+  Unload();
+}
+
+/**
+ * Reads the coefficients from the map metadata and assigns them as base values.
+ */
+Void ReadValuesFromMap(CMap _Map) {
+  Private_RestoreDefaultBaseCoefs();
+
+  Private_CompatExtraWorld(_Map);
+  Private_CompatGalaxy(_Map);
+  Private_CompatTMAllMaker(_Map);
+  Private_CompatKEKL(_Map);
+}
+
+/**
+ * @returns Global value of `AccelCoef`.
+ */
+Real GetAccelCoef() {
+  return ML::Clamp(G_LibGameplayCoefs_AccelBase * G_LibGameplayCoefs_AccelMulti, 0.0, 1.0);
+}
+
+/**
+ * @returns Global value of `ControlCoef`.
+ */
+Real GetControlCoef() {
+  return ML::Clamp(G_LibGameplayCoefs_ControlBase * G_LibGameplayCoefs_ControlMulti, 0.0, 1.0);
+}
+
+/**
+ * @returns Global value of `GravityCoef`.
+ */
+Real GetGravityCoef() {
+  return ML::Clamp(G_LibGameplayCoefs_GravityBase * G_LibGameplayCoefs_GravityMulti, 0.2, 1.0);
+}
+
+/**
+ * Assigns the global values of the coefficients to the player.
+ */
+Void AssignPlayerCoefs(CTmPlayer _Player) {
+  _Player.AccelCoef = GetAccelCoef();
+  _Player.ControlCoef = GetControlCoef();
+  _Player.GravityCoef = GetGravityCoef();
+}
+
+/**
+ * Set the acceleration multiplier on top of the base value.
+ */
+Void SetAccelMultiplier(Real _Multi) {
+  G_LibGameplayCoefs_AccelMulti = _Multi;
+}
+
+/**
+ * Set the steering multiplier on top of the base value.
+ */
+Void SetControlMultiplier(Real _Multi) {
+  G_LibGameplayCoefs_ControlMulti = _Multi;
+}
+
+/**
+ * Set the gravity multiplier on top of the base value.
+ */
+Void SetGravityMultiplier(Real _Multi) {
+  G_LibGameplayCoefs_GravityMulti = _Multi;
+}

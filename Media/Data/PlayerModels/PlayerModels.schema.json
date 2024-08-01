@@ -139,6 +139,10 @@
           "type": "string",
           "title": "Describes in what ways the model will be loaded. For `ItemAndArchetype`, applied model will depend on the player's Stadium unlock status and the model overlay to preserve player's regular skins.",
           "enum": ["Item", "ItemAndArchetype", "Archetype"]
+        },
+        "SkinDirectory": {
+          "type": "string",
+          "title": "Defines a subdirectory of Models or Vehicles folder, from which the user's own skins will be fetched."
         }
       },
       "unevaluatedProperties": false
@@ -149,13 +153,14 @@
       "allOf": [{ "$ref": "#/$defs/base_object" }],
       "properties": {
         "Extends": { "$ref": "#/$defs/id_extends" },
-        "ItemPath": { "$ref": "#/$defs/item_path" }
+        "ItemPath": { "$ref": "#/$defs/item_path" },
+        "Gameplay": { "$ref": "#/$defs/gameplay" }
       },
       "unevaluatedProperties": false
     },
     "skin": {
       "type": "object",
-      "title": "",
+      "title": "Defines a model skin, which will be applied to a player model.",
       "allOf": [{ "$ref": "#/$defs/base_object" }],
       "properties": {
         "AppliesTo": {
@@ -174,10 +179,6 @@
         },
         "Authors": { "$ref": "#/$defs/authors" },
         "Rarity": { "$ref": "#/$defs/rarity" },
-        "IsDefault": {
-          "type": "boolean",
-          "title": "If set to true, the skin will be considered default, it will not be loaded as an item and will exist purely to make the original visuals of the base player model selectable."
-        },
         "IsHidden": {
           "type": "boolean",
           "title": "If set to true, the implementation of the skin selection interface can conisder this skin to be hidden."
@@ -188,6 +189,17 @@
           "default": 0
         }
       },
+      "unevaluatedProperties": false
+    },
+    "gameplay": {
+      "type": "object",
+      "title": "Defines read-only handling values of a TrackMania vehicle, for display purposes only.",
+      "properties": {
+        "AccelCoef": { "type": "number" },
+        "ControlCoef": { "type": "number" },
+        "GravityCoef": { "type": "number" }
+      },
+      "required": ["AccelCoef", "ControlCoef", "GravityCoef"],
       "unevaluatedProperties": false
     }
   }

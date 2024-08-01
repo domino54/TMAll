@@ -15,7 +15,7 @@
 // ---------------------------------- //
 // Settings
 // ---------------------------------- //
-#Setting S_TimeLimit				00	as _("Time limit :") ///< Time limit before going to the next map
+#Setting S_TimeLimit				300	as _("Time limit :") ///< Time limit before going to the next map
 #Setting S_WarmUpNb				0	as _("Number of warm up :")
 #Setting S_WarmUpDuration	0	as _("Duration of one warm up :")
 #Setting S_ForceLapsNb			0 as _("Number of Laps :") //< "< 0" use laps number from map, "== 0" independant laps, "> 0" force laps number
