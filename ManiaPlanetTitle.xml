@@ -80,7 +80,18 @@
 		<playlist name=""/>
 	</splitscreen>
 	<files/>
-	<folders/>
+	<folders>
+		<folder name="Actions" public="false" internal="false"/>
+		<folder name="Blocks" public="false" internal="false"/>
+		<folder name="Items" public="false" internal="false"/>
+		<folder name="Maps" public="false" internal="false"/>
+		<folder name="Media" public="false" internal="false"/>
+		<folder name="Materials" public="false" internal="false"/>
+		<folder name="Modules" public="false" internal="false"/>
+		<folder name="Replays" public="false" internal="false"/>
+		<folder name="Scripts" public="false" internal="false"/>
+		<folder name="Skins" public="false" internal="false"/>
+	</folders>
 	<allowed_client_title_version></allowed_client_title_version>
 	<maker>TMAllMaker@domino54</maker>
 	<limit_camera_fov>false</limit_camera_fov>
