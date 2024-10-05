@@ -14,6 +14,7 @@
 #Include "Libs/domino54/Openplanet_LocalData.Script.txt" as Openplanet_LocalData
 #Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 /// Environment in which the script runs
 #Setting S_ScriptEnvironment "production" /*"development"*/ as "<hidden>"
@@ -32,6 +33,7 @@ MB_LogVersion(HttpClient::GetScriptName(), HttpClient::GetScriptVersion());
 MB_LogVersion(Openplanet_LocalData::GetScriptName(), Openplanet_LocalData::GetScriptVersion());
 MB_LogVersion(PlayerModels_Data::GetScriptName(), PlayerModels_Data::GetScriptVersion());
 MB_LogVersion(PlayerModels_Server::GetScriptName(), PlayerModels_Server::GetScriptVersion());
+MB_LogVersion(TextLibExt::ScriptName, TextLibExt::Version);
 ***
 
 // ---------------------------------- //

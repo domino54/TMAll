@@ -4,6 +4,7 @@
 #Include "Libs/Nadeo/Common/Core/MenuLayers.Script.txt"					as Layers
 #Include "Libs/Nadeo/MP4/Common/SettingsController.Script.txt"  		as SettingsController
 #Include "Libs/Nadeo/MP4/TPLagoon/XMLController.Script.txt"		as XMLController
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 declare Boolean	G_RecordCenterMode;
 declare Boolean G_StatSent;
@@ -141,8 +142,8 @@ Void GetRecords(Text SelectedFilter, Text BuddyLogin, Text SelectedGroup, Text F
     foreach(Record in RecordsComparisonResult.BuddyBestRecordsComparison){
 			RemoteBuddyRecords.add(["Mapname" => Record.MapInfo.Name,
 			"MapFileName" => Record.MapInfo.FileName,
-			"OpponentRecordTime" => TL::TimeToText(Record.OpponentRecordTime, True),
-			"RecordTimeDiff" => TL::TimeToText(Record.RecordTime - Record.OpponentRecordTime),
+			"OpponentRecordTime" => TextLibExt::TimeToText(Record.OpponentRecordTime),
+			"RecordTimeDiff" => TextLibExt::TimeToText(Record.RecordTime - Record.OpponentRecordTime),
 			"OpponentRecordDate" => TL::ToText(Record.OpponentRecordDate),
 			"OpponentRecordElapsedTime" => TL::ToText(Record.OpponentRecordElapsedTime),
 			"GhostUrl" => Record.OpponentRecordUrl]);
@@ -155,8 +156,8 @@ Void GetRecords(Text SelectedFilter, Text BuddyLogin, Text SelectedGroup, Text F
 		foreach(Record in RecordsComparisonResult.PlayerBestRecordsComparison){
 			RemotePlayerRecords.add(["Mapname" => Record.MapInfo.Name,
 			"MapFileName" => Record.MapInfo.FileName,
-			"RecordTime" => TL::TimeToText(Record.RecordTime, True),
-			"RecordTimeDiff" => TL::TimeToText(Record.OpponentRecordTime - Record.RecordTime, True),
+			"RecordTime" => TextLibExt::TimeToText(Record.RecordTime),
+			"RecordTimeDiff" => TextLibExt::TimeToText(Record.OpponentRecordTime - Record.RecordTime),
 			"RecordDate" => TL::ToText(Record.RecordDate),
 			"RecordElapsedTime" => TL::ToText(Record.RecordElapsedTime),
 			"GhostUrl" => Record.OpponentRecordUrl]);
@@ -170,8 +171,8 @@ Void GetRecords(Text SelectedFilter, Text BuddyLogin, Text SelectedGroup, Text F
 		foreach(Record in RecordsComparisonResult.BuddyBestRecordsComparison){
 			RemoteBuddyRecords.add(["Mapname" => Record.MapInfo.Name,
 			"MapFileName" => Record.MapInfo.FileName,
-			"RecordTime" => TL::TimeToText(Record.OpponentRecordTime, True),
-			"RecordTimeDiff" => TL::TimeToText(Record.RecordTime - Record.OpponentRecordTime, True),
+			"RecordTime" => TextLibExt::TimeToText(Record.OpponentRecordTime),
+			"RecordTimeDiff" => TextLibExt::TimeToText(Record.RecordTime - Record.OpponentRecordTime),
 			"RecordDate" => TL::ToText(Record.OpponentRecordDate),
 			"RecordElapsedTime" => TL::ToText(Record.OpponentRecordElapsedTime),
 			"GhostUrl" => Record.OpponentRecordUrl]);
@@ -180,8 +181,8 @@ Void GetRecords(Text SelectedFilter, Text BuddyLogin, Text SelectedGroup, Text F
 		foreach(Record in RecordsComparisonResult.PlayerBestRecordsComparison){
 			RemotePlayerRecords.add(["Mapname" => Record.MapInfo.Name,
 			"MapFileName" => Record.MapInfo.FileName,
-			"RecordTime" => TL::TimeToText(Record.RecordTime, True),
-			"RecordTimeDiff" => TL::TimeToText(Record.OpponentRecordTime - Record.RecordTime, True),
+			"RecordTime" => TextLibExt::TimeToText(Record.RecordTime),
+			"RecordTimeDiff" => TextLibExt::TimeToText(Record.OpponentRecordTime - Record.RecordTime),
 			"RecordDate" => TL::ToText(Record.RecordDate),
 			"RecordElapsedTime" => TL::ToText(Record.RecordElapsedTime),
 			"GhostUrl" => Record.OpponentRecordUrl]);

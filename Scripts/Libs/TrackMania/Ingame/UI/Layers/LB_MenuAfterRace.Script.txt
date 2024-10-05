@@ -6,6 +6,7 @@
 #Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt"							as DesignManialinks
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" 								as Font
 #Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" 					            		as Colors
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 #Const C_ImgBase	"file://Media/MEDIABROWSER_HiddenResources/Common/Images/Ingame/"
  
@@ -84,7 +85,7 @@ Text Build() {
 		{{{DesignManialinks::Includes()}}}
 		
 		{{{Manialink::Load()}}}
-
+		{{{TextLibExt::InjectTimeToText()}}}
 		
 		declare Boolean G_MenuIsVisible;
 		declare Boolean G_EntryIsVisible;
@@ -215,10 +216,8 @@ Text Build() {
 				declare Vec3 Color_NextMedal;
 				declare Text[] PlayersName   = [_("Last Time"),_("Best Time"),_("Next Medal")];
 				declare Text[] PlayersTime;
-				declare Text CurTime = TL::TimeToText(Net_CurTime, True);
-				CurTime ^= TL::SubText(Net_CurTime  ^"", (TL::Length(Net_CurTime^"")-1), 1);
-				declare Text NextMedalTime = TL::TimeToText(Net_NextMedalTime, True);
-				NextMedalTime ^= TL::SubText(Net_NextMedalTime  ^"", (TL::Length(Net_NextMedalTime^"")-1), 1);
+				declare Text CurTime = TimeToText(Net_CurTime);
+				declare Text NextMedalTime = TimeToText(Net_NextMedalTime);
 				PlayersTime.add(CurTime);
 				declare Text BTimePlayer = BestTimePlayer;
 				if(BTimePlayer == "") BTimePlayer = "0:00.000";

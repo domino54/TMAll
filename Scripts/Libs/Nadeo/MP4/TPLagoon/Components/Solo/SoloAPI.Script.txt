@@ -3,6 +3,7 @@
 #Include "Libs/Nadeo/MP4/Common/SettingsController.Script.txt"	as SettingsController
 #Include "Libs/Nadeo/MP4/Common/LoadingScreen.Script.txt"		as LoadingScreen
 #Include "Libs/Nadeo/Common/APIs/PlayerGroups.Script.txt"		as PlayerGroups
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 #Include "TextLib"										as TextLib
 #Include "MathLib"										as MathLib
@@ -598,8 +599,7 @@ Text Private_GetTime(Integer _SectionIndex, Integer _MapIndex)
 	if (Time == -1) {
 		return "-:--.---";
 	}
-	declare Text TimeText = TextLib::TimeToText(Time, True);
-	TimeText ^= TextLib::SubText(Time  ^"", (TextLib::Length(Time^"")-1), 1);
+	declare Text TimeText = TextLibExt::TimeToText(Time);
 	return TimeText;
 }
 

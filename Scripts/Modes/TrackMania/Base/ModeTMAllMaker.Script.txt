@@ -13,6 +13,7 @@
 #Include "Libs/domino54/Openplanet_OnlineData.Script.txt" as Openplanet_OnlineData
 #Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 // ---------------------------------- //
 // Global variables
@@ -34,6 +35,7 @@ Log::RegisterScript(HttpClient::GetScriptName(), HttpClient::GetScriptVersion())
 Log::RegisterScript(Openplanet_OnlineData::GetScriptName(), Openplanet_OnlineData::GetScriptVersion());
 Log::RegisterScript(PlayerModels_Data::GetScriptName(), PlayerModels_Data::GetScriptVersion());
 Log::RegisterScript(PlayerModels_Server::GetScriptName(), PlayerModels_Server::GetScriptVersion());
+Log::RegisterScript(TextLibExt::ScriptName, TextLibExt::Version);
 ***
 
 ***MB_Private_Settings***

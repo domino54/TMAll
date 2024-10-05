@@ -60,6 +60,10 @@ Boolean IsRunning()
 
 Void Show(Text _EventNamePrefix, Text[] _ButtonNames, Text _MediaTitle, Text[] _SecondaryButtonNames, Text _Context, Boolean _IsFilteringUnvalidatedTracks)
 {
+	// Hardcoded fix for disappearing maps after selecting them in match settings editor
+	if (_EventNamePrefix != "TracksToMatchSettings") {
+		TrackBrowserAPI::ResetMatchSettingsTrackList();
+	}
 	if (G_Context != _Context) {
 		G_Context = _Context;
 		G_FolderPath = "";
@@ -170,9 +174,13 @@ Text[][]	LineDataFromContext(Text _Context, Text[Text] _Metadata)
 	declare Text ProjectEnviro for LocalUser;
 	if (ProjectEnviro != "Storm") {
 		declare Text IsValidated	= _Metadata["Validated"];
-		declare Text CourseTime		= _Metadata["GoldTime"];
+		declare Text CourseTime		= _Metadata["Time"];
 		if (IsValidated == "no") {
 			CourseTime = "$900$<" ^ TextLib::GetTranslatedText("Not Validated") ^ "$>";
+		}
+		// PursuitArena and similar save the time as 0:00:001, display as "Validated"
+		else if (TextLib::StartsWith("0:00.", CourseTime)) {
+			CourseTime = "$090$<" ^ TextLib::GetTranslatedText("Validated") ^ "$>";
 		}
 		declare Text Label = TextLib::GetTranslatedText("Time");
 		Result.add([Label^" : " ^ CourseTime]);

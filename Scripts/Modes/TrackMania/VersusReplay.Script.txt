@@ -26,7 +26,7 @@ Game::Load(This, "VersusReplay", True);
 	declare netwrite Text BestTimePlayer for UI;
 	declare netwrite Integer Net_TimeToNextMedal for UI;
 	declare netwrite Boolean Net_IsNewMedal for UI;
-	BestTimePlayer = TL::TimeToText(G_BestTimePlayer, True);
+	BestTimePlayer = TextLibExt::TimeToText(G_BestTimePlayer);
 	Net_IsNewMedal = False;
 
 	//log("G_LastTimePlayer: "^ G_LastTimePlayer);

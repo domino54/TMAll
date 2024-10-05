@@ -1,0 +1,74 @@
+/**
+ * @name TextLibExt.Script.txt
+ * @author domino54
+ * @version 2024-10-04
+ */
+
+#Const Version      "2024-10-04"
+#Const ScriptName   "Libs/domino54/TextLibExt.Script.txt"
+
+#Include "TextLib" as TL
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+/**
+ * Formats a time integer to string with leading minutes and milliseconds.
+ *
+ * @param _Time - Value to format to text.
+ * @returns Time as string in format `0:00.000`.
+ */
+Text TimeToText(Integer _Time) {
+  if (_Time == 0) {
+    return "0:00.000";
+  }
+
+  if (_Time < 0) {
+    return "-" ^ TimeToText(-_Time);
+  }
+
+  declare Milliseconds = _Time % 1000;
+  declare Seconds = (_Time / 1000) % 60;
+  declare Minutes = (_Time / 60000) % 60;
+  declare Hours = (_Time / 3600000);
+
+  declare SecondsMs = TL::FormatInteger(Seconds, 2) ^ "." ^ TL::FormatInteger(Milliseconds, 3);
+
+  if (Hours > 0) {
+    return Hours ^ ":" ^ TL::FormatInteger(Minutes, 2) ^ ":" ^ SecondsMs;
+  }
+
+  return Minutes ^ ":" ^ SecondsMs;
+}
+
+Text InjectTimeToText(Text _TL) {
+  return """
+Text TimeToText(Integer _Time) {
+  if (_Time == 0) {
+    return "0:00.000";
+  }
+
+  if (_Time < 0) {
+    return "-" ^ TimeToText(-_Time);
+  }
+
+  declare Milliseconds = _Time % 1000;
+  declare Seconds = (_Time / 1000) % 60;
+  declare Minutes = (_Time / 60000) % 60;
+  declare Hours = (_Time / 3600000);
+
+  declare SecondsMs = {{{_TL}}}::FormatInteger(Seconds, 2) ^ "." ^ {{{_TL}}}::FormatInteger(Milliseconds, 3);
+
+  if (Hours > 0) {
+    return Hours ^ ":" ^ {{{_TL}}}::FormatInteger(Minutes, 2) ^ ":" ^ SecondsMs;
+  }
+
+  return Minutes ^ ":" ^ SecondsMs;
+}
+  """;
+}
+
+Text InjectTimeToText() {
+  return InjectTimeToText("TL");
+}
