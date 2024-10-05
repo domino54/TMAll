@@ -1,7 +1,7 @@
 /**
  * @name HttpClient.Script.txt
  * @author domino54
- * @version 2024-07-17
+ * @version 2024-10-05
  *
  * @example ```ts
  * Void Load() {
@@ -28,7 +28,7 @@
  * ```
  */
 
-#Const Version      "2024-07-17"
+#Const Version      "2024-10-05"
 #Const ScriptName   "Libs/domino54/HttpClient.Script.txt"
 
 #Include "TextLib" as TL
@@ -139,14 +139,6 @@ Void Private_CreatePost(Text _Namespace, Text _Id, Text _Url, Text _Payload, Int
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
-
-Text GetScriptVersion() {
-  return Version;
-}
-
-Text GetScriptName() {
-  return ScriptName;
-}
 
 /**
  * This method should be called at the end of your script's execution context.

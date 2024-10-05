@@ -12,6 +12,7 @@
       "SkinPath": "Skins/Models/CanyonCar/Ace.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_Ace.webp"
       }
     },
     {
@@ -22,6 +23,7 @@
       "SkinPath": "Skins/Models/CanyonCar/Defrag.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_Defrag.webp"
       }
     },
     {
@@ -32,6 +34,7 @@
       "SkinPath": "Skins/Models/CanyonCar/Duke.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_Duke.webp"
       }
     },
     {
@@ -42,6 +45,7 @@
       "SkinPath": "Skins/Models/CanyonCar/EXD.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_EXD.webp"
       }
     },
     {
@@ -52,6 +56,7 @@
       "SkinPath": "Skins/Models/CanyonCar/ForTOne.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_ForTOne.webp"
       }
     },
     {
@@ -62,6 +67,7 @@
       "SkinPath": "Skins/Models/CanyonCar/Fusi5n.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_Fusi5n.webp"
       }
     },
     {
@@ -72,6 +78,7 @@
       "SkinPath": "Skins/Models/CanyonCar/Gramberg.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_Gramberg.webp"
       }
     },
     {
@@ -82,6 +89,7 @@
       "SkinPath": "Models/CanyonCar/GT500.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_GT500.webp"
       }
     },
     {
@@ -92,6 +100,7 @@
       "SkinPath": "Skins/Models/CanyonCar/JustForward.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_JustForward.webp"
       }
     },
     {
@@ -102,6 +111,7 @@
       "SkinPath": "Skins/Models/CanyonCar/Liberty.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_Liberty.webp"
       }
     },
     {
@@ -112,6 +122,7 @@
       "SkinPath": "Skins/Models/CanyonCar/Magma.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_Magma.webp"
       }
     },
     {
@@ -122,6 +133,7 @@
       "SkinPath": "Skins/Models/CanyonCar/MP.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_MP.webp"
       }
     },
     {
@@ -132,6 +144,7 @@
       "SkinPath": "Skins/Models/CanyonCar/NTeam.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_NTeam.webp"
       }
     },
     {
@@ -142,6 +155,7 @@
       "SkinPath": "Skins/Models/CanyonCar/SafetyCar.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_SafetyCar.webp"
       }
     },
     {
@@ -152,6 +166,7 @@
       "SkinPath": "Skins/Models/CanyonCar/Tecnivals.zip",
       "Author": "NADEO",
       "Assets": {
+        "garage:card": "./Card/Card_Tecnivals.webp"
       }
     }
   ]

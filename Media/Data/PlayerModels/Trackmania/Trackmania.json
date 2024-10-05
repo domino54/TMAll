@@ -13,6 +13,7 @@
       "LoadAs": "ItemAndArchetype",
       "Assets": {
         "garage:name": "Canyon",
+        "garage:card": "./Card/Card_CanyonCar.webp",
         "garage:tab_icon": "./TabIcon/TabIcon_CanyonCar.webp"
       }
     },
