@@ -1,0 +1,152 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tmall:addons",
+  "Name": "Trackmania² Multienvironment additions",
+  "Overlays": [
+    {
+      "Id": "tmall:canyoncar4x",
+      "Name": "Canyon Car (4× Coefficients)",
+      "Extends": "trackmania:canyoncar",
+      "ItemPath": "Vehicles4X/CanyonCar4X.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 4,
+        "ControlCoef": 4,
+        "GravityCoef": 2
+      },
+      "Assets": {
+        "gameplaycoefs:normalize": "true"
+      }
+    },
+    {
+      "Id": "tmall:lagooncar4x",
+      "Name": "Lagoon Car (4× Coefficients)",
+      "Extends": "trackmania:lagooncar",
+      "ItemPath": "Vehicles4X/LagoonCar4X.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 4,
+        "ControlCoef": 4,
+        "GravityCoef": 2
+      },
+      "Assets": {
+        "gameplaycoefs:normalize": "true"
+      }
+    },
+    {
+      "Id": "tmall:trafficcar4x",
+      "Name": "Traffic Car (4× Coefficients)",
+      "Extends": "trackmania:trafficcar",
+      "ItemPath": "Vehicles4X/TrafficCar4X.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 4,
+        "ControlCoef": 4,
+        "GravityCoef": 4
+      },
+      "Assets": {
+        "gameplaycoefs:normalize": "true"
+      }
+    },
+    {
+      "Id": "tmall:valleycar4x",
+      "Name": "Valley Car (4× Coefficients)",
+      "Extends": "trackmania:valleycar",
+      "ItemPath": "Vehicles4X/ValleyCar4X.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 4,
+        "ControlCoef": 4,
+        "GravityCoef": 2
+      },
+      "Assets": {
+        "gameplaycoefs:normalize": "true"
+      }
+    },
+    {
+      "Id": "tmall:baycarud",
+      "Name": "Bay Car (Inverted Gravity)",
+      "Extends": "trackmania:baycar",
+      "ItemPath": "VehiclesUD/BayCarUD.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 1,
+        "ControlCoef": 1,
+        "GravityCoef": -1
+      }
+    },
+    {
+      "Id": "tmall:coastcarud",
+      "Name": "Coast Car (Inverted Gravity)",
+      "Extends": "trackmania:coastcar",
+      "ItemPath": "VehiclesUD/CoastCarUD.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 1,
+        "ControlCoef": 1,
+        "GravityCoef": -1
+      }
+    },
+    {
+      "Id": "tmall:desertcarud",
+      "Name": "Desert Car (Inverted Gravity)",
+      "Extends": "trackmania:desertcar",
+      "ItemPath": "VehiclesUD/DesertCarUD.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 1,
+        "ControlCoef": 1,
+        "GravityCoef": -1
+      }
+    },
+    {
+      "Id": "tmall:islandcarud",
+      "Name": "Island Car (Inverted Gravity)",
+      "Extends": "trackmania:islandcar",
+      "ItemPath": "VehiclesUD/IslandCarUD.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 1,
+        "ControlCoef": 1,
+        "GravityCoef": -1
+      }
+    },
+    {
+      "Id": "tmall:rallycarud",
+      "Name": "Rally Car (Inverted Gravity)",
+      "Extends": "trackmania:rallycar",
+      "ItemPath": "VehiclesUD/RallyCarUD.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 1,
+        "ControlCoef": 1,
+        "GravityCoef": -1
+      }
+    },
+    {
+      "Id": "tmall:snowcarud",
+      "Name": "Snow Car (Inverted Gravity)",
+      "Extends": "trackmania:snowcar",
+      "ItemPath": "VehiclesUD/SnowCarUD.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 1,
+        "ControlCoef": 1,
+        "GravityCoef": -1
+      }
+    },
+    {
+      "Id": "tmall:stadiumcarud",
+      "Name": "Stadium Car (Inverted Gravity)",
+      "Extends": "trackmania:stadiumcar",
+      "ItemPath": "VehiclesUD/StadiumCarUD.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 1,
+        "ControlCoef": 1,
+        "GravityCoef": -1
+      }
+    },
+    {
+      "Id": "tmall:canyoncarflippy",
+      "Name": "Flippy Canyon Car",
+      "Extends": "trackmania:canyoncar",
+      "ItemPath": "VehiclesExtra/CanyonCarFlippy.Item.Gbx",
+      "Gameplay": {
+        "AccelCoef": 0.1,
+        "ControlCoef": -100,
+        "GravityCoef": 1
+      }
+    }
+  ]
+}

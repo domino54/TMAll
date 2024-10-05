@@ -35,6 +35,6 @@
 
 	<Resources flashurl="domino54" />
 	<Ingame accelcoef="1." controlcoef="1." gravitycoef="1." />
-	<Garage path="TM_Garage_Remake_ExtraLights.Map.Gbx" />
+	<Garage path="" />
 	<Profile />
 </titlePackXML>

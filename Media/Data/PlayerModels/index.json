@@ -4,7 +4,8 @@
     "./Trackmania/Trackmania.json",
     "./TMCanyon/TMCanyon.json",
     "./TMValley/TMValley.json",
-    "./TMLagoon/TMLagoon.json"
+    "./TMLagoon/TMLagoon.json",
+    "./TMAll/TMAll.json"
   ],
   "SortOverrides": [
     "trackmania:islandcar",
