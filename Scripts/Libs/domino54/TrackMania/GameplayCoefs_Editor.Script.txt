@@ -19,7 +19,7 @@
 #Const C_LibGameplayCoefs_OpenDialogEvent         "gameplaycoefs:open_dialog"
 #Const C_LibGameplayCoefs_ApplyChangesEvent       "gameplaycoefs:apply"
 #Const C_LibGameplayCoefs_RejectChangesEvent      "gameplaycoefs:reject"
-#Const C_LibGameplayCoefs_DialogTitleText         _("Gameplay Settings")
+#Const C_LibGameplayCoefs_DialogTitleText         _("Vehicle Settings")
 #Const C_LibGameplayCoefs_UninitializedValue      -1.0
 #Const C_LibGameplayCoefs_MinValueDefault         0.0
 #Const C_LibGameplayCoefs_MinValueGravityCoef     0.2
@@ -69,7 +69,7 @@ while (True) {
 }
 
 Text Private_CreateDialogManialinkLayer() {
-  declare Note = _("Note: Gameplay settings work only inside the standard game modes, and custom game modes that have adopted them. These options will not take effect while recording MediaTracker ghosts.\n\n$<$F00Replay validation$> will not work if any of the above options aren't set to their strongest value.");
+  declare Note = _("Note: Vehicle settings work only inside the standard game modes, and custom game modes that have adopted them. These options will not take effect while recording MediaTracker ghosts.\n\n$<$F00Replay validation$> will not work if any of the above options aren't set to their strongest value.");
 
   declare SliderLength = 101.5;
 

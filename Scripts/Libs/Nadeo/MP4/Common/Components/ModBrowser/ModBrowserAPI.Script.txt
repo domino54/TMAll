@@ -5,7 +5,7 @@
 #Const C_FilePrefix				""
 #Const C_BrowserName			"ModBrowser"
 #Const C_MediaType				CDataFileMgr::EMediaType::Skins
-#Const C_ThumbnailType		""
+#Const C_ThumbnailType		"NoThumbnail"
 
 declare CTaskResult_FileList G_TaskResult;
 

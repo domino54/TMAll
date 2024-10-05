@@ -272,6 +272,13 @@ Text[] GetAllSortedFolders(Boolean _IsSortingFromDateRatherThanName, Boolean _Is
 	return Result;
 }
 
+Void CancelHardFetchMetadata()
+{
+	declare CMatchSettings CurrentMatchSettings for LocalUser;
+	CurrentMatchSettings = Null;
+	G_IsInHardFetchMetadata = False;
+}
+
 Void HardFetchMetadata()
 {
 	G_IsInHardFetchMetadata = True;
