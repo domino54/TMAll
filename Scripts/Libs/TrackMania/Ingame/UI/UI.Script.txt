@@ -14,6 +14,7 @@
 #Include "Libs/Nadeo/Common/ManialinkTools/UIPadButtons.Script.txt"						        as UIButtons
 #Include "Libs/Trackmania/Prompter2.Script.txt"				                as Prompter2
 #Include "Libs/Trackmania/Ingame/UI/SplitScreenLibManialinkCoef.Script.txt"	as SplitScreenLibManialinkCoef
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 #Const Version		"2016-03-01"
 #Const ScriptName	"UI.Script.txt"
@@ -432,6 +433,7 @@ declare Integer[Integer] G_LapRecordByCheckpointTime;
 declare Integer[Integer] G_ActualCheckpointTime;
 declare Integer          G_BestLapTime;
 
+{{{TextLibExt::InjectTimeToText()}}}
 
 {{{Manialink::Load()}}}
 
@@ -439,6 +441,7 @@ Text GetRaceTime()
 {
 	declare Integer TimeInt = GameTime - GUIPlayer.RaceStartTime;
 	if(TimeInt < 0 || GUIPlayer.RaceStartTime <= 0) TimeInt = 0;
+	// Commonly agreed that while racing, thousandths are useless unless paused
 	declare Text TimeText = TL::TimeToText(TimeInt, True);
 	return TimeText;
 }
@@ -648,7 +651,7 @@ Void UpdateWayPoint(Integer _LapTime, Integer _CheckpointInLap, Integer _Checkpo
 		declare CMlLabel Label_PlayerTime   <=> (Frame_Player.GetFirstChild("Label_PlayerTime")          as CMlLabel);
 		declare Integer TimeInt = G_PlayersWayPointTime[Index];
 
-		declare Text TimeText = TL::TimeToText(TimeInt, True);
+		declare Text TimeText = TimeToText(TimeInt);
 		//TimeText ^= TL::SubText(TimeInt  ^"", (TL::Length(TimeInt^"")-1), 1);
 		Label_PlayerTime.SetText(TimeText);
 		
@@ -751,8 +754,8 @@ Void UpdateWayPoint(Integer _LapTime, Integer _CheckpointInLap, Integer _Checkpo
 		Quad_Color.BgColor = <1., 1., 1.>;
 	}
 
-	Label_WayPointInfo1.SetText(Prefix^""^TL::TimeToText(TimeDif, True));
-	Label_WayPointInfo0.SetText(TL::TimeToText(PlayerTimeWayPoint, True));
+	Label_WayPointInfo1.SetText(Prefix^""^TimeToText(TimeDif));
+	Label_WayPointInfo0.SetText(TimeToText(PlayerTimeWayPoint));
 
 	declare Boolean StopWayPointInfo3Anim = False;
 	declare Integer PrevBestLapTime;
@@ -819,7 +822,7 @@ Void UpdateWayPoint(Integer _LapTime, Integer _CheckpointInLap, Integer _Checkpo
 		{
 			Quad_Color3.Hide();
 		}
-		Label_WayPointInfo3.SetText(Prefix ^""^ TL::TimeToText(TimeDifLap, True));
+		Label_WayPointInfo3.SetText(Prefix ^""^ TimeToText(TimeDifLap));
 		Label_WayPointInfo3.TextColor = {{{Colors::GetColor("Yellow")}}};
 	}
 	else
@@ -851,7 +854,7 @@ Void UpdateWayPoint(Integer _LapTime, Integer _CheckpointInLap, Integer _Checkpo
 		
 		if(Net_NbLaps > 0 && GUIPlayer.CurrentNbLaps > 0)
 		{
-			Label_WayPointInfo2.SetText("LAP " ^ TL::TimeToText(_LapTime, True));
+			Label_WayPointInfo2.SetText("LAP " ^ TimeToText(_LapTime));
 			Label_WayPointInfo2.TextColor = {{{Colors::GetColor("Yellow")}}};
 			Quad_Img2.ChangeImageUrl("{{{IMGPATH^IMG_Arrow2}}}");
 			Quad_Img2.Size = <4., 4.>;
@@ -897,7 +900,7 @@ Void UpdateWayPoint(Integer _LapTime, Integer _CheckpointInLap, Integer _Checkpo
 		LibManialink_SetTargetScale(Label_WayPointInfo3, 1.0);
 		LibManialink_PresetAnimInsert(Label_WayPointInfo3, 100, 100, "EaseLinear");
 
-		Label_WayPointInfo2.SetText("LAP " ^ TL::TimeToText(_LapTime, True));
+		Label_WayPointInfo2.SetText("LAP " ^ TimeToText(_LapTime));
 		Label_WayPointInfo2.TextColor = {{{Colors::GetColor("Yellow")}}};
 		Quad_Img2.ChangeImageUrl("{{{IMGPATH^IMG_Arrow2}}}");
 		Quad_Img2.Size = <4., 4.>;
@@ -1011,7 +1014,7 @@ Void InitMapInfo()
 			}
 			
 		}
-		Label_PlayerTime.Value = "0:00.00";
+		Label_PlayerTime.Value = "0:00.000";
 		Label_PlayerTime.TextColor = <1.,1.0,1.0>;
 
 		Index += 1;
@@ -1658,6 +1661,8 @@ Text Private_TimeOutTimer()
 	
 	#Const DebugName  "L_PressToRestart"
 	
+	{{{TextLibExt::InjectTimeToText()}}}
+
 	main() 
 	{
 		declare Label_Title 				<=> (Page.MainFrame.GetFirstChild("Label_Title") 			as CMlLabel);
@@ -1665,7 +1670,7 @@ Text Private_TimeOutTimer()
 		
 		declare netread Integer Net_TimeOutTimer for UI;
 		
-		Label_Title.Value = "00:00.0";
+		Label_Title.Value = "00:00.000";
 		
 		while(True) 
 		{
@@ -1683,7 +1688,7 @@ Text Private_TimeOutTimer()
 						declare Opacity 			= 0.5 + 0.5 * ML::Sin(Now*0.01);
 						Label_Title.Opacity 		= Opacity;
 						Label_Explanation.Opacity 	= Opacity;
-						Label_Title.Value 			= TL::TimeToText(Net_TimeOutTimer, True);
+						Label_Title.Value 			= TimeToText(Net_TimeOutTimer);
 					} 
 					else 
 					{
@@ -1694,7 +1699,7 @@ Text Private_TimeOutTimer()
 				else 
 				{
 					Label_Title.Opacity 	= 1.0;
-					Label_Title.Value 		= TL::TimeToText(0, True);
+					Label_Title.Value 		= TimeToText(0);
 				}
 			}
 		}

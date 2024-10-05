@@ -4,6 +4,7 @@
 #Const ScriptName			"FlavourText.Script.txt"
 
 #Include "TextLib" as TextLib
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 Text GetHotSeatOurOfGas() {
 	return "You're out of gas!";
@@ -156,29 +157,25 @@ Text GetFinalistLoseRounds() { //Arnaud - Regarder si débranchable
 }
 
 Text GetNewRecordOfThePlayer(Integer _PlayerTime) {
-	declare PlayerTime = TextLib::TimeToText(_PlayerTime, True);
-	PlayerTime ^= TextLib::SubText(_PlayerTime  ^"", (TextLib::Length(_PlayerTime^"")-1), 1);
+	declare PlayerTime = TextLibExt::TimeToText(_PlayerTime);
 	//L16N record as in "world record"
 	return TextLib::Compose("%1%2", _("New record: "), "$fd4"^PlayerTime);
 }
 
 Text GetLastRecordOfThePlayer(Integer _PlayerTime) {
-	declare PlayerTime = TextLib::TimeToText(_PlayerTime, True);
-	PlayerTime ^= TextLib::SubText(_PlayerTime  ^"", (TextLib::Length(_PlayerTime^"")-1), 1);
+	declare PlayerTime = TextLibExt::TimeToText(_PlayerTime);
 	//L16N record as in "world record"
 	return TextLib::Compose("%1%2", _("Your last record: "), PlayerTime);
 }
 
 Text GetRecordOfThePlayer(Integer _PlayerTime) {
-	declare PlayerTime = TextLib::TimeToText(_PlayerTime, True);
-	PlayerTime ^= TextLib::SubText(_PlayerTime  ^"", (TextLib::Length(_PlayerTime^"")-1), 1);
+	declare PlayerTime = TextLibExt::TimeToText(_PlayerTime);
 	//L16N record as in "world record"
 	return TextLib::Compose("%1%2", _("Your record: "), "$fd4"^PlayerTime);
 }
 
 Text GetPlayerTime(Integer _PlayerTime) {
-	declare PlayerTime = TextLib::TimeToText(_PlayerTime, True);
-	PlayerTime ^= TextLib::SubText(_PlayerTime  ^"", (TextLib::Length(_PlayerTime^"")-1), 1);
+	declare PlayerTime = TextLibExt::TimeToText(_PlayerTime);
 	//L16N record as in "world record"
 	return TextLib::Compose("%1%2", _("Your time: "), "$fd4"^PlayerTime);
 }

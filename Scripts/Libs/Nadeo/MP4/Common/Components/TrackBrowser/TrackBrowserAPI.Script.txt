@@ -1,5 +1,6 @@
 #Include "Libs/Nadeo/Common/Core/Logger.Script.txt"									as Logger
 #Include "Libs/Nadeo/Common/ManiascriptTools/Sort.Script.txt"								as SortTools
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 #Include "TextLib"																as TextLib
 
 #Const C_ImgTrack				"file://Media/MEDIABROWSER_HiddenResources/Common/Images/TrackBrowser/"
@@ -188,20 +189,23 @@ Text Private_GetLogo(Text _CollectionName) {
 Text[Text] GetMetadataFromMapInfo(CMapInfo _MapInfo, Text _2ndState)
 {
 	declare Text IsValidated = "no";
-	declare Text MapTime = "-:--.--";
-	declare Text MapGoldTime = "-:--.--";
+	declare Text MapTime = "-:--.---";
+	declare Text MapGoldTime = "-:--.---";
 	declare Text Flag = _MapInfo.AuthorCountryFlagUrl;
 	declare Text PersonalTime = TextLib::ToText(ScoreMgr.Map_GetRecord(UserMgr.MainUser.Id, _MapInfo.MapUid, ""));
+	// Can return -1 if the campaign was removed.
 	declare Integer Index = ScoreMgr.Map_GetMultiAsyncLevel(UserMgr.MainUser.Id, _MapInfo.MapUid, "");
-	if(!C_MedalsFromFalguiere.existskey(Index)) return [];
-	declare PersonalMedal = C_MedalNumbers[C_MedalsFromFalguiere[Index]];
+	declare PersonalMedal = C_MedalNumbers[C_MedalsFromFalguiere[0]];
+	if (C_MedalsFromFalguiere.existskey(Index)) {
+		PersonalMedal = C_MedalNumbers[C_MedalsFromFalguiere[Index]];
+	}
 	if (Flag == "file://ZoneFlags/Path/") {
 		Flag = "file://ZoneFlags/Path/World";
 	}
 	if (_MapInfo.IsPlayable && _MapInfo.TMObjective_AuthorTime != -1) {
 		IsValidated	= "yes";
-		MapTime		= TextLib::TimeToText(_MapInfo.TMObjective_AuthorTime, True);
-		MapGoldTime	= TextLib::TimeToText(_MapInfo.TMObjective_GoldTime, True);
+		MapTime		= TextLibExt::TimeToText(_MapInfo.TMObjective_AuthorTime);
+		MapGoldTime	= TextLibExt::TimeToText(_MapInfo.TMObjective_GoldTime);
 	}
 	declare Text IsMultilap = TextLib::ToText(False);
 	if (_MapInfo.TMObjective_IsLapRace) {
@@ -468,6 +472,12 @@ Void UpdateMainData()
 Text[Text][] GetMainData() {
 	UpdateMainData();
 	return G_MainData;
+}
+
+Void ResetMatchSettingsTrackList()
+{
+	declare Text[] MatchSettingCurrentTrackList	for LocalUser;
+	MatchSettingCurrentTrackList.clear();
 }
 
 Void InputPageUp()

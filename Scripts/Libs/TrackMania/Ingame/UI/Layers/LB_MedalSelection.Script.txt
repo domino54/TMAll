@@ -3,6 +3,7 @@
 #Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" 					            		as Colors
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_SoloMapInfosBase.Script.txt"		as Inject_SoloMapInfosBase
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_QuadsSelector.Script.txt"			as Inject_QuadsSelector
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 #Const TMC_MEDAL_AUTHOR					0
 #Const TMC_MEDAL_GOLD					1
@@ -55,6 +56,7 @@ Text Build() {
 		{{{Manialink::GetIncludes()}}}
 		
 		{{{Manialink::Load()}}}
+		{{{TextLibExt::InjectTimeToText()}}}
 		
 		//declare Integer G_ButtonFocus;
 		declare Vec3[Integer] G_QuadMedalImgColor;
@@ -132,14 +134,10 @@ Text Build() {
 										  "{{{_("World Records")}}}"];
 			
 
-			declare Text TimeAuthor = TL::TimeToText(TimesOnMap[{{{TMC_MEDAL_AUTHOR}}}]  , True);
-			declare Text TimeGold   = TL::TimeToText(TimesOnMap[{{{TMC_MEDAL_GOLD}}}]  , True);
-			declare Text TimeSilver = TL::TimeToText(TimesOnMap[{{{TMC_MEDAL_SILVER}}}], True);
-			declare Text TimeBronze = TL::TimeToText(TimesOnMap[{{{TMC_MEDAL_BRONZE}}}], True);
-			TimeAuthor ^= TL::SubText(TimesOnMap[{{{TMC_MEDAL_AUTHOR}}}]  ^"",(TL::Length(TimesOnMap[{{{TMC_MEDAL_AUTHOR}}}]^"")-1),1);
-			TimeGold   ^= TL::SubText(TimesOnMap[{{{TMC_MEDAL_GOLD}}}]  ^"",(TL::Length(TimesOnMap[{{{TMC_MEDAL_GOLD}}}]^"")-1),1);
-			TimeSilver ^= TL::SubText(TimesOnMap[{{{TMC_MEDAL_SILVER}}}]^"",(TL::Length(TimesOnMap[{{{TMC_MEDAL_SILVER}}}]^"")-1),1);
-			TimeBronze ^= TL::SubText(TimesOnMap[{{{TMC_MEDAL_BRONZE}}}]^"",(TL::Length(TimesOnMap[{{{TMC_MEDAL_BRONZE}}}]^"")-1),1);
+			declare Text TimeAuthor = TimeToText(TimesOnMap[{{{TMC_MEDAL_AUTHOR}}}]);
+			declare Text TimeGold   = TimeToText(TimesOnMap[{{{TMC_MEDAL_GOLD}}}]);
+			declare Text TimeSilver = TimeToText(TimesOnMap[{{{TMC_MEDAL_SILVER}}}]);
+			declare Text TimeBronze = TimeToText(TimesOnMap[{{{TMC_MEDAL_BRONZE}}}]);
 			declare Text[] LabelMedalsTime = [
 
 			""";

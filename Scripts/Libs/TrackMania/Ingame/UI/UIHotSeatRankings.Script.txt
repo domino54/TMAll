@@ -10,6 +10,7 @@
 #Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt"	as Manialink
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" 		as Font
 #Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" 			as Colors
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 #Const ImgPath					"file://Media/MEDIABROWSER_HiddenResources/Common/Images/Ingame/"
 #Const SOUNDPATH				"file://Media/Sounds/TPLagoon/"
@@ -122,7 +123,7 @@ Void Private_CreateLayerDynaRanking(Integer _EnergyMax)
 						<quad 	id="Quad_Gauge{{{I}}}"  	pos="-2			 				-2.6" z-index=".4" 	size="{{{QuadSizeX}}} 		{{{0.5}}}" 	bgcolor="0007" valign="center" halign="left" />
 						<label 	id="Label_Name{{{I}}}" 		pos="0 							0" z-index=".26.6" 	size="160 10" 	halign="left" 	valign="center" textsize="1.0" scale="1.0"/>
 						<label 	id="Label_Cp{{{I}}}" 		pos="{{{QuadSizeX-26}}} 		0" z-index=".33.6" 	size="160 10" 	halign="left" 	valign="center" text="CP:" style="TextButtonBig" textsize="1" textfont="{{{MainSmallFont}}}" hidden="1"/>
-						<label 	id="Label_State{{{I}}}" 	pos="{{{QuadSizeX-4.5}}} 		0" z-index=".66.6" 	size="160 10" 	halign="right" 	valign="center" text="--:--.--" style="TextButtonBig" textsize="1.5" textfont="{{{MainFont}}}"/>
+						<label 	id="Label_State{{{I}}}" 	pos="{{{QuadSizeX-4.5}}} 		0" z-index=".66.6" 	size="160 10" 	halign="right" 	valign="center" text="--:--.---" style="TextButtonBig" textsize="1.5" textfont="{{{MainFont}}}"/>
 					</frame>
 				</frame>
 				<quad 		id="Quad_Strong{{{I}}}" 	pos="0.  {{{-(I*SizeY) - Separator*0.5}}}" 	size="{{{SizeX}}} {{{SizeY}}}" halign="left" valign="center" image="{{{ImgPath^ImgPlayerBg}}}" hidden="1"/>
@@ -168,10 +169,11 @@ Void Private_CreateLayerDynaRanking(Integer _EnergyMax)
 		declare CMlQuad	[Integer] Quad_Strong;
 		
 		{{{Manialink::Load()}}}
+		{{{TextLibExt::InjectTimeToText()}}}
 		
 		Void DisplayNoScorePlayer(Integer _PlayerIndex, Integer _PlayerState) {
 			if(_PlayerState == C_HOTSEAT_PLAYING) {
-				Label_State[_PlayerIndex].Value = "--:--.--";
+				Label_State[_PlayerIndex].Value = "--:--.---";
 				Label_Cp[_PlayerIndex].Visible = False;
 				Frame_Player[_PlayerIndex].Visible = True;
 				// Frame_Rank	[_PlayerIndex].Visible = True;
@@ -485,7 +487,7 @@ Void Private_CreateLayerDynaRanking(Integer _EnergyMax)
 								
 								//If the player is the first of his CP, then we display his time. Otherwise we compare with the best player time.
 								if(FirstAtCheckpoint) {
-									Label_State[IndexPlayer].Value = TL::TimeToText(CpTime, True);
+									Label_State[IndexPlayer].Value = TimeToText(CpTime);
 									Label_Cp[IndexPlayer].Visible = True;
 									
 									Frame_Player[IndexPlayer].Visible = True;
@@ -501,7 +503,7 @@ Void Private_CreateLayerDynaRanking(Integer _EnergyMax)
 										Label_Cp[IndexPlayer].Value = "CP#"^CpFinalIndex;
 									}
 								} else {
-									Label_State[IndexPlayer].Value = "+"^TL::TimeToText(CpTime - BestPlayerCpTime, True);
+									Label_State[IndexPlayer].Value = "+"^TimeToText(CpTime - BestPlayerCpTime);
 									Label_Cp[IndexPlayer].Visible = True;
 									Label_Cp[IndexPlayer].Value = "--";
 									
@@ -523,11 +525,11 @@ Void Private_CreateLayerDynaRanking(Integer _EnergyMax)
 						foreach(IndexPlayer => BestTime in Net_BestTimePlayers) {
 							if(BestTime != -1) {
 								if(IndexPlayer != Net_TableScore[0]) {
-									Label_State[IndexPlayer].Value = "+"^TL::TimeToText(BestTime - TimeBestPlayer, True);
+									Label_State[IndexPlayer].Value = "+"^TimeToText(BestTime - TimeBestPlayer);
 									Label_Cp[IndexPlayer].Visible = False;
 									Label_Cp[IndexPlayer].Value = "--";
 								} else {
-									Label_State[IndexPlayer].Value = TL::TimeToText(BestTime, True);
+									Label_State[IndexPlayer].Value = TimeToText(BestTime);
 									Label_Cp[IndexPlayer].Visible = False;
 									Label_Cp[IndexPlayer].Value = "Finish";
 								}
@@ -540,11 +542,11 @@ Void Private_CreateLayerDynaRanking(Integer _EnergyMax)
 						declare Integer CurPlayerTime = Net_PlayersLastCpTime[Net_CurPlayerIndex];
 						if(CurPlayerTime != -1) {
 							if(Net_CurPlayerIndex != Net_TableScore[0]) {
-								Label_State[Net_CurPlayerIndex].Value = "+"^TL::TimeToText(CurPlayerTime - TimeBestPlayer, True);
+								Label_State[Net_CurPlayerIndex].Value = "+"^TimeToText(CurPlayerTime - TimeBestPlayer);
 								Label_Cp[Net_CurPlayerIndex].Visible = False;
 								Label_Cp[Net_CurPlayerIndex].Value = "--";
 							} else {
-								Label_State[Net_CurPlayerIndex].Value = TL::TimeToText(CurPlayerTime, True);
+								Label_State[Net_CurPlayerIndex].Value = TimeToText(CurPlayerTime);
 								Label_Cp[Net_CurPlayerIndex].Visible = False;
 								Label_Cp[Net_CurPlayerIndex].Value = "Finish";
 							}
@@ -560,7 +562,7 @@ Void Private_CreateLayerDynaRanking(Integer _EnergyMax)
 				} else if(Net_TableScoreState == C_TABLESCORE_DEFAULT) {
 					foreach(Position => IndexPlayer in Net_TableScore) {
 						
-						Label_State[IndexPlayer].Value = "--:--.--";
+						Label_State[IndexPlayer].Value = "--:--.---";
 						if(Net_BestTimePlayers[IndexPlayer] != -1) {
 							Label_Cp[IndexPlayer].Visible = True;
 							Label_Cp[IndexPlayer].Value = "START";
@@ -571,11 +573,11 @@ Void Private_CreateLayerDynaRanking(Integer _EnergyMax)
 
 						// if(BestTime != -1) {
 							// if(IndexPlayer != Net_TableScore[0]) {
-								// Label_State[IndexPlayer].Value = "+"^TL::TimeToText(BestTime - TimeBestPlayer, True);
+								// Label_State[IndexPlayer].Value = "+"^TimeToText(BestTime - TimeBestPlayer);
 								// Label_Cp[IndexPlayer].Visible = True;
 								// Label_Cp[IndexPlayer].Value = "--";
 							// } else {
-								// Label_State[IndexPlayer].Value = TL::TimeToText(BestTime, True);
+								// Label_State[IndexPlayer].Value = TimeToText(BestTime);
 								// Label_Cp[IndexPlayer].Visible = True;
 								// Label_Cp[IndexPlayer].Value = "Finish";
 							// }

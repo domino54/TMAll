@@ -32,6 +32,7 @@
 "VersusReplay" => _("Versus Replay"),
 "HotSeat" => _("Hot Seat"),
 "SplitScreen" => _("Split Screen"),
+"MatchSettings" => _("Match settings"),
 "LocalNetHack" => _("Local Network"),
 "LocalNetwork" => _("Local Network")]
 
@@ -278,7 +279,7 @@ Void Loop() {
 			}
 			case "HotSeat" : {
 				MatchSettingsEditorController::Show("Modes/TrackMania/HotSeat", "MatchSettingsFromHotSeat", [
-				_("Next")],
+				_("Play")],
 				//L16N |Noun| Title of the section, browsing playlists of maps associated with a ruleset
 				_("Match settings"),
 				//L16N |Noun| In a popup, a button to create a new playlist of maps associated with a ruleset
@@ -300,6 +301,14 @@ Void Loop() {
 			case "LocalNetwork_SelectServer" : {
 				declare Integer ServerIndex = TextLib::ToInteger(Event.CustomEventData[0]);
 				LocalPlayAPI::FetchServerInfo(ServerIndex);
+			}
+			case "MatchSettings" : {
+				MatchSettingsEditorController::Show("MatchSettingsFromLocalPlay", [
+				_("Play")],
+				//L16N |Noun| Title of the section, browsing playlists of maps associated with a ruleset
+				_("Match settings"),
+				//L16N |Noun| In a popup, a button to create a new playlist of maps associated with a ruleset
+				[_("New match settings")]);
 			}
 			case "ListDisplayer_Password" : {
 				declare Text ServerPassword = Event.CustomEventData[0];
@@ -379,7 +388,7 @@ Void Loop() {
 			}
 			case "SplitScreenToMatchSettings" : {
 				G_SplitScreenLayoutType = GetSplitScreenLayoutType(Event.CustomEventData[0]);
-				MatchSettingsEditorController::Show("Modes/TrackMania/LocalRounds", "MatchSettingsFromSplitScreen", [_("Next")],
+				MatchSettingsEditorController::Show("MatchSettingsFromSplitScreen", [_("Next")],
 					//L16N |Noun| Title of the section, browsing playlists of maps associated with a ruleset
 					_("Match settings"),
 					//L16N |Noun| In a popup, a button to create a new playlist of maps associated with a ruleset
@@ -391,6 +400,13 @@ Void Loop() {
 				declare CMatchSettings MatchSettings <=> MatchSettingsEditorController::GetMatchSettings();
 				wait(TitleFlow.IsReady);
 				TitleFlow.PlaySplitScreen(G_SplitScreenLayoutType, MatchSettings);
+			}
+			case "MatchSettingsFromLocalPlay_Button_0" : {
+				LoadingScreen::SetLoadingType(0, "");
+				Pages::GotoHome("LocalPlayMain");
+				declare CMatchSettings MatchSettings <=> MatchSettingsEditorController::GetMatchSettings();
+				wait(TitleFlow.IsReady);
+				TitleFlow.PlayMatchSettings(MatchSettings, "", "");
 			}
 			case "ListDisplayer_SortElements" : {
 				LocalPlayAPI::ListDisplayer_SortElements(TextLib::ToInteger(Event.CustomEventData[0]));	

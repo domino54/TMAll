@@ -6,6 +6,7 @@
 #Include "Libs/Nadeo/MP4/Common/Colors.Script.txt"				as Colors
 #Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt"	as DesignManialinks
 #Include "Libs/Nadeo/Common/Core/LayerBuilder.Script.txt"	as LayerBuilder
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 #Const C_ImgBase		"file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
 
@@ -136,7 +137,7 @@ Text Build(Text _LayerName, Text[] _InfoLineLogos, Integer _ItemType, Boolean _C
 					{{{ThumbnailSizeY}}}" style="Bgs1" substyle="BgDialogBlur" opacity="0." bluramount="0.1"/>
 			</frame>
 		</frame>
-		<label id="Label_PersonalTime" halign="center" valign="center" pos="102 -5" size="20 4" textfont="{{{ChronoFont}}}" textcolor="{{{YellowIntense}}}" textsize="5" text="--:--.--"/>
+		<label id="Label_PersonalTime" halign="center" valign="center" pos="102 -5" size="20 4" textfont="{{{ChronoFont}}}" textcolor="{{{YellowIntense}}}" textsize="5" text="--:--.---"/>
 		<quad id="Quad_PersonalMedal" halign="center" valign="center" pos="71.5 -8" size="7 14" keepratio="fit" z-index="1"/>
 	</framemodel>
 
@@ -243,6 +244,7 @@ Text Build(Text _LayerName, Text[] _InfoLineLogos, Integer _ItemType, Boolean _C
 	""";
 	declare Text Declares	= """
 	// <script>
+{{{TextLibExt::InjectTimeToText()}}}
 {{{MediaCardDisplayer::FirstDeclares()}}}
 	declare Text	G_EventPrefix;
 	declare Text[]	G_ButtonNames;
@@ -397,9 +399,9 @@ Text Build(Text _LayerName, Text[] _InfoLineLogos, Integer _ItemType, Boolean _C
 				&& _Data["PersonalTime"] != "" && _Data["PersonalMedal"] != "") {
 				Label_PersonalTime.Opacity = 1.;
 				if (_Data["PersonalTime"] != "-1") {
-					Label_PersonalTime.SetText({{{_LayerName}}}_TextLib::TimeToText({{{_LayerName}}}_TextLib::ToInteger(_Data["PersonalTime"]), True));
+					Label_PersonalTime.SetText(TimeToText({{{_LayerName}}}_TextLib::ToInteger(_Data["PersonalTime"])));
 				} else {
-					Label_PersonalTime.SetText("--:--.--");
+					Label_PersonalTime.SetText("--:--.---");
 				}
 				declare Text MedalType = _Data["PersonalMedal"];
 				Quad_PersonalMedal.ChangeImageUrl(C_ImgContextMedals[MedalType]);

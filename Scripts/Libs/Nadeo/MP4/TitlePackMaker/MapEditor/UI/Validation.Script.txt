@@ -11,6 +11,8 @@
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_SoloMapInfosBase.Script.txt"		as Inject_SoloMapInfosBase
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_QuadsSelector.Script.txt"			as Inject_QuadsSelector
 #Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt"								as ManialinkNew
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
+
 // ---------------------------------- //
 // Constants
 // ---------------------------------- //
@@ -106,6 +108,8 @@ Text Private_GetValidationML2(Boolean _Validation) {
 		
 		{{{Inject_QuadsSelector::InjectInFunction()}}}
 
+		{{{TextLibExt::InjectTimeToText()}}}
+
 		Void SetTime(Integer _BestTime, Integer _YourTime) {
 
 			declare Label_Title      <=> (Page.MainFrame.GetFirstChild("Label_Title") as CMlLabel);
@@ -116,13 +120,13 @@ Text Private_GetValidationML2(Boolean _Validation) {
 			//Label_BestTime.RelativePosition.X = {{{-SizeXHeader+HeaderContentPosX+10.}}} + LabelWidth;
 			Label_BestTime.RelativePosition.X = {{{-HeaderContentPosX}}};
 			
-			if (_BestTime < 0) Label_BestTime.Value = "--:--.--";
-			else Label_BestTime.Value = TL::GetTranslatedText("Best time :") ^ TL::TimeToText(_BestTime, True);
+			if (_BestTime < 0) Label_BestTime.Value = "--:--.---";
+			else Label_BestTime.Value = TL::GetTranslatedText("Best time :") ^ " " ^ TimeToText(_BestTime);
 			
-			Label_YourTime.Value = TL::GetTranslatedText("Your time:") ^ "$ff0" ^ TL::TimeToText(_YourTime, True);
+			Label_YourTime.Value = TL::GetTranslatedText("Your time:") ^ " $ff0" ^ TimeToText(_YourTime);
 
 			if (_YourTime <= _BestTime || _BestTime <= 0) {
-				Label_BestTime.Value = TL::GetTranslatedText("Best time :") ^ TL::TimeToText(_YourTime, True);
+				Label_BestTime.Value = TL::GetTranslatedText("Best time :") ^ " " ^ TimeToText(_YourTime);
 				//Label_New.RelativePosition_V3.X = Label_YourTime.ComputeWidth(Label_BestTime.Value) + 1.;
 				Label_New.Visible = True;
 			} else {

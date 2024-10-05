@@ -3,6 +3,7 @@
 #Include "TextLib"											as TextLib
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" 		as Font
 #Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt"	as DesignManialinks
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 
 #Const C_ImgBase		 "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
@@ -79,7 +80,7 @@ Text Build(Boolean _SoloAllowEvaluate) {
 		<quad  pos="22.5 4."   halign="center" valign="center" size="36. 0.2" opacity="0.5" bgcolor="fff"/>
 		<label id="Label_Rank" halign="right"	valign="bottom" size="4.2" pos="07.5 0." z-index="1" textfont="{{{MainFont}}}" textsize="1.43" textcolor="fff" text="0"/>
 		<label id="Label_Name" halign="left"	valign="bottom" size="21" pos="08.5 0." z-index="1" textfont="{{{MainFont}}}" textsize="1.43" textcolor="fff" text="PlayerName"/>
-		<label id="Label_Time" halign="right"	valign="bottom" size="10" pos="40.5 0." z-index="1" textfont="{{{ChronoFont}}}" textsize="1.43" textcolor="{{{YellowIntense}}}" text="00:00.00"/>
+		<label id="Label_Time" halign="right"	valign="bottom" size="10" pos="40.5 0." z-index="1" textfont="{{{ChronoFont}}}" textsize="1.43" textcolor="{{{YellowIntense}}}" text="00:00.000"/>
 	</framemodel>
 
 	<framemodel id="MediaCardDisplayer_Card_ExtraData">
@@ -172,6 +173,7 @@ Text Build(Boolean _SoloAllowEvaluate) {
 
 {{{MediaCardDisplayer::Includes()}}}
 {{{MediaCardDisplayer::FirstDeclares()}}}
+{{{TextLibExt::InjectTimeToText("Solo_TextLib")}}}
 
 	declare Boolean					G_IsFirstBackground;
 	declare Integer					G_CurrentMap;
@@ -215,8 +217,7 @@ Text Build(Boolean _SoloAllowEvaluate) {
 			
 			if(Top_Time.existskey(I) && Top_Time[I] > 0)
 			{
-				declare Text TimeText = Solo_TextLib::TimeToText(Top_Time[I], True);
-				TimeText ^= Solo_TextLib::SubText(Top_Time[I]  ^"", (Solo_TextLib::Length(Top_Time[I]^"")-1), 1);
+				declare Text TimeText = TimeToText(Top_Time[I]);
 				Label_Time.SetText(TimeText);
 			} else {
 				Label_Time.SetText("-:--.---");

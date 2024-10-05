@@ -372,8 +372,7 @@ declare netwrite Integer[Integer] Net_TimesOnMap for UI;
 Net_TimesOnMap = G_TimesOnMap;
 if(G_BestTimePlayer != -1)
 {
-	BestTimePlayer = TL::TimeToText(G_BestTimePlayer, True);
-	BestTimePlayer ^= TL::SubText(G_BestTimePlayer  ^"", (TL::Length(G_BestTimePlayer^"")-1), 1);
+	BestTimePlayer = TextLibExt::TimeToText(G_BestTimePlayer);
 }
 
 +++SetRaceMode+++
@@ -596,7 +595,7 @@ if(G_GamePhase == C_GAMEPHASE_GAME)
 				declare UI <=> UIManager.GetUI(Players[G_ThePlayerId]);
 				declare netwrite Text Net_DefaultReplay for UI;
 
-				declare Text TimeToText = TL::TimeToText(G_LastTimePlayer, True);
+				declare Text TimeToText = TextLibExt::TimeToText(G_LastTimePlayer);
 				declare Text[] SplitMinute = TL::Split(":", TimeToText);
 				declare Integer Minute = TL::ToInteger(SplitMinute[0]);
 				declare Text PrefixMinute = "";
@@ -1505,8 +1504,7 @@ Void SetNewRecord(Text _Context) {
 	G_BestTimePlayer 			= Players[G_ThePlayerId].CurRace.Time;
 	declare UI <=> UIManager.GetUI(Players[G_ThePlayerId]);
 	declare netwrite Text BestTimePlayer for UI;
-	BestTimePlayer = TL::TimeToText(G_BestTimePlayer, True);
-	BestTimePlayer ^= TL::SubText(G_BestTimePlayer  ^"", (TL::Length(G_BestTimePlayer^"")-1), 1);
+	BestTimePlayer = TextLibExt::TimeToText(G_BestTimePlayer);
 
 	if(G_PlayerGhost != Null)
 	{
@@ -1586,8 +1584,7 @@ Void WaitForChallengeChoice() {
 Text GetVersusTimeText(Boolean _OpponentOrMedal, Integer _GhostIndex) {
 	declare Text VersusText = "";
 	
-	declare TimeText = TL::TimeToText(G_LastTimePlayer, True);
-	//TimeText ^= TL::SubText(G_LastTimePlayer  ^"", (TL::Length(G_LastTimePlayer^"")-1), 1);
+	declare TimeText = TextLibExt::TimeToText(G_LastTimePlayer);
 	declare Integer GhostIndex = _GhostIndex;
 	declare Text PlayerName    = Players[G_ThePlayerId].User.Name;
 	//if(GhostIndex <= -1) GhostIndex = 0;
@@ -1595,16 +1592,14 @@ Text GetVersusTimeText(Boolean _OpponentOrMedal, Integer _GhostIndex) {
 
 	if(G_OpponentPlayerGhost.count > 0 && G_OpponentPlayerGhost.existskey(GhostIndex)) {
 		if(PlayerName == G_OpponentPlayerGhost[GhostIndex].Nickname) PlayerName = TL::GetTranslatedText("Your Time");
-		declare OponentTimeText = TL::TimeToText(G_OpponentPlayerGhost[GhostIndex].Result.Time, True);
-		OponentTimeText ^= TL::SubText(G_OpponentPlayerGhost[GhostIndex].Result.Time  ^"", (TL::Length(G_OpponentPlayerGhost[GhostIndex].Result.Time^"")-1), 1);
+		declare OponentTimeText = TextLibExt::TimeToText(G_OpponentPlayerGhost[GhostIndex].Result.Time);
 		VersusText = TL::Compose("$<%1$>: %2 - $<%3$>: %4", PlayerName, TimeText, G_OpponentPlayerGhost[GhostIndex].Nickname, OponentTimeText);
 	}
 
 	/*
 	if(_OpponentOrMedal) {
 	} else {
-		declare OponentTimeText = TL::TimeToText(G_OpponentFinalTime, True);
-		OponentTimeText ^= TL::SubText(G_OpponentFinalTime  ^"", (TL::Length(G_OpponentFinalTime^"")-1), 1);
+		declare OponentTimeText = TextLibExt::TimeToText(G_OpponentFinalTime);
 		VersusText = TL::Compose("$<%1$>: %2 - $<%3$>: %4", Players[G_ThePlayerId].User.Name, TimeText, Medals::GetMedalName(G_OpponentChosen), OponentTimeText);
 	}
 	*/

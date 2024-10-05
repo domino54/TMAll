@@ -1,6 +1,7 @@
 #Include "Libs/Nadeo/Common/ManialinkTools/2DArrayCardBuilder.Script.txt"		as TwoDArrayCardBuilder
 #Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt"	as DesignManialinks
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" 		as Font
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 
 #Const C_RecordsMaxCountPerLine	9
@@ -52,8 +53,8 @@ Text Build()
 			<quad  id="Quad_Select"         halign="center" valign="center" z-index="-1" size="{{{C_RecordSize[0]}}} {{{C_RecordSize[1]}}}" opacity="0.0" bgcolor="fff"/>
 
 			<label id="Label_ChallengeUidDetails"	halign="left" valign="center" textfont="{{{SubFont}}}" pos="-64 0" z-index="2" textsize="2" textcolor="fff" opacity="1." text="A08 Russian Pursuit"/>
-			<label id="Label_RecordTime"			halign="center" valign="center" textfont="{{{MainFont}}}" size="15 {{{C_RecordSize[1]}}}" textsize="2" pos="8 0" text="00:00.0"/>
-			<label id="Label_RecordDetailsDiff"		halign="center" valign="center" textfont="{{{MainFont}}}" size="18 {{{C_RecordSize[1]}}}" textsize="2" pos="32 0" text="-00:00.0"/>
+			<label id="Label_RecordTime"			halign="center" valign="center" textfont="{{{MainFont}}}" size="15 {{{C_RecordSize[1]}}}" textsize="2" pos="8 0" text="00:00.000"/>
+			<label id="Label_RecordDetailsDiff"		halign="center" valign="center" textfont="{{{MainFont}}}" size="18 {{{C_RecordSize[1]}}}" textsize="2" pos="32 0" text="-00:00.000"/>
 			<label id="Label_ElapsedTime"			halign="center" valign="center" textfont="{{{SubFont}}}" textsize="2" size="22 {{{C_RecordSize[1]}}}" pos="58 0" text="2mn ago"/>
 		</frame>
 	</framemodel>
@@ -141,6 +142,7 @@ Text Build()
 {{{TwoDArrayCardBuilder::Includes()}}}
 {{{DesignManialinks::Includes()}}}
 {{{DesignManialinks::Declares()}}}
+{{{TextLibExt::InjectTimeToText("RecordCenterDetails_TextLib")}}}
 
 		declare Integer[]				G_PlayerLists; // 1 => C_LIST_OPPONENT, 0 => C_LIST_PLAYER
 		declare Integer[Integer]		G_PlayerIndexes; // C_LIST_OPPONENT => 1, C_LIST_PLAYER => 0
@@ -169,22 +171,7 @@ Text Build()
 
 	Text RecordTimeToText(Integer _RecordTime)
 	{
-		declare Text RecordTime = RecordCenterDetails_TextLib::ToText(_RecordTime);
-		// TODO : Mieux générer que ça pour les minutes
-		declare Text Result = "";
-		declare Integer DigitsNumber = RecordCenterDetails_TextLib::Length(RecordTime);
-		for (AppendZerosIndex, 0, 5 - DigitsNumber)
-		{
-			Result ^= "0";
-		}
-		Result = Result ^ RecordTime;
-
-		// Result est de la forme xxyyzz
-		// => On le met sous xx:yy.zz
-		Result = RecordCenterDetails_TextLib::SubString(Result, 0, 2) ^ ":" ^
-				RecordCenterDetails_TextLib::SubString(Result, 2, 2) ^ "." ^
-				RecordCenterDetails_TextLib::SubString(Result, 4, 2);
-		return Result;
+		return TimeToText(_RecordTime);
 	}
 
 	Void FakeRecords()
