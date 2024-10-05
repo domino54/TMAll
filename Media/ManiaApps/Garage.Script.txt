@@ -1,0 +1,215 @@
+#RequireContext CManiaApp
+// ^ Must be the first line for the browser to load the maniaapp.
+
+/**
+ * @name Garage.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
+
+#Const Version    "2024-10-05"
+#Const ScriptName "ManiaApps/Garage.Script.txt"
+
+#Setting S_ScriptEnvironment "development"
+
+#Include "TextLib" as TL
+#Include "ColorLib" as CL
+#Include "Libs/domino54/CustomSkins_Client.Script.txt" as CustomSkins_Client
+#Include "Libs/domino54/Garage/ServerComm.Script.txt" as GarageServer
+#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PMData
+#Include "ManiaApps/domino54/Common/MenuTabs.Script.txt" as MenuTabs
+#Include "ManiaApps/domino54/Common/SkinSelection.Script.txt" as SkinSelection
+#Include "ManiaApps/domino54/Common/TitleLogoControls.Script.txt" as TitleLogoControls
+#Include "ManiaApps/domino54/Garage/GarageBackground.Script.txt" as GarageBg
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Garage/"
+
+#Const C_GarageAssetId_ModelAliasName   "garage:name"
+#Const C_GarageAssetId_ModelTabIcon     "garage:tab_icon"
+#Const C_GarageAssetId_SkinCardIcon     "garage:card"
+#Const C_GarageDefaultModelTabIcon      "TabIcon_Default.webp"
+#Const C_GarageDefaultSkinCardIcon      "SkinCard_Default.webp"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct MenuTabs::K_MenuTab as K_MenuTab
+#Struct SkinSelection::K_SkinOption as K_SkinOption
+
+// ---------------------------------- //
+// Extends
+// ---------------------------------- //
+***AB_LogVersions***
+***
+Log::RegisterScript(ScriptName, Version);
+Log::RegisterScript(GarageBg::ScriptName, GarageBg::Version);
+Log::RegisterScript(CustomSkins_Client::ScriptName, CustomSkins_Client::Version);
+Log::RegisterScript(GarageServer::ScriptName, GarageServer::Version);
+Log::RegisterScript(MenuTabs::ScriptName, MenuTabs::Version);
+Log::RegisterScript(PMData::ScriptName, PMData::Version);
+Log::RegisterScript(SkinSelection::ScriptName, SkinSelection::Version);
+Log::RegisterScript(TitleLogoControls::ScriptName, TitleLogoControls::Version);
+***
+
+// ---------------------------------- //
+// Init Garage
+// ---------------------------------- //
+***AB_InitApp***
+***
+if (This is CManiaAppPlayground) {
+  // Mutes the car engine.
+  Audio.LimitSceneSoundVolumedB = -40.0;
+}
+else {
+  GarageBg::Load();
+}
+
+TitleLogoControls::Load();
+MenuTabs::Load();
+MenuTabs::SetColor(CL::HexToRgb("736AE6")); // TODO configurable
+SkinSelection::Load();
+PMData::Load();
+
+while (PMData::Loading()) {
+  AB_Yield();
+}
+
+declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
+
+UpdateCurrentModel(Persistent_Garage_LastPlayerModelId);
+
+declare PlayerModels = PMData::GetModelsList();
+declare K_MenuTab[] MenuTabsData;
+
+foreach (PlayerModel in PlayerModels) {
+  MenuTabsData.add(K_MenuTab {
+    Id = PlayerModel.Id,
+    Label = PMData::GetPlayerModelAsset(PlayerModel.Id, C_GarageAssetId_ModelAliasName, PlayerModel.Name),
+    IconUrl = PMData::GetPlayerModelAsset(PlayerModel.Id, C_GarageAssetId_ModelTabIcon, C_ImgBase^C_GarageDefaultModelTabIcon)
+  });
+}
+
+MenuTabs::SetHeaderText(GetHeaderText(PMData::ModelTypeCategory()));
+MenuTabs::SetTabsData(MenuTabsData, Persistent_Garage_LastPlayerModelId);
+***
+
+// ---------------------------------- //
+// Garage Loop
+// ---------------------------------- //
+***AB_AppLoop***
+***
+foreach (Event in PendingEvents) {
+  if (Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
+
+  switch (Event.CustomEventType) {
+    case MenuTabs::C_LibMenuTabs_EventType_ActiveTab: {
+      UpdateCurrentModel(Event.CustomEventData[0]);
+    }
+    case SkinSelection::C_LibSkinSelection_EventType_SetPreview: {
+      GarageServer::SetPreviewSkinId(LocalUser, Event.CustomEventData[0]);
+    }
+    case SkinSelection::C_LibSkinSelection_EventType_SetApplied: {
+      CustomSkins_Client::SetPlayerSkinId(Persistent_Garage_LastPlayerModelId, Event.CustomEventData[0]);
+    }
+  }
+
+  if (Event.CustomEventType == "GlobalB_Back") {
+    GarageClose();
+  }
+}
+***
+
+// ---------------------------------- //
+// Stop Garage
+// ---------------------------------- //
+***AB_EndApp***
+***
+GarageBg::Unload();
+TitleLogoControls::Unload();
+MenuTabs::Unload();
+SkinSelection::Unload();
+PMData::Unload();
+***
+
+// ---------------------------------- //
+// Functions
+// ---------------------------------- //
+
+K_SkinOption[] GetSkinOptions(Text _ModelId) {
+  declare ModelSkins = PMData::GetSkinsListByModelId(_ModelId);
+  declare K_SkinOption[Text] SkinOptionsToSort;
+
+  foreach (Skin in ModelSkins) {
+    declare Index = TL::ToUpperCase("""{{{Skin.IsCustom}}}|{{{Skin.SortIndex}}}|{{{Skin.Name}}}|{{{Skin.Id}}}""");
+
+    SkinOptionsToSort[Index] = K_SkinOption {
+      Id = Skin.Id,
+      Name = Skin.Name,
+      IconUrl = PMData::GetSkinAsset(Skin.Id, C_GarageAssetId_SkinCardIcon, C_ImgBase^C_GarageDefaultSkinCardIcon),
+      Rarity = Skin.Rarity
+    };
+  }
+
+  SkinOptionsToSort = SkinOptionsToSort.sortkey();
+
+  declare K_SkinOption[] Result;
+
+  foreach (SkinOption in SkinOptionsToSort) {
+    Result.add(SkinOption);
+  }
+
+  return Result;
+}
+
+Void UpdateCurrentModel(Text _ModelId) {
+  declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
+
+  Persistent_Garage_LastPlayerModelId = _ModelId;
+
+  declare SkinOptions = GetSkinOptions(_ModelId);
+  declare InitialPreviewSkinId = CustomSkins_Client::GetPlayerSkinId(_ModelId);
+
+  GarageServer::SetPreviewModelId(LocalUser, _ModelId);
+  GarageServer::SetPreviewSkinId(LocalUser, InitialPreviewSkinId);
+
+  SkinSelection::SetSkinsData(SkinOptions, InitialPreviewSkinId);
+}
+
+Text GetHeaderText(Text _Type) {
+  switch (_Type) {
+    case PMData::C_LibPlayerModels_ModelType_Character: {
+      return _("Characters");
+    }
+    case PMData::C_LibPlayerModels_ModelType_Vehicle: {
+      return _("Garage");
+    }
+  }
+
+  return _("Models");
+}
+
+Void SendModeEvent(Text _CustomEventName, Text[] _CustomEventData) {
+  declare CManiaApp _Context = This;
+  if (!(_Context is CManiaAppPlayground)) return;
+  (_Context as CManiaAppPlayground).SendCustomEvent(_CustomEventName, _CustomEventData);
+}
+
+Void GarageClose() {
+  declare CManiaApp _Context = This;
+
+  switchtype (_Context) {
+    case CManiaAppPlayground: {
+      SendModeEvent(GarageServer::C_LibGarage_EventType_StopServer, []);
+    }
+    case CManiaAppBrowser: {
+      (_Context as CManiaAppBrowser).BrowserQuit();
+    }
+  }
+}

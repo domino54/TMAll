@@ -1,0 +1,55 @@
+/**
+ * @name GarageBackground.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#Const Version      "2024-10-05"
+#Const ScriptName   "Libs/domino54/Garage/GarageBackground.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_BaseUrl "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Garage/"
+
+#Const C_LibAppBackground_ManialinkLayerId  "garage_background:main"
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Text Private_CreateManialinkLayer() {
+  return """
+<manialink version="3" name="{{{C_LibAppBackground_ManialinkLayerId}}}">
+<stylesheet>
+  <style class="Center" pos="0 0" halign="center" valign="center" />
+</stylesheet>
+
+<quad class="Center" size="{{{320 * 2}}} 180" image="{{{C_BaseUrl}}}GarageBackground.webp" z-index="-1" autoscale="0" />
+<quad class="Center" size="{{{320 * 8}}} 180" image="{{{C_BaseUrl}}}GarageBackgroundFar.webp" z-index="-2" autoscale="0" />
+<quad class="Center" size="320 180" bgcolor="0C0C0C" z-index="-3" />
+
+</manialink>
+  """;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetVisibility(Boolean _IsVisible) {
+  Layers::SetVisibility(C_LibAppBackground_ManialinkLayerId, _IsVisible);
+}
+
+Void Unload() {
+  Layers::Destroy(C_LibAppBackground_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_LibAppBackground_ManialinkLayerId, Private_CreateManialinkLayer());
+}

@@ -1,0 +1,64 @@
+/**
+ * @name CustomSkins_Client.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#Const Version      "2024-10-05"
+#Const ScriptName   "Libs/domino54/CustomSkins_Client.Script.txt"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetPlayerSkinId(Text _ModelId, Text _SkinId) {
+  if (_ModelId == "") {
+    return;
+  }
+
+  declare persistent Integer Persistent_LibCustomSkins_LastUpdate for LocalUser;
+  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for LocalUser;
+
+  if (_SkinId == "" && Persistent_LibCustomSkins_ModelIdToSkinId.existskey(_ModelId)) {
+    declare Removed = Persistent_LibCustomSkins_ModelIdToSkinId.removekey(_ModelId);
+    Persistent_LibCustomSkins_LastUpdate = Now;
+  }
+
+  else if (_SkinId != "") {
+    Persistent_LibCustomSkins_ModelIdToSkinId[_ModelId] = _SkinId;
+    Persistent_LibCustomSkins_LastUpdate = Now;
+  }
+}
+
+Void UnsetPlayerSkinId(Text _ModelId) {
+  SetPlayerSkinId(_ModelId, "");
+}
+
+Void SetPreferCustom(Text _ModelId, Boolean _PreferCustom) {
+  declare persistent Integer Persistent_LibCustomSkins_LastUpdate for LocalUser;
+  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for LocalUser;
+
+  if (_PreferCustom && !Persistent_LibCustomSkins_UseCustomOverArchetype.exists(_ModelId)) {
+    Persistent_LibCustomSkins_UseCustomOverArchetype.add(_ModelId);
+    Persistent_LibCustomSkins_LastUpdate = Now;
+  }
+
+  else if (!_PreferCustom && Persistent_LibCustomSkins_UseCustomOverArchetype.exists(_ModelId)) {
+    declare Removed = Persistent_LibCustomSkins_UseCustomOverArchetype.remove(_ModelId);
+    Persistent_LibCustomSkins_LastUpdate = Now;
+  }
+}
+
+Text GetPlayerSkinId(Text _ModelId) {
+  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for LocalUser;
+
+  if (!Persistent_LibCustomSkins_ModelIdToSkinId.existskey(_ModelId)) return "";
+
+  return Persistent_LibCustomSkins_ModelIdToSkinId[_ModelId];
+}
+
+Boolean GetPlayerUseCustomOverArchetype(Text _ModelId) {
+  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for LocalUser;
+
+  return Persistent_LibCustomSkins_UseCustomOverArchetype.exists(_ModelId);
+}
