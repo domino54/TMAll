@@ -1,10 +1,10 @@
 /**
  * @name CustomSkins_Players.Script.txt
  * @author domino54
- * @version 2024-07-17
+ * @version 2024-10-05
  */
 
-#Const Version      "2024-07-17"
+#Const Version      "2024-10-05"
 #Const ScriptName   "Libs/domino54/CustomSkins_Players.Script.txt"
 
 // ---------------------------------- //
@@ -17,14 +17,6 @@ declare Text[][Text] G_LibCustomSkins_PlayerUseCustomOverArchetype;
 // ---------------------------------- //
 // Functions
 // ---------------------------------- //
-
-Text GetScriptVersion() {
-  return Version;
-}
-
-Text GetScriptName() {
-  return ScriptName;
-}
 
 Void SetPlayerModelIdToSkinId(Text _Login, Text[Text] _ModelIdToSkinId) {
   G_LibCustomSkins_PlayerModelIdToSkinId[_Login] = _ModelIdToSkinId;

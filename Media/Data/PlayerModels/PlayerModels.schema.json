@@ -73,7 +73,11 @@
       "title": "A dictionary of optional assets tied to the object, used for display purposes. The keys and value types depend on their implementation inside the title pack. It can contain paths to images, custom displayed text or anything else.",
       "minProperties": 1,
       "additionalProperties": {
-        "type": "string"
+        "anyOf": [
+          { "type": "string" },
+          { "type": "number" },
+          { "type": "boolean" }
+        ]
       }
     },
     "archetype": {
@@ -100,13 +104,9 @@
       "title": "Path to the player model item file to load. The item must use the same base skin (or utilize the same UV maps) as the parent model.",
       "pattern": ".+\\.[Ii][Tt][Ee][Mm]\\.[Gg][Bb][Xx]$"
     },
-    "authors": {
-      "type": "array",
-      "title": "A list of the authors.",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
+    "author": {
+      "type": "string",
+      "title": "Author of a 3D model or 2D skin."
     },
     "rarity": {
       "type": "integer",
@@ -128,11 +128,6 @@
       "title": "Defines a usable player model. If the model only extends an archetype with minor gameplay tweaks, without changing the visuals, prefer using an overlay instead to preserve the custom skin selection.",
       "allOf": [{ "$ref": "#/$defs/base_object" }],
       "properties": {
-        "Type": {
-          "type": "string",
-          "title": "Model type characterization used for cosmetic differentiation between the terminology used by the skin selection and layout details in TrackMania vs ShootMania.",
-          "enum": ["Character", "Vehicle"]
-        },
         "Archetype": { "$ref": "#/$defs/archetype" },
         "ItemPath": { "$ref": "#/$defs/item_path" },
         "LoadAs": {
@@ -140,10 +135,16 @@
           "title": "Describes in what ways the model will be loaded. For `ItemAndArchetype`, applied model will depend on the player's Stadium unlock status and the model overlay to preserve player's regular skins.",
           "enum": ["Item", "ItemAndArchetype", "Archetype"]
         },
-        "SkinDirectory": {
-          "type": "string",
-          "title": "Defines a subdirectory of Models or Vehicles folder, from which the user's own skins will be fetched."
-        }
+        "SkinDirectories": {
+          "type": "array",
+          "title": "Defines a subdirectory of Models or Vehicles folder, from which the user's own skins will be fetched.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "Author": { "$ref": "#/$defs/author" }
       },
       "unevaluatedProperties": false
     },
@@ -177,7 +178,7 @@
           "type": "string",
           "title": "Path to the skin file to load. Its diffuse texture must use the same UV maps as the base skin in the parent model."
         },
-        "Authors": { "$ref": "#/$defs/authors" },
+        "Author": { "$ref": "#/$defs/author" },
         "Rarity": { "$ref": "#/$defs/rarity" },
         "IsHidden": {
           "type": "boolean",

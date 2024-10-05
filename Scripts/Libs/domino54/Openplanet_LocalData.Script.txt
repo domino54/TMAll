@@ -1,10 +1,10 @@
 /**
  * @name Openplanet_LocalData.Script.txt
  * @author domino54
- * @version 2024-07-19
+ * @version 2024-10-05
  */
 
-#Const Version      "2024-07-19"
+#Const Version      "2024-10-05"
 #Const ScriptName   "Libs/domino54/Openplanet_LocalData.Script.txt"
 
 #Include "Libs/domino54/Openplanet_Players.Script.txt" as OPPlayers
@@ -12,14 +12,6 @@
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
-
-Text GetScriptVersion() {
-  return Version;
-}
-
-Text GetScriptName() {
-  return ScriptName;
-}
 
 Void Load() {
   declare OpenplanetInfo = OPPlayers::TestForOpenplanet(System.ExtraTool_Info);

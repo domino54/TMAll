@@ -6,11 +6,10 @@
   "Models": [
     {
       "Id": "trackmania:canyoncar",
-      "Type": "Vehicle",
       "Name": "Canyon Car",
       "Archetype": "CanyonCar",
       "ItemPath": "Vehicles/CanyonCar.Item.Gbx",
-      "SkinDirectory": "CanyonCar",
+      "SkinDirectories": ["CanyonCar"],
       "LoadAs": "ItemAndArchetype",
       "Assets": {
         "garage:name": "Canyon",
@@ -19,11 +18,10 @@
     },
     {
       "Id": "trackmania:stadiumcar",
-      "Type": "Vehicle",
       "Name": "Stadium Car",
       "Archetype": "StadiumCar",
       "ItemPath": "Vehicles/StadiumCar.Item.Gbx",
-      "SkinDirectory": "StadiumCar",
+      "SkinDirectories": ["StadiumCar"],
       "LoadAs": "ItemAndArchetype",
       "Assets": {
         "garage:name": "Stadium",
@@ -32,11 +30,10 @@
     },
     {
       "Id": "trackmania:valleycar",
-      "Type": "Vehicle",
       "Name": "Valley Car",
       "Archetype": "ValleyCar",
       "ItemPath": "Vehicles/ValleyCar.Item.Gbx",
-      "SkinDirectory": "ValleyCar",
+      "SkinDirectories": ["ValleyCar"],
       "LoadAs": "ItemAndArchetype",
       "Assets": {
         "garage:name": "Valley",
@@ -45,11 +42,10 @@
     },
     {
       "Id": "trackmania:lagooncar",
-      "Type": "Vehicle",
       "Name": "Lagoon Car",
       "Archetype": "LagoonCar",
       "ItemPath": "Vehicles/LagoonCar.Item.Gbx",
-      "SkinDirectory": "LagoonCar",
+      "SkinDirectories": ["LagoonCar"],
       "LoadAs": "ItemAndArchetype",
       "Assets": {
         "garage:name": "Lagoon",
@@ -58,11 +54,10 @@
     },
     {
       "Id": "trackmania:islandcar",
-      "Type": "Vehicle",
       "Name": "Island Car",
       "Archetype": "IslandCar",
       "ItemPath": "Vehicles/IslandCar.Item.Gbx",
-      "SkinDirectory": "SportCar",
+      "SkinDirectories": ["CarCommon\\SportCar", "CarCommon\\IslandCar"],
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Island",
@@ -71,11 +66,10 @@
     },
     {
       "Id": "trackmania:baycar",
-      "Type": "Vehicle",
       "Name": "Bay Car",
       "Archetype": "BayCar",
       "ItemPath": "Vehicles/BayCar.Item.Gbx",
-      "SkinDirectory": "BayCar",
+      "SkinDirectories": ["CarCommon\\BayCar"],
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Bay",
@@ -84,11 +78,10 @@
     },
     {
       "Id": "trackmania:coastcar",
-      "Type": "Vehicle",
       "Name": "Coast Car",
       "Archetype": "CoastCar",
       "ItemPath": "Vehicles/CoastCar.Item.Gbx",
-      "SkinDirectory": "CoastCar",
+      "SkinDirectories": ["CarCommon\\CoastCar"],
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Coast",
@@ -97,11 +90,14 @@
     },
     {
       "Id": "trackmania:desertcar",
-      "Type": "Vehicle",
       "Name": "Desert Car",
       "Archetype": "DesertCar",
       "ItemPath": "Vehicles/DesertCar.Item.Gbx",
-      "SkinDirectory": "AmericanCar",
+      "SkinDirectories": [
+        "CarCommon\\AmericanCar",
+        "CarCommon\\American",
+        "CarCommon\\DesertCar"
+      ],
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Desert",
@@ -110,24 +106,23 @@
     },
     {
       "Id": "trackmania:snowcar",
-      "Type": "Vehicle",
       "Name": "Snow Car",
       "Archetype": "SnowCar",
       "ItemPath": "Vehicles/SnowCar.Item.Gbx",
-      "SkinDirectory": "SnowCar",
+      "SkinDirectories": ["CarCommon\\SnowCar"],
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Snow",
+        "garage:card": "./Card/Card_SnowCars.webp",
         "garage:tab_icon": "./TabIcon/TabIcon_SnowCar.webp"
       }
     },
     {
       "Id": "trackmania:rallycar",
-      "Type": "Vehicle",
       "Name": "Rally Car",
       "Archetype": "RallyCar",
       "ItemPath": "Vehicles/RallyCar.Item.Gbx",
-      "SkinDirectory": "RallyCar",
+      "SkinDirectories": ["CarCommon\\RallyCar", "CarCommon\\Rally"],
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Rally",
@@ -136,11 +131,10 @@
     },
     {
       "Id": "trackmania:trafficcar",
-      "Type": "Vehicle",
       "Name": "Traffic Car",
       "Archetype": "TrafficCar",
       "ItemPath": "Vehicles/TrafficCar.Item.Gbx",
-      "SkinDirectory": "TrafficCar",
+      "SkinDirectories": ["CarCommon\\TrafficCar"],
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Traffic",

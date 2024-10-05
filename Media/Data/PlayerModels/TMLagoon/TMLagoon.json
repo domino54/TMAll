@@ -10,7 +10,7 @@
       "Name": "Aloha",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Aloha.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:coral",
@@ -18,7 +18,7 @@
       "Name": "Coral",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Coral.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:farewell",
@@ -26,7 +26,7 @@
       "Name": "Farewell",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Farewell.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:jellyfish",
@@ -34,7 +34,7 @@
       "Name": "Jellyfish",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/jellyfish.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:ocean",
@@ -42,7 +42,7 @@
       "Name": "Ocean",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Ocean.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:orchid",
@@ -50,7 +50,7 @@
       "Name": "Orchid",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Orchid.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:r3d",
@@ -58,7 +58,7 @@
       "Name": "R3D",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/R3D.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:ray",
@@ -66,7 +66,7 @@
       "Name": "Ray",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Ray.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:samurai",
@@ -74,7 +74,7 @@
       "Name": "Samurai",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Samurai.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:shark",
@@ -82,7 +82,7 @@
       "Name": "Shark",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Shark.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:thunder",
@@ -90,7 +90,7 @@
       "Name": "Thunder",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Thunder.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmlagoon:wave",
@@ -98,7 +98,7 @@
       "Name": "Wave",
       "Rarity": 2,
       "SkinPath": "Skins/Models/LagoonCar/Wave.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     }
   ]
 }

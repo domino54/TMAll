@@ -1,10 +1,10 @@
 /**
  * @name GameplayCoefs_Server.Script.txt
  * @author domino54
- * @version 2024-08-01
+ * @version 2024-10-05
  */
 
-#Const Version      "2024-08-01"
+#Const Version      "2024-10-05"
 #Const ScriptName   "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt"
 
 #Include "MathLib" as ML
@@ -112,14 +112,6 @@ Void Private_CompatKEKL(CMap _Map) {
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
-
-Text GetScriptVersion() {
-  return Version;
-}
-
-Text GetScriptName() {
-  return ScriptName;
-}
 
 Void Unload() {
   Private_RestoreDefaultBaseCoefs();

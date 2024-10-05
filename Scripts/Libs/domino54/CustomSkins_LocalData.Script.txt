@@ -1,10 +1,10 @@
 /**
  * @name CustomSkins_LocalData.Script.txt
  * @author domino54
- * @version 2024-07-17
+ * @version 2024-10-05
  */
 
-#Const Version      "2024-07-17"
+#Const Version      "2024-10-05"
 #Const ScriptName   "Libs/domino54/CustomSkins_LocalData.Script.txt"
 
 #Include "Libs/domino54/CustomSkins_Players.Script.txt" as CSPlayers
@@ -26,14 +26,6 @@ Void Private_ReadPlayerSkinSettings(CUser _User) {
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
-
-Text GetScriptVersion() {
-  return Version;
-}
-
-Text GetScriptName() {
-  return ScriptName;
-}
 
 Void Unload() {
   foreach (User in Users) {

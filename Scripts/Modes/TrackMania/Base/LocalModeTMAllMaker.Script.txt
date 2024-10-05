@@ -25,14 +25,14 @@
 ***LogVersion***
 ***
 MB_LogVersion(MB_TMAll_ScriptName, MB_TMAll_Version);
-MB_LogVersion(Env::GetScriptName(), Env::GetScriptVersion());
-MB_LogVersion(Log::GetScriptName(), Log::GetScriptVersion());
-MB_LogVersion(CustomSkins_LocalData::GetScriptName(), CustomSkins_LocalData::GetScriptVersion());
-MB_LogVersion(GameplayCoefs_Server::GetScriptName(), GameplayCoefs_Server::GetScriptVersion());
-MB_LogVersion(HttpClient::GetScriptName(), HttpClient::GetScriptVersion());
-MB_LogVersion(Openplanet_LocalData::GetScriptName(), Openplanet_LocalData::GetScriptVersion());
-MB_LogVersion(PlayerModels_Data::GetScriptName(), PlayerModels_Data::GetScriptVersion());
-MB_LogVersion(PlayerModels_Server::GetScriptName(), PlayerModels_Server::GetScriptVersion());
+MB_LogVersion(Env::ScriptName, Env::Version);
+MB_LogVersion(Log::ScriptName, Log::Version);
+MB_LogVersion(CustomSkins_LocalData::ScriptName, CustomSkins_LocalData::Version);
+MB_LogVersion(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
+MB_LogVersion(HttpClient::ScriptName, HttpClient::Version);
+MB_LogVersion(Openplanet_LocalData::ScriptName, Openplanet_LocalData::Version);
+MB_LogVersion(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
+MB_LogVersion(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
 MB_LogVersion(TextLibExt::ScriptName, TextLibExt::Version);
 ***
 
@@ -50,7 +50,6 @@ CustomSkins_LocalData::Load();
 CustomSkins_LocalData::Yield();
 Openplanet_LocalData::Load();
 GameplayCoefs_Server::Load();
-PlayerModels_Server::StrictCompatibilityMode();
 PlayerModels_Data::Load();
 
 while (PlayerModels_Data::Loading()) {
@@ -64,9 +63,14 @@ while (PlayerModels_Data::Loading()) {
 ***BeforeLoadMap***
 ***
 ItemList_Begin();
-// Ensure that we only load the skins that are absolutely necessary.
-PlayerModels_Server::Load(This, [], PlayerModels_Server::GetLocalPlayerSkinIds());
+
+PlayerModels_Server::Load(This, PlayerModels_Server::K_Options {
+  // Ensure that we only load the skins that are absolutely necessary.
+  SkinIdAllowlist = PlayerModels_Server::GetLocalPlayerSkinIds()
+});
+
 +++ItemList+++
+
 ItemList_End();
 ***
 
@@ -114,7 +118,7 @@ Env::Unload();
   +++TMAll_BeforeAutoGameplay+++
 
   GameplayCoefs_Server::AssignPlayerCoefs(_Player);
-  PlayerModels_Server::AssignPlayerModel(_Player);
+  PlayerModels_Server::AssignModel(_Player);
 
   +++TMAll_AfterAutoGameplay+++
 }
