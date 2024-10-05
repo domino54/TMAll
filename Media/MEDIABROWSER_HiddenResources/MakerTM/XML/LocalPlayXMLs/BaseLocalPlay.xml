@@ -3,5 +3,7 @@
 	<asset id="SingleMap"		isdefault="yes"	titlename="Single Map"		makername="Single Map"		isvisibleinmaker="yes"	isactivated="yes"/>
 	<asset id="VersusReplay"	isdefault="yes"	titlename="Versus Replay"	makername="Versus Replay"	isvisibleinmaker="yes"	isactivated="yes"/>
 	<asset id="HotSeat"			isdefault="yes"	titlename="Hotseat"			makername="Hotseat"			isvisibleinmaker="yes"	isactivated="yes"/>
+	<asset id="SplitScreen"		isdefault="yes"	titlename="Split Screen"			makername="Split Screen"			isvisibleinmaker="yes"	isactivated="no"/>
+	<asset id="MatchSettings"	isdefault="yes"	titlename="Match Settings"	makername="Match Settings"	isvisibleinmaker="yes"	isactivated="yes"/>
 	<asset id="LocalNetwork"	isdefault="yes"	titlename="Local Network"	makername="Local Network"	isvisibleinmaker="yes"	isactivated="yes"/>
 </localmodes>

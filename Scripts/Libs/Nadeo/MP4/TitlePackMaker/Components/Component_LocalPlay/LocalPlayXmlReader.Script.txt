@@ -10,6 +10,7 @@
 "VersusReplay" => _("Versus Replay"),
 "HotSeat" => _("Hot Seat"),
 "SplitScreen" => _("Split Screen"),
+"MatchSettings" => _("Match settings"),
 "LocalNetHack" => _("Local Network"),
 "LocalNetwork" => _("Local Network")]
 
