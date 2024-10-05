@@ -7,6 +7,7 @@
 
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/ManiaCredits/ManiaCreditsController.Script.txt"			as ManiaCreditsController
 #Include "Libs/Nadeo/MP4/Common/Components/DialogBox/DialogBoxController.Script.txt"					as DialogBoxController
+#Include "Libs/Nadeo/MP4/Common/LoadingScreen.Script.txt"												as LoadingScreen
 #Include "Libs/Nadeo/MP4/TPLagoon/TokenManager.Script.txt"												as TokenManager
 #Include "Libs/Nadeo/MP4/TPLagoon/XMLController.Script.txt"												as XMLController
 
@@ -118,6 +119,24 @@ Void UpdateRanking()
 	Ranking_RemainingPoints["Multiplayer"]	= TextLib::Compose(_("|You need xxx Ladder Points to be promoted|%1 LP left"), TextLib::ToText(MultiplayerAPI::Get_PointsToNextPromotion()));
 	Ranking_PromotionMedal					= SoloAPI::Get_PromotionMedal();
 	LayerCustomEvent(LayerToSend, "RankingSent", []);
+}
+
+Void LaunchGarage()
+{
+  declare Text GarageMapName = XMLController::GetGarageMapPath();
+	// declare Text GarageMapName = "TMAllMaker/Garage/TMAllMaker_Garage.Map.Gbx";
+
+	if (GarageMapName == "") {
+		OpenLink("file://Media/ManiaApps/Garage.Script.txt", CManiaApp::ELinkType::ManialinkBrowser);
+		return;
+	}
+
+	declare Text Mode = "Modes/TrackMania/ModeGarage";
+
+	wait(TitleFlow.IsReady);
+
+	LoadingScreen::SetLoadingType(0, "");
+	TitleFlow.PlayMap(GarageMapName, Mode, "");
 }
 
 //XML Parse functions
@@ -247,6 +266,9 @@ Void Loop() {
 				GlobalButtonsController::UpdateHome(True);
 				GlobalButtonsController::UpdateBack(True);
 				GlobalButtonsController::UpdateSection(Sections_Name[SectionId]);
+			}
+			case "MainMenu_LaunchGarage": {
+				LaunchGarage();
 			}
 			case "MainMenu_ShowProfile": {
 				//SectionsManager::SetActualSection("Profil");

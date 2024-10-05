@@ -37,6 +37,7 @@ Text Build() {
 	declare Real	MarginY_New              = 0.4;
 	declare Real	MarginX_New              = 4.0;
 
+	declare Text    IMGLogo_Garage           = C_ImgBase ^ "Logo_Garage.dds";
 	declare Text    IMGLogo_Profil           = C_ImgBase ^ "Logo_Profil.dds";
 
 	//declare Text    IMGEchelonBase           = C_ImgBase ^ "Echelons/Echelon_";
@@ -54,6 +55,7 @@ Text Build() {
 
 	declare Text MainFont = Font::GetFontName("Main");
 	declare Text SubFont  = Font::GetFontName("SubTitle");
+	DesignManialinks::AddAction("Button_Action1");
 	DesignManialinks::AddAction("Button_Action2");
 
 	declare Text MLText = """
@@ -85,6 +87,25 @@ Text Build() {
 				<quad id="Quad_HeaderImg" halign="center" valign="center" size="23.0 23.0"  pos="-35 40" z-index="3" opacity="1.0" bgcolor="009" style="Icons128x128_1" substyle="Vehicles"/>
 				<label id="Label_HeaderTitle"  halign="left" valign="center" style="TextTitle1" pos="-19 42" z-index="2" textsize="13" textcolor="fff" opacity="1."/>
 				<label id="Label_HeaderSubTitle"  halign="left" valign="center" style="TextTitle1" pos="-24 36" z-index="2" textsize="2" textcolor="fff" opacity="0."/>
+			</frame>
+
+			<frame hidden="1">
+			<frame id="Frame_Garage" pos="113 79.0" z-index="1">
+				<quad id="Button_Action1" halign="center" valign="center" pos="-8.2 0" size="{{{C_SizeProfil.Y/0.9}}} {{{C_SizeProfil.Y/0.9}}}" z-index="1"  opacity="1.0" image="{{{IMGLogo_Garage}}}" hidden="0"/>
+				<quad id="Quad_LogoGarage" halign="center" valign="center" pos="-8.2 0" size="{{{C_SizeProfil.Y/1.4}}} {{{C_SizeProfil.Y/1.4}}}" z-index="1"  opacity="1.0" image="{{{IMGLogo_Garage}}}" hidden="0"/>
+				<quad id="Quad_Garage"   halign="center" valign="center" size="{{{C_SizeProfil.X}}} {{{C_SizeProfil.Y}}}" opacity="0." bgcolor="000" scriptevents="1"/>
+				<label id="Label_Garage" halign="center" valign="center" pos="2.2 0" textfont="{{{SubFont}}}" z-index="1" textsize="2" textcolor="fff" textprefix="$t" textemboss="1" text="{{{_("Garage")}}}"/>
+				<frame id="Frame_MouseOver" z-index="2" hidden="1">
+					<quad id="Quad_Up"		halign="center"	valign="top"	size="{{{C_SizeProfil.X}}} 0.4" pos="0 {{{C_SizeProfil.Y/2.}}}"		opacity="0.8" bgcolor="fff"/>
+					<quad id="Quad_Down"	halign="center"	valign="bottom"	size="{{{C_SizeProfil.X}}} 0.4" pos="0 -{{{C_SizeProfil.Y/2.}}}"	opacity="0.8" bgcolor="fff"/>
+					<quad id="Quad_Left"	halign="left"	valign="center"	size="0.4 {{{C_SizeProfil.Y}}}" pos="-{{{C_SizeProfil.X/2.}}} 0"		opacity="0.8" bgcolor="fff"/>
+					<quad id="Quad_Right"	halign="right"	valign="center"	size="0.4 {{{C_SizeProfil.Y}}}" pos="{{{C_SizeProfil.X/2.}}} 0"		opacity="0.8" bgcolor="fff"/>
+				</frame>
+				<frame pos="{{{C_SizeProfil.X/2.}}} {{{-C_SizeProfil.Y/2.-1.8}}}">
+					<quad halign="right" valign="top"    size="{{{C_SizeProfil.X}}} 0.2" opacity="1." bgcolor="fff"/>
+					<quad halign="right" valign="bottom" size="3  0.2" pos="0 0"              opacity="1." bgcolor="fff"/>
+				</frame>
+			</frame>
 			</frame>
 
 			<frame id="Frame_Profile" pos="143 79.0" z-index="1">
@@ -495,6 +516,7 @@ Text Build() {
 
 		Void LaunchTransition(Boolean _IsShow)
 		{
+			Page.GetFirstChild("Frame_Garage").Visible = _IsShow;
 			Page.GetFirstChild("Frame_Profile").Visible = _IsShow;
 			declare Real TargetPosX;
 			declare Real TargetPosNewX;
@@ -617,6 +639,7 @@ Text Build() {
 
 		Void ForceShow()
 		{
+			Page.GetFirstChild("Frame_Garage").Visible = True;
 			Page.GetFirstChild("Frame_Profile").Visible = True;
 			declare Real TargetPosX    = 0.;
 			declare Real TargetPosNewX = 0.;
@@ -867,6 +890,9 @@ Text Build() {
 										LightNews(G_NewsFocus);
 									}
 								}
+								case CMlEvent::EMenuNavAction::Action1 : {
+									SendCustomEvent("MainMenu_LaunchGarage", Text[]);
+								}
 								case CMlEvent::EMenuNavAction::Action2 : {
 									SendCustomEvent("MainMenu_ShowProfile", Text[]);
 								}
@@ -886,6 +912,11 @@ Text Build() {
 							{
 								declare Integer QuadId for Event.Control;
 								SelectNews(QuadId);
+							}
+							else if (Event.ControlId == "Quad_Garage")
+							{
+								Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+								SendCustomEvent("MainMenu_LaunchGarage", Text[]);
 							}
 							else if (Event.ControlId == "Quad_Profile")
 							{
@@ -953,6 +984,11 @@ Text Build() {
 								G_NewsFocus = QuadId;
 								LightNews(QuadId);
 							}
+							else if (Event.ControlId == "Quad_Garage")
+							{
+								declare CMlLabel Label_Garage <=> (Event.Control.Parent.GetFirstChild("Label_Garage")	as CMlLabel);
+								Label_Garage.Scale = 1.1;
+							}
 							else if (Event.ControlId == "Quad_Profile")
 							{
 								declare CMlLabel Label_Profile <=> (Event.Control.Parent.GetFirstChild("Label_Profile")	as CMlLabel);
@@ -978,6 +1014,11 @@ Text Build() {
 								UnLightNews(QuadId);
 								//declare Quad <=> (Event.Control as CMlQuad);
 								//Quad.Opacity = 0.6;
+							}
+							else if (Event.ControlId == "Quad_Garage")
+							{
+								declare CMlLabel Label_Garage <=> (Event.Control.Parent.GetFirstChild("Label_Garage")	as CMlLabel);
+								Label_Garage.Scale = 1.0;
 							}
 							else if (Event.ControlId == "Quad_Profile")
 							{
