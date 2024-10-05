@@ -1,0 +1,274 @@
+/**
+ * @name ModeGarage.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#RequireContext CTmMode
+
+#Const MB_Version     "2024-10-05"
+#Const MB_ScriptName  "Modes/TrackMania/ModeGarage.Script.txt"
+
+#Include "Libs/Nadeo/Env.Script.txt" as Env
+#Include "Libs/Nadeo/Log.Script.txt" as Log
+#Include "Libs/domino54/Garage/ServerComm.Script.txt" as Garage
+#Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
+#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
+#Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+
+// ---------------------------------- //
+// Settings
+// ---------------------------------- //
+#Setting S_ScriptEnvironment "development" as "<hidden>" ///< Environment in which the script runs
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+#Const C_ManiaAppUrl "file://Media/ManiaApps/Garage.Script.txt"
+#Const C_RespawnCooldown  100 ///< Cooldown prevents the model not updating fast enough.
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+declare Boolean MB_Private_RunServer;
+
+// ---------------------------------- //
+// Log versions
+// ---------------------------------- //
+***MB_LogVersions***
+***
+Log::RegisterScript(MB_ScriptName, MB_Version);
+Log::RegisterScript(Env::ScriptName, Env::Version);
+Log::RegisterScript(Garage::ScriptName, Garage::Version);
+Log::RegisterScript(HttpClient::ScriptName, HttpClient::Version);
+Log::RegisterScript(Log::ScriptName, Log::Version);
+Log::RegisterScript(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
+Log::RegisterScript(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
+***
+
+// ---------------------------------- //
+// Load libraries
+// ---------------------------------- //
+***MB_LoadLibraries***
+***
+// Must be loaded before other libraries
+Env::Load();
+Env::Set(S_ScriptEnvironment);
+Log::Load();
+HttpClient::Load();
+PlayerModels_Data::Load();
+
+while (PlayerModels_Data::Loading()) {
+  MB_Yield();
+}
+***
+
+// ---------------------------------- //
+// Load items
+// ---------------------------------- //
+***MB_ItemList***
+***
+PlayerModels_Server::Load(This, PlayerModels_Server::K_Options {
+  LoadingMode = PlayerModels_Server::C_LoadingMode_LoadEverything,
+  SkipOverlays = True
+});
+***
+
+// ---------------------------------- //
+// Init server
+// ---------------------------------- //
+***MB_InitServer***
+***
+ClientManiaAppUrl = C_ManiaAppUrl;
+MB_SetDefaultUIVisibility(False);
+UIManager.UIAll.ForceSpectator = True;
+UIManager.UIAll.UISequence = CUIConfig::EUISequence::None;
+HideOpponents = True;
+Replay_AutoStart = False;
+***
+
+// ---------------------------------- //
+// Init map
+// ---------------------------------- //
+***MB_InitMap***
+***
+// Has to be called in InitMap, because reflections otherwise don't work.
+UIManager.UIAll.UISequence = CUIConfig::EUISequence::CustomMTClip_WithUIInteraction;
+UIManager.UIAll.UISequence_CustomMTClip = "HLoff_C_RFX";
+UIManager.UIAll.UISequence_CustomMTRefTime = Now - 2500;
+
+foreach (Player in Players) {
+  declare Text PrevPreviewModelId for Player;
+  declare Text PrevPreviewSkinId for Player;
+
+  PrevPreviewModelId = "";
+  PrevPreviewSkinId = "";
+}
+***
+
+// ---------------------------------- //
+// Yield
+// ---------------------------------- //
+***MB_Yield***
+***
+HttpClient::Yield();
+
+foreach (Event in UIManager.PendingEvents) {
+  if (Event.Type != CUIConfigEvent::EType::OnLayerCustomEvent) continue;
+
+  if (Event.CustomEventType == Garage::C_LibGarage_EventType_StopServer) {
+    MB_Private_RunServer = False;
+  }
+}
+***
+
+// ---------------------------------- //
+// Play loop
+// ---------------------------------- //
+***MB_PlayLoop***
+***
+foreach (Event in PendingEvents) {
+  // Ignore all game events.
+  PassOn(Event);
+}
+
+foreach (Player in Players) {
+  // This will be changed by the UI layer.
+  declare PreviewModelId = Garage::GetPreviewModelId(Player.User);
+  declare PreviewSkinId = Garage::GetPreviewSkinId(Player.User);
+
+  declare Text PrevPreviewModelId for Player;
+  declare Text PrevPreviewSkinId for Player;
+  declare Integer LastDespawnTime for Player;
+
+  // Why like this instead of events? Because it's more reliable.
+  if ((PrevPreviewModelId != PreviewModelId || PrevPreviewSkinId != PreviewSkinId) && Now >= LastDespawnTime + C_RespawnCooldown) {
+    PrevPreviewModelId = PreviewModelId;
+    PrevPreviewSkinId = PreviewSkinId;
+    LastDespawnTime = Now;
+
+    UnspawnPlayer(Player);
+  }
+
+  // Spawn players with the target model.
+  if (!Player.IsSpawned) {
+    declare PreviewModelId = Garage::GetPreviewModelId(Player.User);
+    declare PreviewSkinId = Garage::GetPreviewSkinId(Player.User);
+
+    PlayerModels_Server::AssignModel(Player, PreviewModelId, PreviewSkinId, True);
+
+    SpawnPlayer(Player, 0, Now);
+  }
+}
+***
+
+// ---------------------------------- //
+// Unload libraries
+// ---------------------------------- //
+***MB_UnloadLibraries***
+***
+PlayerModels_Server::Unload(This);
+PlayerModels_Data::Unload();
+HttpClient::Unload();
+Log::Unload();
+Env::Unload();
+***
+
+// ---------------------------------- //
+// Functions
+// ---------------------------------- //
+
+Void MB_SetDefaultUIVisibility(Boolean _Visible) {
+  UIManager.UIAll.OverlayHideNotices = !_Visible;
+  UIManager.UIAll.OverlayHideMapInfo = !_Visible;
+  UIManager.UIAll.OverlayHideOpponentsInfo = !_Visible;
+  UIManager.UIAll.OverlayHideChat = !_Visible;
+  UIManager.UIAll.OverlayHideCheckPointList = !_Visible;
+  UIManager.UIAll.OverlayHideRoundScores = !_Visible;
+  UIManager.UIAll.OverlayHideCountdown = !_Visible;
+  UIManager.UIAll.OverlayHideCrosshair = !_Visible;
+  UIManager.UIAll.OverlayHideGauges = !_Visible;
+  UIManager.UIAll.OverlayHideConsumables = !_Visible;
+  UIManager.UIAll.OverlayHide321Go = !_Visible;
+  UIManager.UIAll.OverlayHideBackground = !_Visible;
+  UIManager.UIAll.OverlayHideChrono = !_Visible;
+  UIManager.UIAll.OverlayHideSpeedAndDist = !_Visible;
+  UIManager.UIAll.OverlayHidePersonnalBestAndRank = !_Visible;
+  UIManager.UIAll.OverlayHidePosition = !_Visible;
+  UIManager.UIAll.OverlayHideCheckPointTime = !_Visible;
+  UIManager.UIAll.OverlayHideEndMapLadderRecap = !_Visible;
+  UIManager.UIAll.OverlayHideMultilapInfos = !_Visible;
+  UIManager.UIAll.OverlayHideSpectatorControllers = !_Visible;
+  UIManager.UIAll.OverlayHideSpectatorInfos = !_Visible;
+  UIManager.UIAll.AltMenuNoDefaultScores = !_Visible;
+
+  if (_Visible) {
+    UIManager.UIAll.ScoreTableVisibility = CUIConfig::EVisibility::None;
+  } else {
+    UIManager.UIAll.ScoreTableVisibility = CUIConfig::EVisibility::ForcedHidden;
+  }
+}
+
+Void MB_Yield() {
+  yield;
+
+  +++MB_Yield+++
+}
+
+Void MB_Private_LoadMap() {
+  if (!MapLoaded) RequestLoadMap();
+  while (!MapLoaded) MB_Yield();
+}
+
+Void MB_Private_UnloadMap() {
+  if (MapLoaded) RequestUnloadMap();
+  while (MapLoaded) MB_Yield();
+}
+
+Boolean MB_Private_ServerIsRunning() {
+  return !ServerShutdownRequested && MB_Private_RunServer;
+}
+
+Boolean MB_Private_MatchIsRunning() {
+  return MB_Private_ServerIsRunning() && !MatchEndRequested;
+}
+
+Void MB_Private_ItemList() {
+  ItemList_Begin();
+  +++MB_ItemList+++
+  ItemList_End();
+}
+
+// ---------------------------------- //
+// Script entry point
+// ---------------------------------- //
+main() {
+  MB_Private_RunServer = True;
+
+  while (MB_Private_ServerIsRunning()) {
+    +++MB_LoadLibraries+++
+    +++MB_LogVersions+++
+
+    +++MB_InitServer+++
+    +++MB_StartServer+++
+
+    MB_Private_ItemList();
+    MB_Private_LoadMap();
+
+    +++MB_InitMap+++
+    +++MB_StartMap+++
+
+    while (MB_Private_MatchIsRunning()) {
+      MB_Yield();
+
+      +++MB_PlayLoop+++
+    }
+
+    +++MB_EndMap+++
+
+    MB_Private_UnloadMap();
+  }
+
+  +++MB_EndServer+++
+  +++MB_UnloadLibraries+++
+}

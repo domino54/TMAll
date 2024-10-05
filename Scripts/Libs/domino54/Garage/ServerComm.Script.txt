@@ -1,0 +1,42 @@
+/**
+ * @name ServerComm.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#Const Version      "2024-10-05"
+#Const ScriptName   "Libs/domino54/Garage/ServerComm.Script.txt"
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_LibGarage_EventType_StopServer "garage:stop_server"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetPreviewModelId(CUser _User, Text _ModelId) {
+  declare Text LibGarage_CurrentPreviewModelId for _User;
+
+  LibGarage_CurrentPreviewModelId = _ModelId;
+}
+
+Text GetPreviewModelId(CUser _User) {
+  declare Text LibGarage_CurrentPreviewModelId for _User;
+
+  return LibGarage_CurrentPreviewModelId;
+}
+
+Void SetPreviewSkinId(CUser _User, Text _SkinId) {
+  declare Text LibGarage_CurrentPreviewSkinId for _User;
+
+  LibGarage_CurrentPreviewSkinId = _SkinId;
+}
+
+Text GetPreviewSkinId(CUser _User) {
+  declare Text LibGarage_CurrentPreviewSkinId for _User;
+
+  return LibGarage_CurrentPreviewSkinId;
+}

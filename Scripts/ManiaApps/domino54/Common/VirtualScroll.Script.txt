@@ -1,0 +1,87 @@
+/**
+ * @name VirtualScroll.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#Const Version      "2024-10-05"
+#Const ScriptName   "ManiaApps/domino54/Common/VirtualScroll.Script.txt"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text InjectInManialink() {
+  return """
+Void VirtualScroll_ResetControls() {
+  declare CMlControl[Integer] Control_VirtualScrollItems for Page;
+
+  Control_VirtualScrollItems.clear();
+}
+
+Integer VirtualScroll_GetIndex(CMlControl _Control) {
+  declare CMlControl[Integer] Control_VirtualScrollItems for Page;
+
+  return Control_VirtualScrollItems.keyof(_Control);
+}
+
+CMlControl VirtualScroll_GetAtIndex(Integer _Index) {
+  declare CMlControl[Integer] Control_VirtualScrollItems for Page;
+
+  if (Control_VirtualScrollItems.existskey(_Index)) {
+    return Control_VirtualScrollItems[_Index];
+  }
+
+  return Null;
+}
+
+CMlControl[Integer] VirtualScroll_ReassignFromIndex(CMlControl[] _Controls, Integer _StartIndex, Integer _DataLength) {
+  declare CMlControl[Integer] Control_VirtualScrollItems for Page;
+
+  declare EndIndex = _StartIndex + _Controls.count;
+
+  // First, get the indexes of all controls that should not be visible, and release them.
+  declare Integer[] IndexesToRemove;
+
+  foreach (I => Control in Control_VirtualScrollItems) {
+    if (I >= _StartIndex && I < EndIndex) continue;
+
+    IndexesToRemove.add(I);
+    Control.Hide();
+  }
+
+  foreach (I in IndexesToRemove) {
+    declare Removed = Control_VirtualScrollItems.removekey(I);
+  }
+
+  // Next, list all controls that are currently unassigned.
+  declare Integer[] AvailableFrames;
+
+  foreach (I => Control in _Controls) {
+    if (Control_VirtualScrollItems.exists(Control)) continue;
+
+    AvailableFrames.add(I);
+  }
+
+  // Finally, assign the controls to indexes, which are lacking a control.
+  declare CMlControl[Integer] Result;
+
+  for (I, _StartIndex, EndIndex - 1) {
+    if (Control_VirtualScrollItems.existskey(I)) continue;
+
+    declare FrameIndex = AvailableFrames[0];
+    declare Removed = AvailableFrames.removekey(0);
+    declare Control <=> _Controls[FrameIndex];
+
+    Control_VirtualScrollItems[I] = Control;
+    Control.Visible = I >= 0 && I < _DataLength;
+
+    if (!Control.Visible) continue;
+
+    Result[I] = Control;
+  }
+
+  return Result;
+}
+  """;
+}

@@ -1,0 +1,125 @@
+/**
+ * @name MenuTabs.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#Const Version      "2024-10-05"
+#Const ScriptName   "ManiaApps/domino54/Common/TitleLogoControls.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
+
+#Const C_LibTitleLogoControls_ManialinkLayerId  "titlelogo:main"
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Text Private_CreateManialinkLayer() {
+  // TODO Value is missing if playing on server and menu was not loaded
+  declare Text ImgLogo for LocalUser;
+
+  declare QuadSize = <5.0, 5.0>;
+  declare MainFont = Font::GetFontName("Main");
+  declare SubFont = Font::GetFontName("SubTitle");
+
+  return """
+<manialink version="3" name="{{{C_LibTitleLogoControls_ManialinkLayerId}}}">
+<frame pos="-132 77">
+  <quad halign="left" valign="top" size="75 20"  pos="-21 9" z-index="2" image="{{{ImgLogo}}}" keepratio="Fit" />
+</frame>
+
+<frame id="Frame_BackButton" pos="-144 65">
+  <quad id="Quad_BackButton" pos="0 0" halign="left" valign="top" size="26 10" scriptevents="1" />
+  <quad id="Button_Cancel" pos="3 -5" halign="center" valign="center" size="{{{QuadSize.X + 3.0}}} {{{QuadSize.Y + 3.0}}}" opacity="1.0" keepratio="Fit" />
+  <quad id="Quad_BackIcon" pos="3 -5" halign="center" valign="center" size="{{{QuadSize.X}}} {{{QuadSize.Y}}}" image="{{{C_ImgBase}}}Global_Back.dds" />
+  <label id="Label_Back" pos="17 -5" halign="center" valign="center2" textsize="2" textemboss="1" textcolor="fff" textprefix="$t" text="{{{_("Back")}}}" textfont="{{{SubFont}}}" opacity="1.0"  />
+
+  <quad pos="26 -10" halign="right" valign="bottom" size="26 0.2" bgcolor="fff" opacity="0.7" />
+  <quad pos="26 -9.8" halign="right" valign="bottom" size="3 0.4" bgcolor="fff" opacity="0.7" />
+</frame>
+
+<script><!--
+
+Void FocusButton(CMlControl _Control) {
+  foreach (Control in _Control.Parent.Controls) {
+    if (!(Control is CMlLabel)) {
+      continue;
+    }
+
+    declare Label <=> (Control as CMlLabel);
+
+    Label.TextColor = <1., 1., 1.>;
+    Label.Scale = 1.05;
+  }
+}
+
+Void UnfocusButton(CMlControl _Control) {
+  foreach (Control in _Control.Parent.Controls) {
+    if (!(Control is CMlLabel)) {
+      continue;
+    }
+
+    declare Label <=> (Control as CMlLabel);
+
+    Label.TextColor = <0.95, 0.95, 0.95>;
+    Label.Scale = 1.0;
+  }
+}
+
+main() {
+  while (True) {
+    yield;
+
+    if (!PageIsVisible && PendingEvents.count == 0) {
+      continue;
+    }
+
+    foreach (Event in PendingEvents) {
+      switch (Event.Type) {
+        case CMlScriptEvent::Type::MouseClick: {
+          if (Event.ControlId == "Quad_BackButton") {
+            SendCustomEvent("GlobalB_Back", []);
+          }
+        }
+        case CMlScriptEvent::Type::MouseOver: {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+          FocusButton(Event.Control);
+        }
+        case CMlScriptEvent::Type::MouseOut: {
+          UnfocusButton(Event.Control);
+        }
+      }
+    }
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetVisibility(Boolean _IsVisible) {
+  Layers::SetVisibility(C_LibTitleLogoControls_ManialinkLayerId, _IsVisible);
+}
+
+Void Unload() {
+  Layers::Destroy(C_LibTitleLogoControls_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_LibTitleLogoControls_ManialinkLayerId, Private_CreateManialinkLayer());
+}

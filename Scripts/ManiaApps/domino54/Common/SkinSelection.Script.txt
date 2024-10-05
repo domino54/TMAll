@@ -1,0 +1,541 @@
+/**
+ * @name SkinSelection.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#Const Version      "2024-10-05"
+#Const ScriptName   "ManiaApps/domino54/Common/SkinSelection.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/"
+
+#Const C_LibSkinSelection_ManialinkLayerId        "skin_selection:main"
+#Const C_LibSkinSelection_ButtonGap               2
+#Const C_LibSkinSelection_ButtonRatio             1.7777777
+#Const C_LibSkinSelection_ScreenFrameWidth        320.0
+#Const C_LibSkinSelection_ButtonsTotalWidth       300.0
+#Const C_LibSkinSelection_BottomPadding           3.0
+#Const C_LibSkinSelection_NbButtonsScreen         7
+#Const C_LibSkinSelection_NbButtonsBudget         2
+#Const C_LibSkinSelection_EventType_UpdateSkins   "skin_selection:update_skins"
+#Const C_LibSkinSelection_EventType_SetPreview    "skin_selection:set_preview"
+#Const C_LibSkinSelection_EventType_SetApplied    "skin_selection:set_applied"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_SkinOption {
+  Text Id;
+  Text Name;
+  Text IconUrl;
+  Integer Rarity;
+}
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Text Private_CreateManialinkLayer() {
+  declare PaddingX = (C_LibSkinSelection_ScreenFrameWidth - C_LibSkinSelection_ButtonsTotalWidth) / 2;
+  declare PaddingY = C_LibSkinSelection_BottomPadding;
+
+  declare Gap = C_LibSkinSelection_ButtonGap;
+  declare TotalWithMarginX = C_LibSkinSelection_ButtonsTotalWidth - (Gap * (C_LibSkinSelection_NbButtonsScreen - 1));
+
+  declare SizeX = TotalWithMarginX / C_LibSkinSelection_NbButtonsScreen;
+  declare SizeY = SizeX / C_LibSkinSelection_ButtonRatio;
+
+  declare GridY = (SizeX + Gap) / 4;
+  declare ButtonWidth = SizeX + Gap;
+
+  declare ButtonInstances = "";
+
+  for (I, 0, C_LibSkinSelection_NbButtonsScreen + C_LibSkinSelection_NbButtonsBudget - 1) {
+    ButtonInstances ^= """<frameinstance modelid="FrameModel_SkinButton" hidden="1" />""";
+  }
+
+  declare MainFont = Font::GetFontName("Main");
+  declare SubFont = Font::GetFontName("SubTitle");
+
+  return """
+<manialink version="3" name="{{{C_LibSkinSelection_ManialinkLayerId}}}">
+<stylesheet>
+  <style class="Name" textsize="2" textemboss="1" textfont="{{{MainFont}}}" textcolor="FFF" />
+</stylesheet>
+
+<framemodel id="FrameModel_SkinButton">
+  <frame pos="2 {{{3 - SizeY}}}">
+    <label id="Label_SkinName" class="Name" halign="left" valign="center2" size="{{{SizeX - 4}}} 0" />
+  </frame>
+
+  <!-- cropped outlet for the apply button -->
+  <frame pos="{{{SizeX / 2}}} {{{SizeY / -2}}}" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}">
+    <frame id="Frame_ApplyButtonAnim" pos="0 0" halign="center" valign="center" size="{{{SizeX * 2}}} 0" hidden="1">
+      <frame pos="{{{SizeX / -2}}} 0">
+        <quad class="Hover" pos="0 0" halign="left" valign="center" size="{{{SizeX}}} 10" bgcolor="FFFFFF44" opacity="0" />
+        <label pos="{{{(SizeX / 2) + 4}}} -0.25" halign="center" valign="center2" size="{{{SizeX - 14}}} 0" textsize="4" textcolor="444" textfont="{{{SubFont}}}" textprefix="$t" text="{{{_("Apply")}}}" />
+        <quad pos="0 0" halign="right" valign="center" size="10 10" bgcolor="FFF" />
+        <quad pos="5 0" halign="center" valign="center" size="10 10" image="{{{C_ImgBase}}}Buttons/EmptyContour.dds" />
+        <quad pos="5 0" halign="center" valign="center" size="10 10" image="{{{C_ImgBase}}}Buttons/ReplaceLogoMain.dds" scale="0.9" />
+        <quad pos="10 0" halign="left" valign="center" size="{{{SizeX}}} 10" bgcolor="FFF" />
+        <quad pos="0 0" halign="left" valign="center" size="{{{SizeX}}} 10" bgcolor="000" opacity="{{{1/3.}}}" />
+      </frame>
+    </frame>
+  </frame>
+
+  <quad id="Quad_SkinApplied" pos="0 0" halign="left" valign="top" size="{{{SizeY / 5}}} {{{SizeY / 5}}}" scale="1" image="{{{C_ImgBase}}}Garage/GarageSelected.webp" hidden="1" />
+  <quad id="Quad_SkinPreviewed" pos="{{{SizeX / 2}}} {{{SizeY / -2}}}" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" scale="1" image="{{{C_ImgBase}}}Garage/GarageCardSelected.webp" hidden="1" />
+  <quad class="Hover" pos="{{{SizeX / 2}}} {{{SizeY / -2}}}" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" scale="1.01" image="{{{C_ImgBase}}}Garage/GarageCardOver.webp" opacity="0" />
+
+  <!-- cropped outlet for the car image -->
+  <frame pos="{{{SizeX / 2}}} {{{SizeY / -2}}}" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}">
+    <quad id="Quad_SkinIcon" pos="{{{SizeX * 0.25}}} 0" halign="center" valign="center" size="{{{SizeX}}} {{{SizeX * 9/16}}}" scale="1.375" autoscale="0" />
+    <quad pos="{{{SizeX * 0.25}}} 0" halign="center" valign="center" size="{{{SizeX}}} {{{SizeX}}}" scale="1.375" image="{{{C_ImgBase}}}Garage/MP.webp" opacity="0.05" autoscale="0" />
+    <quad class="Hover" pos="0 0" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" bgcolor="FFFFFF22" opacity="0" />
+    <quad pos="0 0" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" bgcolor="FFF" opacity="0.125" />
+    <quad id="Quad_SkinButton" class="Focus" pos="0 0" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" style="Bgs1" substyle="BgDialogBlur" opacity="0" scriptevents="1"  />
+  </frame>
+</framemodel>
+
+<frame pos="{{{C_LibSkinSelection_ScreenFrameWidth / -2}}} -90">
+  <frame id="Frame_ScrollContainer" rot="-90" halign="left" valign="top" size="{{{SizeY + PaddingY * 3}}} {{{C_LibSkinSelection_ScreenFrameWidth}}}" scroll="1" scrollgrid="0 {{{GridY}}}">
+    <frame rot="90">
+      <frame id="Frame_SkinButtonInstances" pos="0 {{{PaddingY + Gap + 1 + SizeY}}}">
+        {{{ButtonInstances}}}
+      </frame>
+
+      <!-- scroll handle must be inside the scrolling container frame to avoid the handle preventing the scrolling -->
+      <frame id="Frame_ScrollExempt">
+        <frame pos="{{{PaddingX}}} {{{PaddingY}}}" z-index="1">
+          <quad id="Quad_ScrollBarTarget" class="Focus" pos="0 0" halign="left" valign="center" size="0 6" bgcolor="0000" scriptevents="1" />
+        </frame>
+      </frame>
+
+      <quad id="Quad_ScrollTarget" halign="left" valign="bottom" size="0 40" scriptevents="1" />
+    </frame>
+  </frame>
+
+  <frame id="Frame_ScrollBar" pos="{{{PaddingX}}} {{{PaddingY}}}" hidden="1" z-index="1">
+    <quad id="Quad_ScrollBarHandle" pos="0 0" halign="left" valign="center" size="0 1" bgcolor="FFF" />
+    <quad id="Quad_ScrollBarTrack" pos="0 0" halign="left" valign="center" size="{{{C_LibSkinSelection_ButtonsTotalWidth}}} 0.25" bgcolor="FFF" opacity="0.25" />
+  </frame>
+</frame>
+
+<script><!--
+
+#Include "MathLib" as ML
+
+#Const Colors ["", "AAA", "3B6", "27F", "A5E", "F91"]
+
+#Struct K_SkinOption {
+  Text Id;
+  Text Name;
+  Text IconUrl;
+  Integer Rarity;
+}
+
+{{{VirtualScroll::InjectInManialink()}}}
+
+Void FormatSkinButton(CMlFrame _Frame, Integer _Index, K_SkinOption _DataSkin) {
+  declare Label_SkinName <=> (_Frame.GetFirstChild("Label_SkinName") as CMlLabel);
+  declare Quad_SkinIcon <=> (_Frame.GetFirstChild("Quad_SkinIcon") as CMlQuad);
+
+  _Frame.RelativePosition_V3.X = {{{PaddingX}}} + ({{{SizeX + C_LibSkinSelection_ButtonGap}}}) * _Index;
+  Label_SkinName.Value = _DataSkin.Name;
+  Quad_SkinIcon.ImageUrl = _DataSkin.IconUrl;
+}
+
+Void SetSkinButtonSelected(CMlFrame _Frame, Boolean _IsSelected) {
+  declare Quad_SkinPreviewed <=> (_Frame.GetFirstChild("Quad_SkinPreviewed") as CMlQuad);
+  declare Label_SkinName <=> (_Frame.GetFirstChild("Label_SkinName") as CMlLabel);
+
+  AnimMgr.Flush(Quad_SkinPreviewed);
+  AnimMgr.Flush(Label_SkinName);
+
+  Quad_SkinPreviewed.Visible = _IsSelected;
+  Quad_SkinPreviewed.RelativeScale = 1.01;
+  Label_SkinName.RelativePosition_V3.Y = 0.0;
+
+  if (_IsSelected) {
+    AnimMgr.Add(Quad_SkinPreviewed, "<quad scale='1.03' />", 125, CAnimManager::EAnimManagerEasing::CircOut);
+    AnimMgr.Add(Label_SkinName, "<label pos='0 0.25' />", 125, CAnimManager::EAnimManagerEasing::CircOut);
+  }
+}
+
+Void SetSkinButtonApplied(CMlFrame Frame, Boolean _IsApplied) {
+  declare Quad_SkinApplied <=> (Frame.GetFirstChild("Quad_SkinApplied") as CMlQuad);
+
+  Quad_SkinApplied.Visible = _IsApplied;
+}
+
+Void SetSkinButtonCanApply(CMlFrame Frame, Boolean _IsApplied) {
+  declare Frame_ApplyButton <=> (Frame.GetFirstChild("Frame_ApplyButton") as CMlFrame);
+  declare Frame_ApplyButtonAnim <=> (Frame.GetFirstChild("Frame_ApplyButtonAnim") as CMlFrame);
+
+  AnimMgr.Flush(Frame_ApplyButtonAnim);
+
+  declare Size = <Frame_ApplyButtonAnim.Size.X, 0.0>;
+  declare Scale = 0.9;
+
+  if (_IsApplied) {
+    Frame_ApplyButtonAnim.Visible = True;
+    Size.Y = 10.0;
+    Scale = 1.0;
+
+    AnimMgr.Add(Frame_ApplyButtonAnim, "<frame scale='1' size='"^Size.X^" 10' />", 125, CAnimManager::EAnimManagerEasing::CircOut);
+  }
+
+  if (!_IsApplied) {
+    AnimMgr.Add(Frame_ApplyButtonAnim, "<frame scale='0.9' size='"^Size.X^" 0' />", 100, CAnimManager::EAnimManagerEasing::SineIn);
+    AnimMgr.Add(Frame_ApplyButtonAnim, "<frame hidden='1' />", Now + (100), 1,  CAnimManager::EAnimManagerEasing::Linear);
+  }
+}
+
+Void SetSelectedSkinIndex(Integer _Index, Boolean _CanApply) {
+  declare Frame_SkinButtonInstances <=> (Page.GetFirstChild("Frame_SkinButtonInstances") as CMlFrame);
+
+  foreach (Control in Frame_SkinButtonInstances.Controls) {
+    declare Index = VirtualScroll_GetIndex(Control);
+    declare Button <=> (Control as CMlFrame);
+
+    SetSkinButtonSelected(Button, Index == _Index);
+    SetSkinButtonCanApply(Button, Index == _Index && _CanApply);
+  }
+}
+
+Void SetAppliedSkinIndex(Integer _Index) {
+  declare Frame_SkinButtonInstances <=> (Page.GetFirstChild("Frame_SkinButtonInstances") as CMlFrame);
+
+  foreach (Control in Frame_SkinButtonInstances.Controls) {
+    declare Index = VirtualScroll_GetIndex(Control);
+
+    SetSkinButtonApplied((Control as CMlFrame), Index == _Index);
+  }
+}
+
+Void SetSkinButtonHover(CMlFrame _Frame, Boolean _IsHovered) {
+  Page.GetClassChildren("Hover", _Frame, True);
+
+  declare Opacity = 0.0;
+
+  if (_IsHovered) {
+    Opacity = 1.0;
+  }
+
+  foreach (Control in Page.GetClassChildren_Result) {
+    AnimMgr.Flush(Control);
+    AnimMgr.Add(Control, "<quad opacity='"^Opacity^"' />", 125, CAnimManager::EAnimManagerEasing::CircOut);
+  }
+}
+
+Void ScrollIntoIndex(Integer _Index) {
+  declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
+  declare _Offset = {{{ButtonWidth}}} * (0.5 + _Index - {{{C_LibSkinSelection_NbButtonsScreen / 2.0}}});
+
+  Frame_ScrollContainer.ScrollOffset.Y = _Offset;
+}
+
+main() {
+  declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
+  declare Frame_ScrollExempt <=> (Page.GetFirstChild("Frame_ScrollExempt") as CMlFrame);
+  declare Quad_ScrollTarget <=> (Page.GetFirstChild("Quad_ScrollTarget") as CMlQuad);
+
+  declare Frame_ScrollBar <=> (Page.GetFirstChild("Frame_ScrollBar") as CMlFrame);
+  declare Quad_ScrollBarHandle <=> (Page.GetFirstChild("Quad_ScrollBarHandle") as CMlQuad);
+  declare Quad_ScrollBarTarget <=> (Page.GetFirstChild("Quad_ScrollBarTarget") as CMlQuad);
+  declare Quad_ScrollBarTrack <=> (Page.GetFirstChild("Quad_ScrollBarTrack") as CMlQuad);
+
+  declare Frame_SkinButtonInstances <=> (Page.GetFirstChild("Frame_SkinButtonInstances") as CMlFrame);
+  declare CMlFrame[] Frame_SkinButtons;
+
+  foreach (_Control in Frame_SkinButtonInstances.Controls) {
+    Frame_SkinButtons.add((_Control as CMlFrame));
+  }
+
+  declare K_SkinOption[] SkinsData for Page;
+  declare Text PreviewSkinId for Page;
+  declare Text AppliedSkinId for Page;
+
+  declare StartIndex = 0;
+  declare Text[] AllSkinIds;
+
+  declare PrevScrollOffsetY = -1.0;
+  declare PrevStartIndex = -1000;
+
+  declare ScrollIsDragging = False;
+  declare Real ScrollMouseOriginX;
+  declare Real ScrollOffsetOriginX;
+
+  while (True) {
+    yield;
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+        if (Event.ControlId == "Quad_ScrollBarTarget") {
+          ScrollIsDragging = True;
+          ScrollMouseOriginX = Input.MousePos.X;
+          ScrollOffsetOriginX = Frame_ScrollContainer.ScrollOffset.Y;
+        }
+
+        else if (Event.ControlId == "Quad_SkinButton") {
+          declare Button <=> Event.Control.Parent.Parent;
+          declare Index = VirtualScroll_GetIndex(Button);
+          declare SkinData = SkinsData[Index];
+
+          // Click once = preview
+          if (PreviewSkinId != SkinData.Id) {
+            PreviewSkinId = SkinData.Id;
+
+            SetSelectedSkinIndex(Index, SkinData.Id != AppliedSkinId);
+
+            SendCustomEvent("{{{C_LibSkinSelection_EventType_SetPreview}}}", [PreviewSkinId]);
+          }
+
+          // Click twice = apply
+          else if (SkinData.Id == PreviewSkinId && AppliedSkinId != PreviewSkinId) {
+            AppliedSkinId = SkinData.Id;
+
+            SetSkinButtonSelected(Button, True);
+            SetSkinButtonCanApply(Button, False);
+            SetAppliedSkinIndex(Index);
+
+            SendCustomEvent("{{{C_LibSkinSelection_EventType_SetApplied}}}", [AppliedSkinId]);
+          }
+        }
+      }
+
+      else if (Event.Type == CMlScriptEvent::Type::MouseOut) {
+        if (Event.ControlId != "Quad_SkinButton") continue;
+
+        declare Button <=> Event.Control.Parent.Parent;
+
+        SetSkinButtonHover(Button, False);
+      }
+
+      else if (Event.Type == CMlScriptEvent::Type::MouseOver) {
+        if (Event.ControlId != "Quad_SkinButton") continue;
+
+        declare Button <=> Event.Control.Parent.Parent;
+
+        SetSkinButtonHover(Button, True);
+      }
+
+      else if (Event.Type == CMlScriptEvent::Type::PluginCustomEvent) {
+        if (Event.CustomEventType == "{{{C_LibSkinSelection_EventType_UpdateSkins}}}") {
+          PrevScrollOffsetY = -1.0;
+          PrevStartIndex = -1000;
+
+          VirtualScroll_ResetControls();
+
+          AllSkinIds.clear();
+
+          foreach (_SkinData in SkinsData) {
+            AllSkinIds.add(_SkinData.Id);
+          }
+
+          declare SelectedIndex = AllSkinIds.keyof(PreviewSkinId);
+          declare MaxWidth = ML::Max(0.0, {{{ButtonWidth}}} * SkinsData.count - {{{Gap}}});
+
+          Frame_ScrollContainer.ScrollMax.Y = ML::Max(0.0, MaxWidth - {{{C_LibSkinSelection_ButtonsTotalWidth}}});
+          Quad_ScrollTarget.Size.X = Frame_ScrollContainer.Size.Y + Frame_ScrollContainer.ScrollMax.Y;
+          yield; // Unfortunately have to wait, because scroll does not update in the same frame.
+          ScrollIntoIndex(SelectedIndex);
+          Frame_SkinButtonInstances.RelativePosition_V3.X = ML::Max(0.0, {{{C_LibSkinSelection_ButtonsTotalWidth}}} - MaxWidth) / 2;
+        }
+      }
+    }
+
+    if (!PageIsVisible) continue;
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+        if (Event.Control.HasClass("Focus")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+        }
+      }
+
+      else if (Event.Type == CMlScriptEvent::Type::MouseOver) {
+        if (Event.Control.HasClass("Focus")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+        }
+      }
+    }
+
+    foreach (Event in Input.PendingEvents) {
+      if (Event.Type != CInputEvent::EType::PadButtonPress) continue;
+
+      switch (Event.Button) {
+        case CInputEvent::EButton::A: {
+          // Apply previewed skin
+          if (AppliedSkinId == PreviewSkinId) continue;
+
+          declare SelectedIndex = AllSkinIds.keyof(PreviewSkinId);
+          declare Control <=> VirtualScroll_GetAtIndex(SelectedIndex);
+
+          AppliedSkinId = PreviewSkinId;
+
+          if (Control != Null) {
+            declare Button <=> (Control as CMlFrame);
+
+            SetSkinButtonSelected(Button, True);
+            SetSkinButtonCanApply(Button, False);
+          }
+
+          SetAppliedSkinIndex(SelectedIndex);
+          ScrollIntoIndex(SelectedIndex);
+
+          SendCustomEvent("{{{C_LibSkinSelection_EventType_SetApplied}}}", [AppliedSkinId]);
+
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+        }
+
+        case CInputEvent::EButton::Left, CInputEvent::EButton::LeftStick_Left: {
+          declare PreviewSkinIndex = AllSkinIds.keyof(PreviewSkinId);
+          if (PreviewSkinIndex <= 0) continue;
+
+          PreviewSkinIndex -= 1;
+          PreviewSkinId = AllSkinIds[PreviewSkinIndex];
+
+          SetSelectedSkinIndex(PreviewSkinIndex, PreviewSkinId != AppliedSkinId);
+          ScrollIntoIndex(PreviewSkinIndex);
+          SendCustomEvent("{{{C_LibSkinSelection_EventType_SetPreview}}}", [PreviewSkinId]);
+
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+        }
+
+        case CInputEvent::EButton::Right, CInputEvent::EButton::LeftStick_Right: {
+          declare PreviewSkinIndex = AllSkinIds.keyof(PreviewSkinId);
+          if (PreviewSkinIndex >= AllSkinIds.count - 1) continue;
+
+          PreviewSkinIndex += 1;
+          PreviewSkinId = AllSkinIds[PreviewSkinIndex];
+
+          SetSelectedSkinIndex(PreviewSkinIndex, PreviewSkinId != AppliedSkinId);
+          ScrollIntoIndex(PreviewSkinIndex);
+          SendCustomEvent("{{{C_LibSkinSelection_EventType_SetPreview}}}", [PreviewSkinId]);
+
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+        }
+      }
+    }
+
+    if (ScrollIsDragging && !Input.MouseLeftButton) {
+      ScrollIsDragging = False;
+    }
+
+    if (ScrollIsDragging) {
+      declare ScrollBarTrackLength = Quad_ScrollBarTrack.Size.X - Quad_ScrollBarHandle.Size.X;
+      declare MouseDiff = Input.MousePos.X - ScrollMouseOriginX;
+      declare AddedOffset = Frame_ScrollContainer.ScrollMax.Y * (MouseDiff / ScrollBarTrackLength);
+
+      Frame_ScrollContainer.ScrollOffset.Y = ScrollOffsetOriginX + AddedOffset;
+    }
+
+    // Horizontal scrolling
+    if (PrevScrollOffsetY != Frame_ScrollContainer.ScrollAnimOffset.Y) {
+      PrevScrollOffsetY = Frame_ScrollContainer.ScrollAnimOffset.Y;
+
+      Frame_ScrollExempt.RelativePosition_V3.X = PrevScrollOffsetY;
+      Frame_ScrollBar.Visible = Frame_ScrollContainer.ScrollMax.Y > 1; // floating point issues
+      Quad_ScrollBarTarget.Visible = Frame_ScrollBar.Visible;
+
+      if (Frame_ScrollBar.Visible) {
+        Quad_ScrollBarHandle.Size.X = (Quad_ScrollBarTrack.Size.X * Frame_ScrollContainer.Size.Y) / (Frame_ScrollContainer.Size.Y + Frame_ScrollContainer.ScrollMax.Y);
+        Quad_ScrollBarHandle.RelativePosition_V3.X = (Quad_ScrollBarTrack.Size.X - Quad_ScrollBarHandle.Size.X) * (PrevScrollOffsetY / Frame_ScrollContainer.ScrollMax.Y);
+        Quad_ScrollBarTarget.Size.X = Quad_ScrollBarHandle.Size.X;
+        Quad_ScrollBarTarget.RelativePosition_V3.X = Quad_ScrollBarHandle.RelativePosition_V3.X;
+      }
+
+      StartIndex = ML::FloorInteger((PrevScrollOffsetY + ({{{ButtonWidth}}} * 0.5)) / {{{ButtonWidth}}}) - 1;
+    }
+
+    // Start index change, this means that we have to reassign existing frames to new indexes.
+    if (PrevStartIndex != StartIndex) {
+      PrevStartIndex = StartIndex;
+
+      foreach (I => Control in VirtualScroll_ReassignFromIndex(Frame_SkinButtons, StartIndex, SkinsData.count)) {
+        declare Frame <=> (Control as CMlFrame);
+        declare SkinData = SkinsData[I];
+        declare IsSelected = SkinData.Id == PreviewSkinId;
+        declare IsApplied = SkinData.Id == AppliedSkinId;
+
+        FormatSkinButton(Frame, I, SkinsData[I]);
+        SetSkinButtonSelected(Frame, SkinData.Id == PreviewSkinId);
+        SetSkinButtonApplied(Frame, SkinData.Id == AppliedSkinId);
+        SetSkinButtonCanApply(Frame, IsSelected && !IsApplied);
+      }
+    }
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetVisibility(Boolean _IsVisible) {
+  Layers::SetVisibility(C_LibSkinSelection_ManialinkLayerId, _IsVisible);
+}
+
+Void SetSkinsData(K_SkinOption[] _SkinsData, Text _AppliedSkinId, Text _PreviewSkinId) {
+  declare Layer <=> Layers::Get(C_LibSkinSelection_ManialinkLayerId);
+
+  declare K_SkinOption[] SkinsData for Layer.LocalPage;
+  declare Text PreviewSkinId for Layer.LocalPage;
+  declare Text AppliedSkinId for Layer.LocalPage;
+
+  SkinsData = _SkinsData;
+
+  declare Text[] ExistingSkinIds;
+
+  foreach (_SkinData in SkinsData) {
+    ExistingSkinIds.add(_SkinData.Id);
+  }
+
+  if (_AppliedSkinId != "") {
+    PreviewSkinId = _AppliedSkinId;
+  }
+
+  if (_PreviewSkinId != "") {
+    PreviewSkinId = _PreviewSkinId;
+  }
+
+  if (!ExistingSkinIds.exists(PreviewSkinId) && ExistingSkinIds.count > 0) {
+    PreviewSkinId = ExistingSkinIds[0];
+  }
+
+  AppliedSkinId = _AppliedSkinId;
+
+  LayerCustomEvent(Layer, C_LibSkinSelection_EventType_UpdateSkins, []);
+}
+
+Void SetSkinsData(K_SkinOption[] _SkinsData, Text _AppliedSkinId) {
+  SetSkinsData(_SkinsData, _AppliedSkinId, "");
+}
+
+Void SetSkinsData(K_SkinOption[] _SkinsData) {
+  SetSkinsData(_SkinsData, "");
+}
+
+Void Unload() {
+  Layers::Destroy(C_LibSkinSelection_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_LibSkinSelection_ManialinkLayerId, Private_CreateManialinkLayer());
+}

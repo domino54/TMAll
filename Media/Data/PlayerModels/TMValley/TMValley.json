@@ -10,7 +10,7 @@
       "Name": "AzurSwift",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/AzurSwift.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:grass99tm",
@@ -18,7 +18,7 @@
       "Name": "Grass99TM",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/Grass99TM.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:kingmustard",
@@ -26,7 +26,7 @@
       "Name": "KingMustard",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/KingMustard.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:redturn",
@@ -34,7 +34,7 @@
       "Name": "RedTurn",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/RedTurn.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:shadowmantis",
@@ -42,7 +42,7 @@
       "Name": "ShadowMantis",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/ShadowMantis.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:straightblue",
@@ -50,7 +50,7 @@
       "Name": "StraightBlue",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/StraightBlue.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:thewasp",
@@ -58,7 +58,7 @@
       "Name": "TheWasp",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/TheWasp.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:trigen",
@@ -66,7 +66,7 @@
       "Name": "TriGen",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/TriGen.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:whitelegend",
@@ -74,7 +74,7 @@
       "Name": "WhiteLegend",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/WhiteLegend.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmvalley:windleaf",
@@ -82,7 +82,7 @@
       "Name": "Windleaf",
       "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/Windleaf.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     }
   ]
 }
