@@ -8,7 +8,7 @@
 #Const C_SizeProfil				<25., 6.5>
 
 Text Build() {
-	declare Integer Count_InstancesY         = 7;
+	declare Integer Count_InstancesY         = 9;
 	declare Integer Count_InstancesX         = 1;
 	declare Real	PosXFirstQuad            = -120.;
 	declare Real	PosYFirstQuad            = -10.;
@@ -95,8 +95,9 @@ Text Build() {
 			<frameinstance modelid="Frame_Button" pos="-63 -92" z-index="5" id="Frame_Instance30"/>
 			<frameinstance modelid="Frame_Button" pos="-63 -110.5" z-index="5" id="Frame_Instance40"/>
 			<frameinstance modelid="Frame_Button" pos="47 -73.5" z-index="5" id="Frame_Instance50"/>
-			<frameinstance modelid="Frame_Button" pos="47 -92" z-index="5" id="Frame_Instance60" hidden="1"/>
-			<!--frameinstance modelid="Frame_Button" pos="47 -110.5" z-index="5" id="Frame_Instance70"/-->
+			<frameinstance modelid="Frame_Button" pos="47 -92" z-index="5" id="Frame_Instance60"/>
+			<frameinstance modelid="Frame_Button" pos="47 -110.5" z-index="5" id="Frame_Instance70" hidden="1"/>
+			<frameinstance modelid="Frame_Button" pos="47 -129" z-index="5" id="Frame_Instance80" hidden="1"/>
 		</frame>
 		<frame id="Frame_Active" pos="0 0">
 			<frame id="Clip_Zone" size="180 180" pos="-100.9 0" halign="right" valign="center" clip="False">

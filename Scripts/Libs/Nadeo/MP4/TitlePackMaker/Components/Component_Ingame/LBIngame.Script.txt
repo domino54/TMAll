@@ -32,7 +32,6 @@ MenuButtons_Init();
 		{
 		}
 
-		Void 
 		Void ShowPage()
 		{
 			G_HideTime = -1;
