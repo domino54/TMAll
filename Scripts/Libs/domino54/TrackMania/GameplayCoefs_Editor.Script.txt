@@ -1,0 +1,469 @@
+/**
+ * @name GameplayCoefs_Editor.Script.txt
+ * @author domino54
+ * @version 2024-10-05
+ */
+
+#Const Version      "2024-10-05"
+#Const ScriptName   "Libs/domino54/TrackMania/GameplayCoefs_Editor.Script.txt"
+
+#Include "MathLib" as ML
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_LibGameplayCoefs_ButtonManialinkLayerId  "gameplaycoefs:button"
+#Const C_LibGameplayCoefs_EditorManialinkLayerId  "gameplaycoefs:editor"
+#Const C_LibGameplayCoefs_OpenDialogEvent         "gameplaycoefs:open_dialog"
+#Const C_LibGameplayCoefs_ApplyChangesEvent       "gameplaycoefs:apply"
+#Const C_LibGameplayCoefs_RejectChangesEvent      "gameplaycoefs:reject"
+#Const C_LibGameplayCoefs_DialogTitleText         _("Gameplay Settings")
+#Const C_LibGameplayCoefs_UninitializedValue      -1.0
+#Const C_LibGameplayCoefs_MinValueDefault         0.0
+#Const C_LibGameplayCoefs_MinValueGravityCoef     0.2
+#Const C_LibGameplayCoefs_MinValueUnitedCoefs     1.0
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Boolean C_LibGameplayCoefs_DialogIsOpen;
+declare Boolean C_LibGameplayCoefs_AutoOpenDialog;
+declare Boolean C_LibGameplayCoefs_RequestOpenDialog;
+declare Boolean C_LibGameplayCoefs_PrevHideEditorInterface;
+
+declare Real C_LibGameplayCoefs_MapPlayerModelAccelCoef;
+declare Real C_LibGameplayCoefs_MapPlayerModelControlCoef;
+declare Real C_LibGameplayCoefs_MapPlayerModelGravityCoef;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Text Private_CreateButtonManialinkLayer() {
+  return """
+<manialink version="3" name="{{{C_LibGameplayCoefs_ButtonManialinkLayerId}}}">
+<frame pos="-116 81">
+  <quad id="Quad_Open" pos="3 0" halign="center" valign="center" size="6 6" style="UIConstruction_Buttons" substyle="Drive" tooltip="{{{C_LibGameplayCoefs_DialogTitleText}}}" scriptevents="1" />
+  <quad pos="-0.5 0" halign="left" valign="center" size="6.5 6" style="Bgs1InRace" substyle="BgWindow2" />
+</frame>
+<script><!--
+
+while (True) {
+  wait(PendingEvents.count > 0);
+
+  foreach (Event in PendingEvents) {
+    if (Event.Type != CMlScriptEvent::Type::MouseClick || Event.ControlId != "Quad_Open") continue;
+
+    SendCustomEvent("{{{C_LibGameplayCoefs_OpenDialogEvent}}}", []);
+  }
+
+  yield;
+}
+
+--></script>
+</manialink>
+  """;
+}
+
+Text Private_CreateDialogManialinkLayer() {
+  declare Note = _("Note: Gameplay settings work only inside the standard game modes, and custom game modes that have adopted them. These options will not take effect while recording MediaTracker ghosts.\n\n$<$F00Replay validation$> will not work if any of the above options aren't set to their strongest value.");
+
+  declare SliderLength = 101.5;
+
+  return """
+<manialink version="3" name="{{{C_LibGameplayCoefs_EditorManialinkLayerId}}}">
+<quad size="320 180" halign="center" valign="center" style="Bgs1" substyle="BgDialogBlur" z-index="1" scriptevents="1" />
+
+<framemodel id="FrameModel_GameplaySlider">
+  <label id="Label_SliderName" pos="4 -6" halign="left" valign="center2" size="104" style="TextTitle3" text="Acceleration" />
+
+  <frame pos="5.5 -12">
+    <quad id="Quad_SliderCursor" pos="0 0" halign="center" valign="center" style="Icons64x64_1" substyle="SliderCursor" size="6 6" scriptevents="1" />
+
+    <frame id="Frame_SliderContainer" pos="0 0" valign="center" size="{{{SliderLength}}} 6">
+      <frame id="Frame_SliderTrack" pos="0 0" valign="center" size="{{{SliderLength}}} 6">
+        <quad id="Quad_SliderTrack" pos="{{{SliderLength * -0.1}}} 0" valign="center" size="{{{SliderLength * 1.2}}} 6" style="Icons128x32_1" substyle="SliderBar" scriptevents="1" />
+      </frame>
+      <frame id="Frame_InactiveSlider" pos="0 0" valign="center" size="0 6">
+        <quad pos="{{{SliderLength * -1}}} 0" valign="center" size="{{{SliderLength * 3}}} 6" style="Icons128x32_1" substyle="SliderBar" opacity="0.25" />
+      </frame>
+    </frame>
+  </frame>
+
+  <frame pos="4 -18">
+    <label id="Label_ValueMin" pos="0 0" halign="left" valign="center2" size="32 6" style="TextValueSmall" text="0.0" textcolor="369" />
+    <entry id="Entry_ValueSet" pos="52 0" halign="center" valign="center2" size="32 6" style="TextValueSmall" value="1.0" selecttext="1" />
+    <label id="Label_ValueMax" pos="104 0" halign="right" valign="center2" size="32 6" style="TextValueSmall" text="1.0" textcolor="369" />
+  </frame>
+
+  <quad size="112 24" style="Bgs1" substyle="BgList" />
+</framemodel>
+
+<frame pos="-60 72" z-index="2">
+  <quad pos="-3.25 4.75" size="126.5 8" style="Bgs1InRace" substyle="BgGlow2" />
+  <label pos="60 -6" halign="center" valign="center2" style="TextTitle3" text="{{{C_LibGameplayCoefs_DialogTitleText}}}" />
+  <quad size="120 12" style="Bgs1InRace" substyle="BgTitle" />
+
+  <frame id="Frame_GameplaySliders" pos="4 -16">
+    <frameinstance modelid="FrameModel_GameplaySlider" pos="0 0" />
+    <frameinstance modelid="FrameModel_GameplaySlider" pos="0 -26" />
+    <frameinstance modelid="FrameModel_GameplaySlider" pos="0 -52" />
+  </frame>
+
+  <frame pos="4 -94">
+    <label pos="4 -4" halign="left" valign="top" size="104" style="TextValueSmall" autonewline="1" text="{{{Note}}}" />
+    <quad size="112 34" style="Bgs1" substyle="BgList" />
+  </frame>
+
+	<label id="Quad_Apply" pos="35 -136" halign="center" valign="center" style="CardButtonMedium" text="{{{_("Apply")}}}" scriptevents="1" />
+	<label id="Quad_Close" pos="85 -136" halign="center" valign="center" style="CardButtonMedium" text="{{{_("Close")}}}" scriptevents="1" />
+
+  <quad size="120 144" style="Bgs1InRace" substyle="BgWindow2" scriptevents="1" />
+  <quad pos="0 -144" size="120 2" style="Bgs1InRace" substyle="BgMetalBar" />
+</frame>
+
+<script><!--
+
+#Include "MathLib" as ML
+#Include "TextLib" as TL
+
+#Const C_NumberRegex "^-?(\\d+(\\.\\d*)?|\\d?\\.\\d*)$"
+#Const C_SliderNames [_("Acceleration"), _("Control"), _("Gravity")]
+
+Text FormatReal(Real _Value) {
+  declare Result = TL::ToText(_Value);
+
+  if (TL::EndsWith(".", Result)) {
+    return Result ^ "0";
+  }
+
+  return Result;
+}
+
+Void FormatSlider(CMlFrame _Frame, Text _Name, Real _Min, Real _Max) {
+  declare Label_SliderName <=> (_Frame.GetFirstChild("Label_SliderName") as CMlLabel);
+  declare Label_ValueMin <=> (_Frame.GetFirstChild("Label_ValueMin") as CMlLabel);
+  declare Label_ValueMax <=> (_Frame.GetFirstChild("Label_ValueMax") as CMlLabel);
+  declare Frame_SliderTrack <=> (_Frame.GetFirstChild("Frame_SliderTrack") as CMlFrame);
+  declare Quad_SliderTrack <=> (_Frame.GetFirstChild("Quad_SliderTrack") as CMlQuad);
+  declare Frame_InactiveSlider <=> (_Frame.GetFirstChild("Frame_InactiveSlider") as CMlFrame);
+
+  Label_SliderName.Value = _Name;
+  Label_ValueMin.Value = FormatReal(0.0);
+  Label_ValueMax.Value = FormatReal(_Max);
+
+  declare Ratio = _Min / _Max;
+
+  Frame_SliderTrack.Size.X = {{{SliderLength}}} * (1.0 - Ratio);
+  Frame_SliderTrack.RelativePosition_V3.X = Frame_SliderTrack.Parent.Size.X * Ratio;
+  Quad_SliderTrack.RelativePosition_V3.X = {{{SliderLength * -0.1}}} - Frame_SliderTrack.RelativePosition_V3.X;
+  Frame_InactiveSlider.Size.X = Frame_SliderTrack.RelativePosition_V3.X;
+  Frame_InactiveSlider.Visible = Frame_InactiveSlider.Size.X > 0;
+}
+
+Void SetSliderValue(CMlFrame _Frame, Real _Value, Real _Multiplier) {
+  declare Quad_SliderCursor <=> (_Frame.GetFirstChild("Quad_SliderCursor") as CMlQuad);
+  declare Entry_ValueSet <=> (_Frame.GetFirstChild("Entry_ValueSet") as CMlEntry);
+
+  if (_Value < 0.0 || _Value > 1.0) {
+    Quad_SliderCursor.RelativePosition_V3.X = {{{SliderLength}}};
+    Entry_ValueSet.Value = "";
+    return;
+  }
+
+  Quad_SliderCursor.RelativePosition_V3.X = {{{SliderLength}}} * _Value;
+  Entry_ValueSet.Value = FormatReal(_Value * _Multiplier);
+}
+
+Integer FindParentIndex(CMlFrame _RootFrame, CMlControl _Control) {
+  declare Control <=> _Control.Parent;
+  declare Index = -1;
+
+  while (Control != Null) {
+    Index = _RootFrame.Controls.keyof(Control);
+
+    if (Index >= 0) {
+      return Index;
+    }
+
+    Control <=> Control.Parent;
+  }
+
+  return Index;
+}
+
+main() {
+  EnableMenuNavigation(True, False, Null, 0);
+
+  declare Frame_GameplaySliders <=> (Page.GetFirstChild("Frame_GameplaySliders") as CMlFrame);
+
+  declare Real[] PlayerModelGameplayCoefs for Page = [1.0, 1.0, 1.0]; /// Max values for current vehicle.
+  declare Real[] MinGameplayCoefs for Page = [{{{C_LibGameplayCoefs_MinValueDefault}}}, {{{C_LibGameplayCoefs_MinValueDefault}}}, {{{C_LibGameplayCoefs_MinValueGravityCoef}}}];
+  declare Real[] MapGameplayCoefs for Page; /// Initial values from map.
+
+  wait(MapGameplayCoefs.count == 3);
+
+  foreach (I => Control in Frame_GameplaySliders.Controls) {
+    declare Frame <=> (Control as CMlFrame);
+
+    FormatSlider(Frame, C_SliderNames[I], MinGameplayCoefs[I] * PlayerModelGameplayCoefs[I], PlayerModelGameplayCoefs[I]);
+    SetSliderValue(Frame, MapGameplayCoefs[I], PlayerModelGameplayCoefs[I]);
+  }
+
+  declare IsDraggingSlider = False;
+  declare DraggingIndex = -1;
+  declare CMlControl DraggingControl;
+  declare PrevMousePosX = -1000.0;
+
+  while (True) {
+    yield;
+
+    if (!PageIsVisible) continue;
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+        if (Event.ControlId == "Quad_Apply") {
+          SendCustomEvent("{{{C_LibGameplayCoefs_ApplyChangesEvent}}}", []);
+        }
+        else if (Event.ControlId == "Quad_Close") {
+          SendCustomEvent("{{{C_LibGameplayCoefs_RejectChangesEvent}}}", []);
+        }
+        else if (Event.ControlId == "Quad_SliderCursor" || Event.ControlId == "Quad_SliderTrack") {
+          IsDraggingSlider = True;
+          DraggingIndex = FindParentIndex(Frame_GameplaySliders, Event.Control);
+          DraggingControl <=> (Frame_GameplaySliders.Controls[DraggingIndex] as CMlFrame).GetFirstChild("Frame_SliderContainer");
+          PrevMousePosX = -1000.0;
+        }
+      }
+
+      if (Event.Type == CMlScriptEvent::Type::EntrySubmit && Event.ControlId == "Entry_ValueSet") {
+        declare Entry <=> (Event.Control as CMlEntry);
+        declare FindResult = TL::RegexFind(C_NumberRegex, TL::Trim(Entry.Value), "i");
+        declare Index = FindParentIndex(Frame_GameplaySliders, Event.Control);
+        declare Slider <=> (Frame_GameplaySliders.Controls[Index] as CMlFrame);
+
+        if (FindResult.count <= 0) {
+          SetSliderValue(Slider, -1.0, 1.0);
+          MapGameplayCoefs[Index] = -1.0;
+          continue;
+        }
+
+        declare LowerBound = MinGameplayCoefs[Index];
+        declare Multiplier = PlayerModelGameplayCoefs[Index];
+        declare Value = ML::Clamp(TL::ToReal(FindResult[0]) / Multiplier, LowerBound, 1.0);
+
+        if (Value >= 1.0) {
+          SetSliderValue(Slider, -1.0, 1.0);
+          MapGameplayCoefs[Index] = -1.0;
+          continue;
+        }
+
+        SetSliderValue(Slider, Value, Multiplier);
+        MapGameplayCoefs[Index] = Value;
+      }
+    }
+
+    if (!IsDraggingSlider) continue;
+
+    if (PrevMousePosX != Input.MousePos.X) {
+      PrevMousePosX = Input.MousePos.X;
+
+      declare Slider <=> (Frame_GameplaySliders.Controls[DraggingIndex] as CMlFrame);
+      declare RawValue = (Input.MousePos.X - DraggingControl.AbsolutePosition_V3.X) / DraggingControl.Size.X;
+      declare Value = ML::Clamp(RawValue, MinGameplayCoefs[DraggingIndex], 1.0);
+
+      if (Value >= 1.0) {
+        SetSliderValue(Slider, -1.0, 1.0);
+        MapGameplayCoefs[DraggingIndex] = -1.0;
+      } else {
+        SetSliderValue(Slider, Value, PlayerModelGameplayCoefs[DraggingIndex]);
+        MapGameplayCoefs[DraggingIndex] = Value;
+      }
+    }
+
+    if (!Input.MouseLeftButton) {
+      IsDraggingSlider = False;
+    }
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}
+
+Void Private_ApplyMapValues(Real _AccelCoef, Real _ControlCoef, Real _GravityCoef) {
+  declare metadata Real Meta_LibGameplayCoefs_AccelCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+  declare metadata Real Meta_LibGameplayCoefs_ControlCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+  declare metadata Real Meta_LibGameplayCoefs_GravityCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+
+  // Skip if no changes were made
+  if (Meta_LibGameplayCoefs_AccelCoef == _AccelCoef && Meta_LibGameplayCoefs_ControlCoef == _ControlCoef && Meta_LibGameplayCoefs_GravityCoef == _GravityCoef) {
+    return;
+  }
+
+  Meta_LibGameplayCoefs_AccelCoef = _AccelCoef;
+  Meta_LibGameplayCoefs_ControlCoef = _ControlCoef;
+  Meta_LibGameplayCoefs_GravityCoef = _GravityCoef;
+
+  UnvalidateMetadata();
+}
+
+Void Private_SendMapValuesToLayer() {
+  declare Layer <=> Layers::Get(C_LibGameplayCoefs_EditorManialinkLayerId);
+
+  if (Layer == Null) return;
+
+  declare metadata Real Meta_LibGameplayCoefs_AccelCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+  declare metadata Real Meta_LibGameplayCoefs_ControlCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+  declare metadata Real Meta_LibGameplayCoefs_GravityCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+
+  declare Real[] MapGameplayCoefs for Layer.LocalPage;
+
+  MapGameplayCoefs = [Meta_LibGameplayCoefs_AccelCoef, Meta_LibGameplayCoefs_ControlCoef, Meta_LibGameplayCoefs_GravityCoef];
+}
+
+Void Private_ApplyMapValuesFromLayer() {
+  declare Layer <=> Layers::Get(C_LibGameplayCoefs_EditorManialinkLayerId);
+
+  if (Layer == Null) return;
+
+  declare Real[] MapGameplayCoefs for Layer.LocalPage;
+
+  if (MapGameplayCoefs.count != 3) return;
+
+  Private_ApplyMapValues(MapGameplayCoefs[0], MapGameplayCoefs[1], MapGameplayCoefs[2]);
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void HideDialog() {
+  if (!C_LibGameplayCoefs_DialogIsOpen) {
+    return;
+  }
+
+  Layers::SetVisibility(C_LibGameplayCoefs_ButtonManialinkLayerId, True);
+  Layers::Destroy(C_LibGameplayCoefs_EditorManialinkLayerId);
+
+  C_LibGameplayCoefs_DialogIsOpen = False;
+
+  HideEditorInterface = C_LibGameplayCoefs_PrevHideEditorInterface;
+
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::HideDialog, 0, 0.0);
+}
+
+Void ShowDialog() {
+  if (C_LibGameplayCoefs_DialogIsOpen) {
+    return;
+  }
+
+  Layers::SetVisibility(C_LibGameplayCoefs_ButtonManialinkLayerId, False);
+  Layers::Create(C_LibGameplayCoefs_EditorManialinkLayerId, Private_CreateDialogManialinkLayer());
+
+  Private_SendMapValuesToLayer();
+
+  C_LibGameplayCoefs_DialogIsOpen = True;
+  C_LibGameplayCoefs_RequestOpenDialog = False;
+  C_LibGameplayCoefs_PrevHideEditorInterface = HideEditorInterface;
+
+  HideEditorInterface = True;
+
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::ShowDialog, 0, 0.0);
+}
+
+Void SetMapPlayerModelCoefs(Real _AccelCoef, Real _ControlCoef, Real _GravityCoef) {
+  declare Layer <=> Layers::Get(C_LibGameplayCoefs_EditorManialinkLayerId);
+
+  if (Layer == Null) return;
+
+  declare Real[] PlayerModelGameplayCoefs for Layer.LocalPage;
+
+  PlayerModelGameplayCoefs = [_AccelCoef, _ControlCoef, _GravityCoef];
+}
+
+Void SetMinGameplayCoefs(Boolean _IsUnited) {
+  declare Layer <=> Layers::Get(C_LibGameplayCoefs_EditorManialinkLayerId);
+
+  if (Layer == Null) return;
+
+  declare Real[] MinGameplayCoefs for Layer.LocalPage;
+
+  if (_IsUnited) {
+    MinGameplayCoefs = [C_LibGameplayCoefs_MinValueUnitedCoefs, C_LibGameplayCoefs_MinValueUnitedCoefs, C_LibGameplayCoefs_MinValueGravityCoef];
+  } else {
+    MinGameplayCoefs = [C_LibGameplayCoefs_MinValueDefault, C_LibGameplayCoefs_MinValueDefault, C_LibGameplayCoefs_MinValueGravityCoef];
+  }
+}
+
+Void NormalizeCoefsIfUninitialized(Real _AccelCoef, Real _ControlCoef, Real _GravityCoef) {
+  declare metadata Real Meta_LibGameplayCoefs_AccelCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+  declare metadata Real Meta_LibGameplayCoefs_ControlCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+  declare metadata Real Meta_LibGameplayCoefs_GravityCoef for Map = C_LibGameplayCoefs_UninitializedValue;
+
+  if (
+    Meta_LibGameplayCoefs_AccelCoef != C_LibGameplayCoefs_UninitializedValue ||
+    Meta_LibGameplayCoefs_ControlCoef != C_LibGameplayCoefs_UninitializedValue ||
+    Meta_LibGameplayCoefs_GravityCoef != C_LibGameplayCoefs_UninitializedValue
+  ) {
+    return;
+  }
+
+  Meta_LibGameplayCoefs_AccelCoef = ML::Clamp(ML::Abs(1.0 / _AccelCoef), C_LibGameplayCoefs_MinValueDefault, 1.0);
+  Meta_LibGameplayCoefs_ControlCoef = ML::Clamp(ML::Abs(1.0 / _ControlCoef), C_LibGameplayCoefs_MinValueDefault, 1.0);
+  Meta_LibGameplayCoefs_GravityCoef = ML::Clamp(ML::Abs(1.0 / _GravityCoef), C_LibGameplayCoefs_MinValueGravityCoef, 1.0);
+}
+
+Void Unload() {
+  HideEditorInterface = C_LibGameplayCoefs_PrevHideEditorInterface;
+
+  C_LibGameplayCoefs_MapPlayerModelAccelCoef = 1.0;
+  C_LibGameplayCoefs_MapPlayerModelControlCoef = 1.0;
+  C_LibGameplayCoefs_MapPlayerModelGravityCoef = 1.0;
+  C_LibGameplayCoefs_RequestOpenDialog = False;
+
+  Layers::Destroy(C_LibGameplayCoefs_ButtonManialinkLayerId);
+}
+
+Void Load(Boolean _AutoOpen) {
+  Unload();
+
+  C_LibGameplayCoefs_AutoOpenDialog = _AutoOpen;
+
+  Layers::Create(C_LibGameplayCoefs_ButtonManialinkLayerId, Private_CreateButtonManialinkLayer());
+}
+
+Void Load() {
+  Load(True);
+}
+
+Boolean IsDialogRequested() {
+  return C_LibGameplayCoefs_RequestOpenDialog;
+}
+
+Void Loop() {
+  foreach (Event in PendingEvents) {
+    if (Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
+
+    switch (Event.CustomEventType) {
+      case C_LibGameplayCoefs_OpenDialogEvent: {
+        C_LibGameplayCoefs_RequestOpenDialog = True;
+      }
+      case C_LibGameplayCoefs_ApplyChangesEvent: {
+        Private_ApplyMapValuesFromLayer();
+        HideDialog();
+      }
+      case C_LibGameplayCoefs_RejectChangesEvent: {
+        HideDialog();
+      }
+    }
+  }
+
+  if (IsDialogRequested() && C_LibGameplayCoefs_AutoOpenDialog) {
+    ShowDialog();
+  }
+}

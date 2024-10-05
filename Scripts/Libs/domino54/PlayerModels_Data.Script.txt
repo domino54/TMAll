@@ -827,11 +827,21 @@ K_GameplayInfo GetPlayerModelGameplayInfo(Text _ModelId) {
   return DefaultResult;
 }
 
-Text GetPlayerModelAsset(Text _ModelId, Text _AssetId, Text _Fallback) {
-  if (!G_LibPlayerModels_ModelById.existskey(_ModelId)) return _Fallback;
-  if (!G_LibPlayerModels_ModelById[_ModelId].Assets.existskey(_AssetId)) return _Fallback;
+Text GetOverlayAsset(Text _OverlayId, Text _AssetId, Text _Fallback) {
+  if (!G_LibPlayerModels_OverlayById.existskey(_OverlayId)) return _Fallback;
+  if (!G_LibPlayerModels_OverlayById[_OverlayId].Assets.existskey(_AssetId)) return _Fallback;
 
-  return G_LibPlayerModels_ModelById[_ModelId].Assets[_AssetId];
+  return G_LibPlayerModels_OverlayById[_OverlayId].Assets[_AssetId];
+}
+
+Text GetPlayerModelAsset(Text _ModelId, Text _AssetId, Text _Fallback) {
+  if (G_LibPlayerModels_ModelById.existskey(_ModelId)) {
+    if (!G_LibPlayerModels_ModelById[_ModelId].Assets.existskey(_AssetId)) return _Fallback;
+    return G_LibPlayerModels_ModelById[_ModelId].Assets[_AssetId];
+  }
+
+  // Fallback to overlay.
+  return GetOverlayAsset(_ModelId, _AssetId, _Fallback);
 }
 
 Text GetSkinAsset(Text _SkinId, Text _AssetId, Text _Fallback) {
@@ -843,15 +853,4 @@ Text GetSkinAsset(Text _SkinId, Text _AssetId, Text _Fallback) {
 
   // Fallback to model.
   return GetPlayerModelAsset(G_LibPlayerModels_SkinById[_SkinId].AppliesTo, _AssetId, _Fallback);
-}
-
-Text GetOverlayAsset(Text _OverlayId, Text _AssetId, Text _Fallback) {
-  if (!G_LibPlayerModels_OverlayById.existskey(_OverlayId)) return _Fallback;
-
-  if (G_LibPlayerModels_OverlayById[_OverlayId].Assets.existskey(_AssetId)) {
-    return G_LibPlayerModels_OverlayById[_OverlayId].Assets[_AssetId];
-  }
-
-  // Fallback to model.
-  return GetPlayerModelAsset(G_LibPlayerModels_OverlayById[_OverlayId].Extends, _AssetId, _Fallback);
 }
