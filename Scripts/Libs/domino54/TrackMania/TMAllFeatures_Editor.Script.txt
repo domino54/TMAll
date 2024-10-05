@@ -1,14 +1,14 @@
 /**
  * @name TMAllFeatures_Editor.Script.txt
  * @author domino54
- * @version 2024-08-01
+ * @version 2024-10-05
  */
 
-#Const Version      "2024-08-01"
+#Const Version      "2024-10-05"
 #Const ScriptName   "Libs/domino54/TrackMania/TMAllFeatures_Editor.Script.txt"
 
 #Include "Libs/Nadeo/Common/Ingame/MapType.Script.txt" as MapType
-//#Include "Libs/domino54/TrackMania/GameplayCoefs_Editor.Script.txt" as GameplayCoefs_Editor
+// #Include "Libs/domino54/TrackMania/GameplayCoefs_Editor.Script.txt" as GameplayCoefs_Editor
 #Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
 #Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
@@ -42,24 +42,44 @@ Void Private_ProbeMapPlayerModelName() {
   G_LibTMAllEditor_HasProbedMapPlayerModelName = True;
 }
 
+/*
+Void Private_OpenGameplayCeofsEditor() {
+  Private_ProbeMapPlayerModelName();
+
+  declare ModelId = PlayerModels_Server::GetMapPlayerModelId();
+  declare GameplayInfo = PlayerModels_Data::GetPlayerModelGameplayInfo(ModelId);
+  declare IsUnited = PlayerModels_Data::GetPlayerModelIsUnitedVehicle(ModelId);
+
+  GameplayCoefs_Editor::ShowDialog();
+  GameplayCoefs_Editor::SetMapPlayerModelCoefs(GameplayInfo.AccelCoef, GameplayInfo.ControlCoef, GameplayInfo.GravityCoef);
+  GameplayCoefs_Editor::NormalizeCoefsIfUninitialized(GameplayInfo.AccelCoef, GameplayInfo.ControlCoef, GameplayInfo.GravityCoef);
+  GameplayCoefs_Editor::SetMinGameplayCoefs(IsUnited);
+}
+
+Void Private_NormalizeCoefsIfUninitialized() {
+  declare ModelId = PlayerModels_Server::GetMapPlayerModelId();
+  declare GameplayInfo = PlayerModels_Data::GetPlayerModelGameplayInfo(ModelId);
+
+  GameplayCoefs_Editor::NormalizeCoefsIfUninitialized(GameplayInfo.AccelCoef, GameplayInfo.ControlCoef, GameplayInfo.GravityCoef);
+}
+  */
+
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
-
-Text GetScriptVersion() {
-  return Version;
-}
-
-Text GetScriptName() {
-  return ScriptName;
-}
 
 /**
  * Call in a custom yield wrapper function.
  */
 Void Loop() {
   HttpClient::Yield();
-  //GameplayCoefs_Editor::Loop();
+  /*
+  GameplayCoefs_Editor::Loop();
+
+  if (GameplayCoefs_Editor::IsDialogRequested()) {
+    Private_OpenGameplayCeofsEditor();
+  }
+  */
 }
 
 /**
@@ -73,7 +93,7 @@ Void Yield() {
 Void UnloadLibraries() {
   HttpClient::Unload();
   CustomSkins_LocalData::Unload();
-  //GameplayCoefs_Editor::Unload();
+  // GameplayCoefs_Editor::Unload();
   GameplayCoefs_Server::Unload();
   PlayerModels_Data::Unload();
 }
@@ -86,9 +106,8 @@ Void LoadLibraries() {
   HttpClient::Load();
   CustomSkins_LocalData::Load();
   Openplanet_Client::Load();
-  //GameplayCoefs_Editor::Load();
+  // GameplayCoefs_Editor::Load(False);
   GameplayCoefs_Server::Load();
-  PlayerModels_Server::StrictCompatibilityMode();
   PlayerModels_Data::Load();
 
   while (PlayerModels_Data::Loading()) {
@@ -108,17 +127,20 @@ Void Load() {
 Void BeforeEnterPlayground() {
   // Pull values from the map
   Private_ProbeMapPlayerModelName();
+  // Private_NormalizeCoefsIfUninitialized();
   GameplayCoefs_Server::ReadValuesFromMap(Map);
 
   // Yield only once, because only the selected skin will load
   CustomSkins_LocalData::Yield();
 
-  declare ModelIds = [PlayerModels_Server::GetMapPlayerModelId()];
-  declare SkinIds = PlayerModels_Server::GetLocalPlayerSkinIds();
-
   // Load skins
   Mode.ItemList_Begin();
-  PlayerModels_Server::Load(Mode, ModelIds, SkinIds);
+
+  PlayerModels_Server::Load(Mode, PlayerModels_Server::K_Options {
+   ModelIdAllowlist = [PlayerModels_Server::GetMapPlayerModelId()],
+   SkinIdAllowlist = PlayerModels_Server::GetLocalPlayerSkinIds()
+  });
+
   Mode.ItemList_End();
 }
 
@@ -134,5 +156,5 @@ Void BeforeLeavePlayground() {
  */
 Void ApplyGameplay(CTmPlayer _Player) {
   GameplayCoefs_Server::AssignPlayerCoefs(_Player);
-  PlayerModels_Server::AssignPlayerModel(_Player);
+  PlayerModels_Server::AssignModel(_Player);
 }

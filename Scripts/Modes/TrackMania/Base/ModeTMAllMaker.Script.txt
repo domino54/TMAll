@@ -3,7 +3,7 @@
  */
 #Extends "Modes/TrackMania/Base/ModeTrackmania.Script.txt"
 
-#Const MB_TMAll_Version     "2024-08-01"
+#Const MB_TMAll_Version     "2024-10-05"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
 #Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
@@ -28,13 +28,13 @@ declare Boolean TMAll_Settings_AutoIntroSequenceModel;
 ***MB_Private_LogVersions***
 ***
 Log::RegisterScript(MB_TMAll_ScriptName, MB_TMAll_Version);
-Log::RegisterScript(CustomSkins_OnlineData::GetScriptName(), CustomSkins_OnlineData::GetScriptVersion());
-Log::RegisterScript(CustomSkins_Players::GetScriptName(), CustomSkins_Players::GetScriptVersion());
-Log::RegisterScript(GameplayCoefs_Server::GetScriptName(), GameplayCoefs_Server::GetScriptVersion());
-Log::RegisterScript(HttpClient::GetScriptName(), HttpClient::GetScriptVersion());
-Log::RegisterScript(Openplanet_OnlineData::GetScriptName(), Openplanet_OnlineData::GetScriptVersion());
-Log::RegisterScript(PlayerModels_Data::GetScriptName(), PlayerModels_Data::GetScriptVersion());
-Log::RegisterScript(PlayerModels_Server::GetScriptName(), PlayerModels_Server::GetScriptVersion());
+Log::RegisterScript(CustomSkins_OnlineData::ScriptName, CustomSkins_OnlineData::Version);
+Log::RegisterScript(CustomSkins_Players::ScriptName, CustomSkins_Players::Version);
+Log::RegisterScript(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
+Log::RegisterScript(HttpClient::ScriptName, HttpClient::Version);
+Log::RegisterScript(Openplanet_OnlineData::ScriptName, Openplanet_OnlineData::Version);
+Log::RegisterScript(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
+Log::RegisterScript(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
 Log::RegisterScript(TextLibExt::ScriptName, TextLibExt::Version);
 ***
 
@@ -52,7 +52,6 @@ HttpClient::Load();
 Openplanet_OnlineData::Load();
 CustomSkins_OnlineData::Load();
 GameplayCoefs_Server::Load();
-PlayerModels_Server::StrictCompatibilityMode();
 PlayerModels_Data::Load();
 
 while (PlayerModels_Data::Loading()) {
@@ -128,7 +127,7 @@ Void TMAll_SetPlayerAutoGameplay(CTmPlayer _Player) {
   +++TMAll_BeforeAutoGameplay+++
 
   GameplayCoefs_Server::AssignPlayerCoefs(_Player);
-  PlayerModels_Server::AssignPlayerModel(_Player);
+  PlayerModels_Server::AssignModel(_Player);
 
   +++TMAll_AfterAutoGameplay+++
 }

@@ -10,7 +10,7 @@
       "Name": "ALG",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/ALG.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ang",
@@ -18,7 +18,7 @@
       "Name": "ANG",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/ANG.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:arg",
@@ -26,7 +26,7 @@
       "Name": "ARG",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/ARG.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:aus",
@@ -34,7 +34,7 @@
       "Name": "AUS",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/AUS.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:aut",
@@ -42,7 +42,7 @@
       "Name": "AUT",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/AUT.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ban",
@@ -50,7 +50,7 @@
       "Name": "BAN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/BAN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:bel",
@@ -58,7 +58,7 @@
       "Name": "BEL",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/BEL.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:bih",
@@ -66,7 +66,7 @@
       "Name": "BIH",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/BIH.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:blr",
@@ -74,7 +74,7 @@
       "Name": "BLR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/BLR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:bol",
@@ -82,7 +82,7 @@
       "Name": "BOL",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/BOL.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:bra",
@@ -90,7 +90,7 @@
       "Name": "BRA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/BRA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:brn",
@@ -98,7 +98,7 @@
       "Name": "BRN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/BRN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:bul",
@@ -106,7 +106,7 @@
       "Name": "BUL",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/BUL.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:can",
@@ -114,7 +114,7 @@
       "Name": "CAN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CAN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:cgo",
@@ -122,7 +122,7 @@
       "Name": "CGO",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CGO.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:chi",
@@ -130,7 +130,7 @@
       "Name": "CHI",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CHI.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:chn",
@@ -138,7 +138,7 @@
       "Name": "CHN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CHN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:civ",
@@ -146,7 +146,7 @@
       "Name": "CIV",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CIV.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:cmr",
@@ -154,7 +154,7 @@
       "Name": "CMR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CMR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:col",
@@ -162,7 +162,7 @@
       "Name": "COL",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/COL.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:cro",
@@ -170,7 +170,7 @@
       "Name": "CRO",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CRO.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:cyp",
@@ -178,7 +178,7 @@
       "Name": "CYP",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CYP.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:cze",
@@ -186,7 +186,7 @@
       "Name": "CZE",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/CZE.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:den",
@@ -194,7 +194,7 @@
       "Name": "DEN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/DEN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ecu",
@@ -202,7 +202,7 @@
       "Name": "ECU",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/ECU.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:egy",
@@ -210,7 +210,7 @@
       "Name": "EGY",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/EGY.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:esp",
@@ -218,7 +218,7 @@
       "Name": "ESP",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/ESP.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:est",
@@ -226,7 +226,7 @@
       "Name": "EST",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/EST.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:fin",
@@ -234,7 +234,7 @@
       "Name": "FIN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/FIN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:fra",
@@ -242,7 +242,7 @@
       "Name": "FRA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/FRA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:gbr",
@@ -250,7 +250,7 @@
       "Name": "GBR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/GBR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ger",
@@ -258,7 +258,7 @@
       "Name": "GER",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/GER.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:gre",
@@ -266,7 +266,7 @@
       "Name": "GRE",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/GRE.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:gua",
@@ -274,7 +274,7 @@
       "Name": "GUA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/GUA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:hun",
@@ -282,7 +282,7 @@
       "Name": "HUN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/HUN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ina",
@@ -290,7 +290,7 @@
       "Name": "INA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/INA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ind",
@@ -298,7 +298,7 @@
       "Name": "IND",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/IND.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:iri",
@@ -306,7 +306,7 @@
       "Name": "IRI",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/IRI.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:irl",
@@ -314,7 +314,7 @@
       "Name": "IRL",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/IRL.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:irq",
@@ -322,7 +322,7 @@
       "Name": "IRQ",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/IRQ.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:isr",
@@ -330,7 +330,7 @@
       "Name": "ISR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/ISR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ita",
@@ -338,7 +338,7 @@
       "Name": "ITA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/ITA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:jpn",
@@ -346,7 +346,7 @@
       "Name": "JPN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/JPN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:kaz",
@@ -354,7 +354,7 @@
       "Name": "KAZ",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/KAZ.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:kor",
@@ -362,7 +362,7 @@
       "Name": "KOR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/KOR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ksa",
@@ -370,7 +370,7 @@
       "Name": "KSA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/KSA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:kuw",
@@ -378,7 +378,7 @@
       "Name": "KUW",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/KUW.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:lao",
@@ -386,7 +386,7 @@
       "Name": "LAO",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/LAO.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:lat",
@@ -394,7 +394,7 @@
       "Name": "LAT",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/LAT.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:lba",
@@ -402,7 +402,7 @@
       "Name": "LBA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/LBA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:lib",
@@ -410,7 +410,7 @@
       "Name": "LIB",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/LIB.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ltu",
@@ -418,7 +418,7 @@
       "Name": "LTU",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/LTU.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:lux",
@@ -426,7 +426,7 @@
       "Name": "LUX",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/LUX.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:mar",
@@ -434,7 +434,7 @@
       "Name": "MAR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/MAR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:mas",
@@ -442,7 +442,7 @@
       "Name": "MAS",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/MAS.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:mex",
@@ -450,7 +450,7 @@
       "Name": "MEX",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/MEX.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:mgl",
@@ -458,7 +458,7 @@
       "Name": "MGL",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/MGL.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:mkd",
@@ -466,7 +466,7 @@
       "Name": "MKD",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/MKD.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ned",
@@ -474,7 +474,7 @@
       "Name": "NED",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/NED.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ngr",
@@ -482,7 +482,7 @@
       "Name": "NGR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/NGR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:nor",
@@ -490,7 +490,7 @@
       "Name": "NOR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/NOR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:nzl",
@@ -498,7 +498,7 @@
       "Name": "NZL",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/NZL.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:oma",
@@ -506,7 +506,7 @@
       "Name": "OMA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/OMA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:other",
@@ -514,7 +514,7 @@
       "Name": "Other",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/Other.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:pak",
@@ -522,7 +522,7 @@
       "Name": "PAK",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/PAK.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:pan",
@@ -530,7 +530,7 @@
       "Name": "PAN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/PAN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:per",
@@ -538,7 +538,7 @@
       "Name": "PER",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/PER.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:phi",
@@ -546,7 +546,7 @@
       "Name": "PHI",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/PHI.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:pol",
@@ -554,7 +554,7 @@
       "Name": "POL",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/POL.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:por",
@@ -562,7 +562,7 @@
       "Name": "POR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/POR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:qat",
@@ -570,7 +570,7 @@
       "Name": "QAT",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/QAT.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:rou",
@@ -578,7 +578,7 @@
       "Name": "ROU",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/ROU.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:rsa",
@@ -586,7 +586,7 @@
       "Name": "RSA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/RSA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:rus",
@@ -594,7 +594,7 @@
       "Name": "RUS",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/RUS.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:sen",
@@ -602,7 +602,7 @@
       "Name": "SEN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/SEN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:slo",
@@ -610,7 +610,7 @@
       "Name": "SLO",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/SLO.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:srb",
@@ -618,7 +618,7 @@
       "Name": "SRB",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/SRB.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:sui",
@@ -626,7 +626,7 @@
       "Name": "SUI",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/SUI.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:svk",
@@ -634,7 +634,7 @@
       "Name": "SVK",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/SVK.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:swe",
@@ -642,7 +642,7 @@
       "Name": "SWE",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/SWE.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:syr",
@@ -650,7 +650,7 @@
       "Name": "SYR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/SYR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:tha",
@@ -658,7 +658,7 @@
       "Name": "THA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/THA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:tun",
@@ -666,7 +666,7 @@
       "Name": "TUN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/TUN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:tur",
@@ -674,7 +674,7 @@
       "Name": "TUR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/TUR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ukr",
@@ -682,7 +682,7 @@
       "Name": "UKR",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/UKR.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:uru",
@@ -690,7 +690,7 @@
       "Name": "URU",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/URU.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:usa",
@@ -698,7 +698,7 @@
       "Name": "USA",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/USA.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:uzb",
@@ -706,7 +706,7 @@
       "Name": "UZB",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/UZB.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:ven",
@@ -714,7 +714,7 @@
       "Name": "VEN",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/VEN.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     },
     {
       "Id": "tmstadium:vie",
@@ -722,7 +722,7 @@
       "Name": "VIE",
       "Rarity": 2,
       "SkinPath": "Skins/Models/StadiumCar/VIE.zip",
-      "Authors": ["NADEO"]
+      "Author": "NADEO"
     }
   ]
 }

@@ -1,10 +1,10 @@
 {
   "$schema": "./index.schema.json",
   "SourceUrls": [
-    "file://Media/Data/PlayerModels/Trackmania/Trackmania.json",
-    "file://Media/Data/PlayerModels/TMCanyon/TMCanyon.json",
-    "file://Media/Data/PlayerModels/TMValley/TMValley.json",
-    "file://Media/Data/PlayerModels/TMLagoon/TMLagoon.json"
+    "./Trackmania/Trackmania.json",
+    "./TMCanyon/TMCanyon.json",
+    "./TMValley/TMValley.json",
+    "./TMLagoon/TMLagoon.json"
   ],
   "SortOverrides": [
     "trackmania:islandcar",
