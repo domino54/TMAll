@@ -135,15 +135,22 @@ Void SwitchSortCriterion(Text _BrowserName)
 	}
 }
 
+Boolean IsDisplayableThumbnail(Text _FileName)
+{
+	// https://mp4.openplanet.dev/Plug/CPlugFileImg
+	return TextLib::RegexFind("\\.(jpe?g|tga|dds|png|exr|hdr|jxr|tgs|webp|webm)$", _FileName, "i").count > 0;
+}
+
 Text[Text] GetMetadataFromFile(Text _BrowserName, Text _File)
 {
 	declare SplitFileName = TextLib::Split("\\", _File);
+	declare CanDisplay = IsDisplayableThumbnail(_File);
 	declare Text ThumbnailImage;
 	declare Text SecondThumbnailImage;
 	if (G_Thumbnail[_BrowserName] == "NoThumbnail") {
 		ThumbnailImage = "";
 		SecondThumbnailImage = "File";
-	} else if (G_Thumbnail[_BrowserName] == "") {
+	} else if (G_Thumbnail[_BrowserName] == "" && CanDisplay) {
 		ThumbnailImage = G_FilePrefix[_BrowserName] ^ _File;
 		SecondThumbnailImage = "";
 	} else {
@@ -172,6 +179,17 @@ Text[Text] GetMetadataFromFolder(Text _BrowserName, Text _Folder)
 			"Thumbnail2"	=> "", // ??
 			"Thumbnail3"	=> "", // ??
 			"State"			=> "Available"];
+}
+
+Text[Text] GetMetadataFromDefault(Text _Name) {
+	return [
+		"Path" => "",
+		"Name" => _Name,
+		"Thumbnail" => "",
+		"SecondThumbnailImage" => "EmptyThumbnail",
+		"State" => "Available",
+		"Logo" => ""
+	];
 }
 
 Text[] GetAllSortedFiles(Text _BrowserName, Boolean _IsSortingFromDateRatherThanName, Boolean _IsSortingFromDescendingOrder)
@@ -274,6 +292,10 @@ Text[Text][] GetMainData(Text _BrowserName) {
 			continue;
 		}
 		Result.add(GetMetadataFromFolder(_BrowserName, SubFolder));
+	}
+	// TODO Remove hardcoded default option for mods
+	if (TextLib::EndsWith("\\Mod\\", G_ListTaskResult[_BrowserName].Path) && Result.count < G_ElemsPerPage[_BrowserName]) {
+		Result.add(GetMetadataFromDefault("(" ^ TextLib::GetTranslatedText("Default") ^ ")"));
 	}
 	//declare Text[] RequestedFiles = GetAllSortedFiles(G_IsSortingFromDateRatherThanName[_BrowserName], G_IsSortingFromDescendingOrder[_BrowserName]);
 	declare MediaIndex = G_AllPages[_BrowserName][G_CurrentPage[_BrowserName]];

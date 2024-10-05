@@ -2,19 +2,16 @@
 
 #Const C_BasePath1				"Skins\\"
 #Const C_BasePath2				"\\Mod\\"
+#Const C_FilePrefix				""
 #Const C_BrowserName			"ModBrowser"
 #Const C_MediaType				CDataFileMgr::EMediaType::Skins
+#Const C_ThumbnailType		""
+
+declare CTaskResult_FileList G_TaskResult;
 
 Void Load()
 {
-	declare Text ProjectEnviro for LocalUser;
-	declare Text BasePath;
-	if (ProjectEnviro == "TMAll" || ProjectEnviro == "") {
-		BasePath = C_BasePath1;
-	} else {
-		BasePath = C_BasePath1 ^ ProjectEnviro ^ C_BasePath2;
-	}
-	FileBrowserAPI::Load(C_BrowserName, BasePath, C_MediaType);
+	FileBrowserAPI::Load(C_BrowserName, C_BasePath1, C_MediaType, C_ThumbnailType, C_FilePrefix);
 }
 
 Text FullPath(Text _Path)
@@ -121,17 +118,18 @@ Integer GetMaxPages()
 	return FileBrowserAPI::GetMaxPages(C_BrowserName);
 }
 
-Void FetchMods()
+Void FetchMods(Text _Enviro)
 {
-	FileBrowserAPI::FetchData(C_BrowserName, "", True);
+	if (G_TaskResult != Null) DataFileMgr.TaskResult_Release(G_TaskResult.Id);
+	G_TaskResult = DataFileMgr.Media_GetGameList(C_MediaType, _Enviro ^ C_BasePath2, True, False, False);
 }
 
 Boolean HasFetchedMods()
 {
-	return HasFetched();
+	return G_TaskResult.HasSucceeded;
 }
 
 Boolean HasAMod()
 {
-	return (FileBrowserAPI::GetTaskResult(C_BrowserName).Files.count > 0);
+	return G_TaskResult.Files.count > 0;
 }

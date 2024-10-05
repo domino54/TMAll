@@ -17,9 +17,22 @@
 
 #Const C_Context1		"MakerCampaign"
 
+#Const C_PreviewName	"ModPreview"
+
 declare Text G_FolderPath;
 
+Void Preview(Text _MediaPath)
+{
+	LayerCustomEvent(Layers::Get(C_PreviewName), "Show", [_MediaPath]);
+}
+
+Void StopPreview()
+{
+	LayerCustomEvent(Layers::Get(C_PreviewName), "Hide", []);
+}
+
 Void Load() {
+	MediaBrowserController::Load(LBModBrowser::Build(), C_PageName, C_BrowserName, C_MediaTitle);
 	ModBrowserAPI::Load();
 }
 
@@ -40,11 +53,16 @@ Boolean IsRunning()
 	return MediaBrowserController::IsRunning(C_BrowserName);
 }
 
-Void Show(Text _EventNamePrefix, Text[] _ButtonNames, Text _MediaTitle, Text[] _SecondaryButtonNames)
+Void Show(Text _EventNamePrefix, Text _FolderPath, Text[] _ButtonNames, Text _MediaTitle, Text[] _SecondaryButtonNames)
 {
-	G_FolderPath = "";
+	G_FolderPath = _FolderPath;
 	ModBrowserAPI::FetchData(G_FolderPath);
 	MediaBrowserController::Show(C_BrowserName, C_PageName, _EventNamePrefix, _ButtonNames, _MediaTitle, _SecondaryButtonNames);
+}
+
+Void Show(Text _EventNamePrefix, Text[] _ButtonNames, Text _MediaTitle, Text[] _SecondaryButtonNames)
+{
+	Show(_EventNamePrefix, "", _ButtonNames, _MediaTitle, _SecondaryButtonNames);
 }
 
 Void Show(Text _EventNamePrefix, Text[] _ButtonNames, Text _MediaTitle)
@@ -75,9 +93,9 @@ Void ForceHide()
 	MediaBrowserController::ForceHide(C_BrowserName);
 }
 
-Void FetchMods()
+Void FetchMods(Text _Enviro)
 {
-	ModBrowserAPI::FetchMods();
+	ModBrowserAPI::FetchMods(_Enviro);
 }
 
 Boolean HasFetchedMods()
