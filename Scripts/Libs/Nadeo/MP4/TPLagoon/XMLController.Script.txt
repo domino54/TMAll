@@ -19,6 +19,7 @@ declare Text		  				G_ProjectEnviro;
 declare Boolean						G_AllowAllModes;
 declare Boolean						G_DisplayTitleServersOnly;
 declare Text						G_FlashUrl;
+declare Text						G_GarageMapPath;
 
 declare Text[]						G_AllowedOnlineModes;
 
@@ -237,6 +238,11 @@ Text GetFlashUrl()
 	return G_FlashUrl;
 }
 
+Text GetGarageMapPath()
+{
+	return G_GarageMapPath;
+}
+
 Text Private_LoadXml(Text _Path) {
 	declare XmlFile = "";
 	
@@ -406,6 +412,8 @@ Void GetXML()
 			G_Gameplay_Gravity			= MapNode.GetAttributeReal("gravitycoef", 1.);
 		} else if (MapNode.Name == "Resources") {
 			G_FlashUrl					= MapNode.GetAttributeText("flashurl", LoadedTitle.TitleId ^ "");
+		} else if (MapNode.Name == "Garage") {
+			G_GarageMapPath					= MapNode.GetAttributeText("path", "");
 		}
 
 		if(G_Sections.existskey(MapNode.Name))

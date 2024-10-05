@@ -96,7 +96,7 @@
 	<maker>TMAllMaker@domino54</maker>
 	<limit_camera_fov>false</limit_camera_fov>
 	<use_hmd>false</use_hmd>
-	<unlock_features>0</unlock_features>
+	<unlock_features>16</unlock_features>
 	<hud3dfont name=""/>
 	<hud_default_module name=""/>
 </maniaplanet_title>

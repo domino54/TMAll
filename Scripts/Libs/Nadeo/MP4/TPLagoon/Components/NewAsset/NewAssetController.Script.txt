@@ -42,9 +42,12 @@ declare Integer	G_EditorChoose;
 declare Integer G_FieldChoose;
 declare Integer G_StadiumChoose;
 declare Integer G_ValleyChoose;
+declare Integer	G_MoodChoose;
+declare Text	G_ModSelect;
 declare Text	G_PageToGoBackTo;
 declare Text	G_SettingsXml;
 declare Boolean	G_Advanced;
+declare Text	G_LoadingScreen;
 
 Void Build(Text _LayerName, Boolean _Attach) {
 
@@ -107,6 +110,13 @@ Boolean IsAtFirstPage()
 	return (G_PageNumber == 1);
 }
 
+Text Get_MoodText(Integer _Index)
+{
+	declare Text[] Moods = ["Sunrise", "Day", "Sunset", "Night"];
+	if(!Moods.existskey(_Index)) return "MoodNotFound";
+	return Moods[_Index];
+}
+
 Text Get_EnviroText(Integer _Index)
 {
 	declare Text[] Environments = ["Canyon", "Stadium", "Valley", "Lagoon"];
@@ -127,12 +137,12 @@ Text Get_VehicleText(Integer _Index)
 	return Vehicles[_Index];
 }
 
-Text Get_PlayerModelText(Text _Vehicle, Text _Gameplay)
+Text Get_PlayerModelText(Text _Vehicle, Text _Gameplay, Boolean _IsStadium)
 {
 	if (_Gameplay == "")
 	{
 		declare Text[] Archetypes = ["CanyonCar", "StadiumCar", "ValleyCar", "LagoonCar"];
-	    if(!Archetypes.exists(_Vehicle)) return "Vehicles\\" ^ _Vehicle ^ ".Item.Gbx";
+		if (!Archetypes.exists(_Vehicle) || (_IsStadium && _Vehicle != "StadiumCar")) return "Vehicles\\" ^ _Vehicle ^ ".Item.Gbx";
 		return _Vehicle;
 	}
 
@@ -252,7 +262,7 @@ Void Load() {
 Void Hide() {
 	G_IsRunning		= False;
 	G_PageNumber	= 0;
-	ModBrowserController::ForceHide();
+	// ModBrowserController::ForceHide();
 	Pages::GotoHome(G_PageToGoBackTo);
 	TrackBrowserController::Show();
 }
@@ -260,7 +270,7 @@ Void Hide() {
 Void ForceHide() {
 	G_IsRunning		= False;
 	G_PageNumber	= 0;
-	ModBrowserController::ForceHide();
+	// ModBrowserController::ForceHide();
 }
 
 Void SetMoodsLock()
@@ -299,14 +309,12 @@ Void GoToNewMap(Boolean _IsSimple)
 	else
 	{
 		G_Advanced = False;
+		G_ModSelect = "";
 		G_PageNumber += 1;
 		declare Boolean IsMods = False; //ModBrowserController::HasAMod();
 		if(IsMods)
 		{
-			ModBrowserController::Show("ModsFromNewMap", [//L16N |Infinitive| In a popup, a button to select
-			_("Choose")],
-			//L16N |Noun, plural| Refers to alteration of textures to give a different display.
-			_("Mods"));
+			// Deprecated
 		} else {
 			SetMoodsLock();
 			declare Text ProjectEnviro for LocalUser;
@@ -320,7 +328,7 @@ Void GoToNewMap(Boolean _IsSimple)
 			}
 			else
 			{
-				Pages::GotoNext("Moods");
+				Pages::GotoNext("Vehicle");
 			}
 		}
 	}
@@ -351,15 +359,17 @@ Void Show(Text _PageToGoBackTo) {
 
 }
 
-Void LaunchEditor(Text _Mood, Text _Thumbnail)
+Void LaunchEditor()
 {
-	LoadingScreen::SetLoadingType(1, _Thumbnail);
+	LoadingScreen::SetLoadingType(1, G_LoadingScreen);
 	declare Text Enviro   = Get_EnviroText(G_EnviroChoose);
 	declare Text Vehicle  = Get_VehicleText(G_VehicleChoose);
-	declare Text Deco     = _Mood ^ Get_PostMood(G_EnviroChoose);
+	declare Text Mood     = Get_MoodText(G_MoodChoose);
+	declare Text Deco     = Mood ^ Get_PostMood(G_EnviroChoose);
+	declare Text Mod      = G_ModSelect;
 	declare Text Gameplay = "";
 
-	declare Text PlayerModel        = Get_PlayerModelText(Vehicle, Gameplay);
+	declare Text PlayerModel        = Get_PlayerModelText(Vehicle, Gameplay, Enviro == "Stadium");
 	declare Text MapType            = ""; // "Race.Script.txt";
 	MapType = "Race.Script.txt";
 	declare Text EditorPluginScript = G_MapEditorScriptName;
@@ -372,34 +382,36 @@ Void LaunchEditor(Text _Mood, Text _Thumbnail)
 		MapType            = "";
 		EditorPluginScript = "";
 		SettingsXml        = "";
-		Deco			   = Get_FieldText(G_FieldChoose) ^ "48x48"^_Mood;
+		Deco			   = Get_FieldText(G_FieldChoose) ^ "48x48"^Mood;
 	}
 	if (Enviro == "Stadium") {
-		declare Text Size = Get_StadiumBaseMapSize(G_StadiumChoose);
-		declare Text BaseMap = Get_BaseMapPath(Enviro, Size, Gameplay, _Mood, Vehicle);
-
-		TitleFlow.EditNewMapFromBaseMap(BaseMap, "", PlayerModel, MapType, EditorPluginScript, SettingsXml);
+		Deco = Get_PreStadium(G_StadiumChoose) ^ Mood;
 	}
-	else if (Enviro == "Valley" && Get_PostValley(G_ValleyChoose) == "64") {
-		declare Text BaseMap = Get_BaseMapPath(Enviro, "64", Gameplay, _Mood, Vehicle);
+	// Use base maps when making a Stadium map with other car without Openplanet
+	if (Enviro == "Stadium" && PlayerModel != "StadiumCar" && System.ExtraTool_Info == "") {
+		declare Text Size = Get_StadiumBaseMapSize(G_StadiumChoose);
+		declare Text BaseMap = Get_BaseMapPath(Enviro, Size, Gameplay, Mood, Vehicle);
 
-		TitleFlow.EditNewMapFromBaseMap(BaseMap, "", PlayerModel, MapType, EditorPluginScript, SettingsXml);
+		TitleFlow.EditNewMapFromBaseMap(BaseMap, Mod, PlayerModel, MapType, EditorPluginScript, SettingsXml);
+	}
+	// Valley 64 is not natively supported, use base maps to access it
+	else if (Enviro == "Valley" && Get_PostValley(G_ValleyChoose) == "64") {
+		declare Text BaseMap = Get_BaseMapPath(Enviro, "64", Gameplay, Mood, Vehicle);
+
+		TitleFlow.EditNewMapFromBaseMap(BaseMap, Mod, PlayerModel, MapType, EditorPluginScript, SettingsXml);
 	}
 	else {
-		TitleFlow.EditNewMap(Enviro, Deco, "", PlayerModel, MapType, EditorPluginScript, SettingsXml);
+		TitleFlow.EditNewMap(Enviro, Deco, Mod, PlayerModel, MapType, EditorPluginScript, SettingsXml);
 	}
 	Hide();
 }
 
 Void GoToByEnviro(Integer _Enviro) {
-    // TODO: Openplanet detection.
-	if (_Enviro == 1 && False) {
-		G_VehicleChoose = 1;
-		Pages::GotoNext("Stadium");
-	}
-	else {
-		Pages::GotoNext("Vehicle");
-	}
+	declare Text Enviro = Get_EnviroText(_Enviro);
+	// Environment is selected first, by the time the user select a mood,
+	// information if there are mods available will be ready.
+	ModBrowserController::FetchMods(Enviro);
+	Pages::GotoNext("Vehicle");
 }
 
 Void GoToFromVehicleByEnviro(Integer _Index) {
@@ -410,11 +422,23 @@ Void GoToFromVehicleByEnviro(Integer _Index) {
 	}
 }
 
+Void GoToFromMood() {
+	if (ModBrowserController::HasAMod()) {
+		declare Text Enviro = Get_EnviroText(G_EnviroChoose);
+
+		ModBrowserController::Show("ModsFromNewMap", Enviro ^ "\\Mod", [//L16N |Infinitive| In a popup, a button to select
+			_("Choose")],
+			//L16N |Noun, plural| Refers to alteration of textures to give a different display.
+			_("Mods"), []);
+	}
+	else {
+		LaunchEditor();
+	}
+}
+
 Void Loop() {
 	if (!G_IsRunning) return;
-	if (ModBrowserController::HasFetchedMods() && G_Advanced) {
-		GoToNewMap(False);
-	}
+
 	foreach(Event in PendingEvents) {
 		if(Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
 		switch(Event.CustomEventType) {
@@ -425,25 +449,33 @@ Void Loop() {
 				if (Event == Null) {
 					continue;
 				}
-				LaunchEditor("Sunrise", Event.CustomEventData[0]);
+				G_LoadingScreen = Event.CustomEventData[0];
+				G_MoodChoose = 0;
+				GoToFromMood();
 			}
 			case "Button_Mood1" : {
 				if (Event == Null) {
 					continue;
 				}
-				LaunchEditor("Day", Event.CustomEventData[0]);
+				G_LoadingScreen = Event.CustomEventData[0];
+				G_MoodChoose = 1;
+				GoToFromMood();
 			}
 			case "Button_Mood2" : {
 				if (Event == Null) {
 					continue;
 				}
-				LaunchEditor("Sunset", Event.CustomEventData[0]);
+				G_LoadingScreen = Event.CustomEventData[0];
+				G_MoodChoose = 2;
+				GoToFromMood();
 			}
 			case "Button_Mood3" : {
 				if (Event == Null) {
 					continue;
 				}
-				LaunchEditor("Night", Event.CustomEventData[0]);
+				G_LoadingScreen = Event.CustomEventData[0];
+				G_MoodChoose = 3;
+				GoToFromMood();
 			}
 			case "Button_Field0" : {
 				G_FieldChoose = 0;
@@ -552,24 +584,12 @@ Void Loop() {
 			}
 			case "Button_Advanced" : {
 				G_Advanced = True;
-				ModBrowserController::FetchMods();
 			}
 			case "ModsFromNewMap_Button_0" : {
-				G_PageNumber += 1;
 				declare Text ModPath = Event.CustomEventData[0];
-				declare Text ProjectEnviro for LocalUser;
-				ModBrowserController::MakeIdle();
-				SetMoodsLock();
-				if(ProjectEnviro == "Storm")
-				{
-					Pages::GotoNext("Fields");
-				}
-				else
-				{
-					Pages::GotoNext("Moods");
-				}
-
-				//G_ModSelect = ModPath;
+				G_PageNumber += 1;
+				G_ModSelect = ModPath;
+				LaunchEditor();
 			}
 		}
 	}
