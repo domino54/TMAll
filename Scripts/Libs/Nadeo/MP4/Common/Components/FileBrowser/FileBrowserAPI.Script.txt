@@ -186,7 +186,7 @@ Text[Text] GetMetadataFromDefault(Text _Name) {
 		"Path" => "",
 		"Name" => _Name,
 		"Thumbnail" => "",
-		"SecondThumbnailImage" => "EmptyThumbnail",
+		"SecondThumbnailImage" => "File",
 		"State" => "Available",
 		"Logo" => ""
 	];

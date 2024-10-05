@@ -61,7 +61,8 @@ Boolean IsRunning()
 Void Show(Text _EventNamePrefix, Text[] _ButtonNames, Text _MediaTitle, Text[] _SecondaryButtonNames, Text _Context, Boolean _IsFilteringUnvalidatedTracks)
 {
 	// Hardcoded fix for disappearing maps after selecting them in match settings editor
-	if (_EventNamePrefix != "TracksToMatchSettings") {
+	TrackBrowserAPI::CancelHardFetchMetadata();
+	if (_Context != "MatchSettingsEditor") {
 		TrackBrowserAPI::ResetMatchSettingsTrackList();
 	}
 	if (G_Context != _Context) {
