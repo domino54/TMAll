@@ -280,57 +280,46 @@ Void SetMoodsLock()
 	MenuButtons::SetButtonActive("Moods", ButtonLock);
 }
 
+Void LaunchSimpleEditor() {
+	LoadingScreen::SetLoadingType(1, C_LoadingScreenSimpleDefault);
+
+	declare Text Enviro             = Get_EnviroText(G_EnviroChoose);
+	declare Text Deco    			= "Day" ^ Get_PostMood(G_EnviroChoose);
+	declare Text PlayerModel        = Enviro^"Car";
+	declare Text MapType            = "Race.Script.txt";
+	declare Text EditorPluginScript = G_MapEditorScriptName;
+	declare Text SettingsXml        = G_SettingsXml;
+	declare Text ProjectEnviro		for LocalUser;
+
+	if (ProjectEnviro == "Storm") {
+		Enviro			   = "Storm";
+		PlayerModel        = "";
+		MapType            = "";
+		EditorPluginScript = "";
+		SettingsXml        = "";
+		Deco			   = "Land48x48Day";
+	}
+
+	TitleFlow.EditNewMap(Enviro, Deco, "", PlayerModel, MapType, True, EditorPluginScript, SettingsXml);
+	Hide();
+}
+
 Void GoToNewMap(Boolean _IsSimple)
 {
-	if(_IsSimple)
-	{
-		G_Advanced = False;
-		LoadingScreen::SetLoadingType(1, C_LoadingScreenSimpleDefault);
+	SetMoodsLock();
+	declare Text ProjectEnviro for LocalUser;
 
-		declare Text Enviro             = Get_EnviroText(G_EnviroChoose);
-		declare Text Deco    			= "Day" ^ Get_PostMood(G_EnviroChoose);
-		declare Text PlayerModel        = Enviro^"Car";
-		declare Text MapType            = "Race.Script.txt";
-		declare Text EditorPluginScript = G_MapEditorScriptName;
-		declare Text SettingsXml        = G_SettingsXml;
-		declare Text ProjectEnviro		for LocalUser;
-		if(ProjectEnviro == "Storm")
-		{
-			Enviro			   = "Storm";
-			PlayerModel        = "";
-			MapType            = "";
-			EditorPluginScript = "";
-			SettingsXml        = "";
-			Deco			   = "Land48x48Day";
-		}
-		Hide();
-		TitleFlow.EditNewMap(Enviro, Deco, "", PlayerModel, MapType, True, EditorPluginScript, SettingsXml);
+	if (ProjectEnviro == "TMAll") {
+		Pages::GotoNext("Enviro");
 	}
-	else
-	{
-		G_Advanced = False;
-		G_ModSelect = "";
-		G_PageNumber += 1;
-		declare Boolean IsMods = False; //ModBrowserController::HasAMod();
-		if(IsMods)
-		{
-			// Deprecated
-		} else {
-			SetMoodsLock();
-			declare Text ProjectEnviro for LocalUser;
-			if(ProjectEnviro == "Storm")
-			{
-				Pages::GotoNext("Fields");
-			}
-			else if(ProjectEnviro == "TMAll")
-			{
-				Pages::GotoNext("Enviro");
-			}
-			else
-			{
-				Pages::GotoNext("Vehicle");
-			}
-		}
+	else if (_IsSimple) {
+		LaunchSimpleEditor();
+	}
+	else if (ProjectEnviro == "Storm") {
+		Pages::GotoNext("Fields");
+	}
+	else {
+		Pages::GotoNext("Vehicle");
 	}
 }
 
@@ -341,6 +330,7 @@ Void Show(Text _PageToGoBackTo) {
 	G_PageNumber		= 1;
 	G_IsRunning			= True;
 	G_PageToGoBackTo	= _PageToGoBackTo;
+	G_ModSelect		= "";
 	ChangeAllMenus();
 
 	declare Text MapEditorMode = UserMgr.MainUser.Config.Editors_MapEditorMode^""; //En text parce que l'EMapEditorMode n'est pas encore trouvé
@@ -411,7 +401,13 @@ Void GoToByEnviro(Integer _Enviro) {
 	// Environment is selected first, by the time the user select a mood,
 	// information if there are mods available will be ready.
 	ModBrowserController::FetchMods(Enviro);
-	Pages::GotoNext("Vehicle");
+
+	if (G_Advanced) {
+		Pages::GotoNext("Vehicle");
+	}
+	else {
+		LaunchSimpleEditor();
+	}
 }
 
 Void GoToFromVehicleByEnviro(Integer _Index) {
@@ -443,6 +439,8 @@ Void Loop() {
 		if(Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
 		switch(Event.CustomEventType) {
 			case "Button_Simple" : {
+				G_Advanced = False;
+				G_PageNumber += 1;
 				GoToNewMap(True);
 			}
 			case "Button_Mood0" : {
@@ -451,6 +449,7 @@ Void Loop() {
 				}
 				G_LoadingScreen = Event.CustomEventData[0];
 				G_MoodChoose = 0;
+				G_PageNumber += 1;
 				GoToFromMood();
 			}
 			case "Button_Mood1" : {
@@ -459,6 +458,7 @@ Void Loop() {
 				}
 				G_LoadingScreen = Event.CustomEventData[0];
 				G_MoodChoose = 1;
+				G_PageNumber += 1;
 				GoToFromMood();
 			}
 			case "Button_Mood2" : {
@@ -467,6 +467,7 @@ Void Loop() {
 				}
 				G_LoadingScreen = Event.CustomEventData[0];
 				G_MoodChoose = 2;
+				G_PageNumber += 1;
 				GoToFromMood();
 			}
 			case "Button_Mood3" : {
@@ -475,6 +476,7 @@ Void Loop() {
 				}
 				G_LoadingScreen = Event.CustomEventData[0];
 				G_MoodChoose = 3;
+				G_PageNumber += 1;
 				GoToFromMood();
 			}
 			case "Button_Field0" : {
@@ -584,6 +586,8 @@ Void Loop() {
 			}
 			case "Button_Advanced" : {
 				G_Advanced = True;
+				G_PageNumber += 1;
+				GoToNewMap(False);
 			}
 			case "ModsFromNewMap_Button_0" : {
 				declare Text ModPath = Event.CustomEventData[0];
