@@ -306,6 +306,7 @@ Void LaunchSimpleEditor() {
 
 Void GoToNewMap(Boolean _IsSimple)
 {
+	G_Advanced = !_IsSimple;
 	SetMoodsLock();
 	declare Text ProjectEnviro for LocalUser;
 
