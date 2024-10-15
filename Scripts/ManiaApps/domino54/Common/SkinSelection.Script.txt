@@ -1,10 +1,10 @@
 /**
  * @name SkinSelection.Script.txt
  * @author domino54
- * @version 2024-10-05
+ * @version 2024-10-15
  */
 
-#Const Version      "2024-10-05"
+#Const Version      "2024-10-15"
 #Const ScriptName   "ManiaApps/domino54/Common/SkinSelection.Script.txt"
 
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
@@ -130,6 +130,8 @@ Text Private_CreateManialinkLayer() {
   </frame>
 </frame>
 
+<quad id="Quad_AnimDummy" hidden="1" />
+
 <script><!--
 
 #Include "MathLib" as ML
@@ -237,11 +239,26 @@ Void SetSkinButtonHover(CMlFrame _Frame, Boolean _IsHovered) {
   }
 }
 
-Void ScrollIntoIndex(Integer _Index) {
+Void ScrollIntoIndex(Integer _Index, Boolean _Instant) {
   declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
-  declare _Offset = {{{ButtonWidth}}} * (0.5 + _Index - {{{C_LibSkinSelection_NbButtonsScreen / 2.0}}});
+  declare Quad_AnimDummy <=> (Page.GetFirstChild("Quad_AnimDummy") as CMlQuad);
 
-  Frame_ScrollContainer.ScrollOffset.Y = _Offset;
+  Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
+
+  declare Offset = {{{ButtonWidth}}} * (0.5 + _Index - {{{C_LibSkinSelection_NbButtonsScreen / 2.0}}});
+  declare Clamped = ML::Clamp(Offset, Frame_ScrollContainer.ScrollMin.X, Frame_ScrollContainer.ScrollMax.Y);
+
+  AnimMgr.Flush(Quad_AnimDummy);
+
+  if (_Instant) {
+    Frame_ScrollContainer.ScrollOffset.Y = Clamped;
+  } else {
+    AnimMgr.Add(Quad_AnimDummy, "<quad pos='0 "^Clamped^"' />", 250, CAnimManager::EAnimManagerEasing::QuadOut);
+  }
+}
+
+Void ScrollIntoIndex(Integer _Index) {
+  ScrollIntoIndex(_Index, False);
 }
 
 main() {
@@ -249,6 +266,7 @@ main() {
   declare Frame_ScrollExempt <=> (Page.GetFirstChild("Frame_ScrollExempt") as CMlFrame);
   declare Quad_ScrollTarget <=> (Page.GetFirstChild("Quad_ScrollTarget") as CMlQuad);
 
+  declare Quad_AnimDummy <=> (Page.GetFirstChild("Quad_AnimDummy") as CMlQuad);
   declare Frame_ScrollBar <=> (Page.GetFirstChild("Frame_ScrollBar") as CMlFrame);
   declare Quad_ScrollBarHandle <=> (Page.GetFirstChild("Quad_ScrollBarHandle") as CMlQuad);
   declare Quad_ScrollBarTarget <=> (Page.GetFirstChild("Quad_ScrollBarTarget") as CMlQuad);
@@ -270,13 +288,20 @@ main() {
 
   declare PrevScrollOffsetY = -1.0;
   declare PrevStartIndex = -1000;
+  declare PrevAnimPosY = 0.0;
 
   declare ScrollIsDragging = False;
   declare Real ScrollMouseOriginX;
   declare Real ScrollOffsetOriginX;
 
   while (True) {
-    yield;
+    // Can't yield here or the events will be missed.
+
+    if (PrevAnimPosY != Quad_AnimDummy.RelativePosition_V3.Y) {
+      PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
+
+      Frame_ScrollContainer.ScrollOffset.Y = PrevAnimPosY;
+    }
 
     foreach (Event in PendingEvents) {
       if (Event.Type == CMlScriptEvent::Type::MouseClick) {
@@ -348,13 +373,16 @@ main() {
           Frame_ScrollContainer.ScrollMax.Y = ML::Max(0.0, MaxWidth - {{{C_LibSkinSelection_ButtonsTotalWidth}}});
           Quad_ScrollTarget.Size.X = Frame_ScrollContainer.Size.Y + Frame_ScrollContainer.ScrollMax.Y;
           yield; // Unfortunately have to wait, because scroll does not update in the same frame.
-          ScrollIntoIndex(SelectedIndex);
+          ScrollIntoIndex(SelectedIndex, True);
           Frame_SkinButtonInstances.RelativePosition_V3.X = ML::Max(0.0, {{{C_LibSkinSelection_ButtonsTotalWidth}}} - MaxWidth) / 2;
         }
       }
     }
 
-    if (!PageIsVisible) continue;
+    if (!PageIsVisible) {
+      yield;
+      continue;
+    }
 
     foreach (Event in PendingEvents) {
       if (Event.Type == CMlScriptEvent::Type::MouseClick) {
@@ -474,6 +502,8 @@ main() {
         SetSkinButtonCanApply(Frame, IsSelected && !IsApplied);
       }
     }
+
+    yield;
   }
 }
 

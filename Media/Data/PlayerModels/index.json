@@ -5,6 +5,7 @@
     "./TMCanyon/TMCanyon.json",
     "./TMValley/TMValley.json",
     "./TMLagoon/TMLagoon.json",
+    "./TrafficCar/TrafficCar.json",
     "./TMAll/TMAll.json"
   ],
   "SortOverrides": [
