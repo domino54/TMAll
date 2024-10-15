@@ -1,10 +1,10 @@
 /**
  * @name MenuTabs.Script.txt
  * @author domino54
- * @version 2024-10-05
+ * @version 2024-10-15
  */
 
-#Const Version      "2024-10-05"
+#Const Version      "2024-10-15"
 #Const ScriptName   "ManiaApps/domino54/Common/MenuTabs.Script.txt"
 
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
@@ -101,6 +101,8 @@ Text Private_CreateManialinkLayer() {
   </frame>
 </frame>
 
+<quad id="Quad_AnimDummy" hidden="1" />
+
 <script><!--
 
 #Include "MathLib" as ML
@@ -183,17 +185,33 @@ Void SetActiveTabIndex(Integer _Index) {
   }
 }
 
-Void ScrollIntoIndex(Integer _Index) {
+Void ScrollIntoIndex(Integer _Index, Boolean _Instant) {
   declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
-  declare Offset = Frame_ScrollContainer.Size.X / -2 + _Index * {{{SizeX}}} + {{{HalfX}}};
+  declare Quad_AnimDummy <=> (Page.GetFirstChild("Quad_AnimDummy") as CMlQuad);
 
-  Frame_ScrollContainer.ScrollOffset.Y = Offset;
+  Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
+
+  declare Offset = Frame_ScrollContainer.Size.Y / -2 + _Index * {{{SizeX}}} + {{{HalfX}}};
+  declare Clamped = ML::Clamp(Offset, Frame_ScrollContainer.ScrollMin.X, Frame_ScrollContainer.ScrollMax.Y);
+
+  AnimMgr.Flush(Quad_AnimDummy);
+
+  if (_Instant) {
+    Frame_ScrollContainer.ScrollOffset.Y = Clamped;
+  } else {
+    AnimMgr.Add(Quad_AnimDummy, "<quad pos='0 "^Clamped^"' />", 250, CAnimManager::EAnimManagerEasing::QuadOut);
+  }
+}
+
+Void ScrollIntoIndex(Integer _Index) {
+  ScrollIntoIndex(_Index, False);
 }
 
 main() {
   declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
   declare Quad_ScrollTarget <=> (Page.GetFirstChild("Quad_ScrollTarget") as CMlQuad);
   declare Quad_LineEnd <=> (Page.GetFirstChild("Quad_LineEnd") as CMlQuad);
+  declare Quad_AnimDummy <=> (Page.GetFirstChild("Quad_AnimDummy") as CMlQuad);
 
   declare Quad_MoreLeft <=> (Page.GetFirstChild("Quad_MoreLeft") as CMlQuad);
   declare Quad_MoreRight <=> (Page.GetFirstChild("Quad_MoreRight") as CMlQuad);
@@ -218,11 +236,18 @@ main() {
 
   declare PrevStartIndex = -1000;
   declare PrevScrollOffsetY = 0.0;
+  declare PrevAnimPosY = 0.0;
 
   // EnableMenuNavigation(True, False, Null, 0);
 
   while (True) {
-    yield;
+    // Can't yield here or the events are missed.
+
+    if (PrevAnimPosY != Quad_AnimDummy.RelativePosition_V3.Y) {
+      PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
+
+      Frame_ScrollContainer.ScrollOffset.Y = PrevAnimPosY;
+    }
 
     foreach (Event in PendingEvents) {
       if (Event.Type == CMlScriptEvent::Type::MouseClick) {
@@ -296,13 +321,16 @@ main() {
             Quad_ScrollTarget.Size.X = MenuTabsData.count * {{{SizeX}}};
             Quad_LineEnd.RelativePosition_V3.X = Quad_ScrollTarget.Size.X;
             yield; // Unfortunately have to wait, because scroll does not update in the same frame.
-            ScrollIntoIndex(ActiveTabIndex);
+            ScrollIntoIndex(ActiveTabIndex, True);
           }
         }
       }
     }
 
-    if (!PageIsVisible) continue;
+    if (!PageIsVisible) {
+      yield;
+      continue;
+    }
 
     foreach (Event in Input.PendingEvents) {
       if (Event.Type != CInputEvent::EType::PadButtonPress) continue;
@@ -376,6 +404,8 @@ main() {
         SetTabIsActive(Frame, MenuTab.Id == ActiveTabId);
       }
     }
+
+    yield;
   }
 }
 
