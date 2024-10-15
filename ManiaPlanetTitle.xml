@@ -31,7 +31,10 @@
 	<editor>
 		<maptype name=""/>
 		<simple_editor_map name=""/>
-		<internalitems/>
+		<internalitems>
+			<item name="Stadium\eyebo\Rings\RingFinishManiaPlanet.Item.Gbx"/>
+			<item name="Stadium\eyebo\Rings\RingFinishNadeo.Item.Gbx"/>
+		</internalitems>
 	</editor>
 	<solo>
 		<!-- either campaign or playlist-->
@@ -84,7 +87,7 @@
 		<folder name="Actions" public="false" internal="false"/>
 		<folder name="Blocks" public="false" internal="false"/>
 		<folder name="Items" public="false" internal="false"/>
-		<folder name="Maps" public="false" internal="false"/>
+		<folder name="Maps" public="false" internal="true"/>
 		<folder name="Media" public="false" internal="false"/>
 		<folder name="Materials" public="false" internal="false"/>
 		<folder name="Modules" public="false" internal="false"/>
