@@ -1,0 +1,64 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "trafficcar:colors",
+  "Name": "TrafficCar Basic Color Skins",
+  "Skins": [
+    {
+      "Id": "trafficcar:charcoal",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Charcoal",
+      "SkinPath": "Skins/Models/TrafficCar/Charcoal.zip",
+      "Author": "Puriii"
+    },
+    {
+      "Id": "trafficcar:lapis",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Lapis",
+      "SkinPath": "Skins/Models/TrafficCar/Lapis.zip",
+      "Author": "Puriii"
+    },
+    {
+      "Id": "trafficcar:marmour",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Marmour",
+      "SkinPath": "Skins/Models/TrafficCar/Marmour.zip",
+      "Author": "Puriii"
+    },
+    {
+      "Id": "trafficcar:peridot",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Peridot",
+      "SkinPath": "Skins/Models/TrafficCar/Peridot.zip",
+      "Author": "Puriii"
+    },
+    {
+      "Id": "trafficcar:purpurite",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Purpurite",
+      "SkinPath": "Skins/Models/TrafficCar/Purpurite.zip",
+      "Author": "Puriii"
+    },
+    {
+      "Id": "trafficcar:ruby",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Ruby",
+      "SkinPath": "Skins/Models/TrafficCar/Ruby.zip",
+      "Author": "Puriii"
+    },
+    {
+      "Id": "trafficcar:silver",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Silver",
+      "SkinPath": "Skins/Models/TrafficCar/Silver.zip",
+      "Author": "Puriii"
+    },
+    {
+      "Id": "trafficcar:topaz",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Topaz",
+      "SkinPath": "Skins/Models/TrafficCar/Topaz.zip",
+      "Author": "Puriii"
+    }
+  ]
+}
