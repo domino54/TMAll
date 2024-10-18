@@ -1983,8 +1983,9 @@ Void Load(CTmMode _Mode, Text _ModeName, Integer _SpawnDuration, Boolean _IsRank
 		Layers::Attach(C_LAYERNAME_UI);
 		Layers::SetType(C_LAYERNAME_UI, CUILayer::EUILayerType::Normal);
 		// EG : wtf ?
-		declare Integer EndTime = Now + 100;
-		wait(Now >= EndTime);
+		// DM: indeed
+		// declare Integer EndTime = Now + 100;
+		// wait(Now >= EndTime);
 		
 		Layers::Create(C_LAYERNAME_TIMEOUT, Private_TimeOutTimer());
 		Layers::Attach(C_LAYERNAME_TIMEOUT);

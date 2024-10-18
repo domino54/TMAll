@@ -1,0 +1,294 @@
+/**
+ * Base for a map type in ManiaPlanet.
+ *
+ * @name MapTypeBase.Script.txt
+ * @author domino54
+ * @version 2024-10-18
+ */
+
+#Const MTB_Version      "2024-10-18"
+#Const MTB_ScriptName   "MapTypes/Base/MapTypeBase.Script.txt"
+
+#Include "Libs/Nadeo/Env.Script.txt" as Env
+#Include "Libs/Nadeo/Log.Script.txt" as Log
+
+#Setting S_ScriptEnvironment "" as "<hidden>" ///< Environment in which the script runs
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+declare Boolean MTB_Private_IsSwitchedToPlayground;
+declare Boolean MTB_Private_PlaygroundIsValidation;
+
+declare Boolean MTB_Setting_UseAutoResetObjectives;
+declare Boolean MTB_Setting_UseDefaultTestMode;
+declare Boolean MTB_Setting_UseDefaultValidation;
+declare Boolean MTB_Setting_UseDefaultIntro;
+
+// ---------------------------------- //
+// Settings
+// ---------------------------------- //
+***MTB_Settings***
+***
+MTB_Setting_UseAutoResetObjectives = True;
+MTB_Setting_UseDefaultTestMode = True;
+MTB_Setting_UseDefaultValidation = True;
+MTB_Setting_UseDefaultIntro = True;
+***
+
+// ---------------------------------- //
+// Log versions
+// ---------------------------------- //
+***MTB_LogVersions***
+***
+Log::RegisterScript(MTB_ScriptName, MTB_Version);
+Log::RegisterScript(Env::ScriptName, Env::Version);
+Log::RegisterScript(Log::ScriptName, Log::Version);
+***
+
+// ---------------------------------- //
+// Load libraries
+// ---------------------------------- //
+***MTB_LoadLibraries***
+***
+Env::Load();
+Env::Set(S_ScriptEnvironment);
+Log::Load();
+***
+
+// ---------------------------------- //
+// Map type loop
+// ---------------------------------- //
+***MTB_Loop***
+***
+// Manage editor events.
+foreach (Event in PendingEvents) {
+  switch (Event.Type) {
+    case CMapEditorPluginEvent::Type::MapModified: {
+      +++MTB_MapModified+++
+
+      MTB_UpdateValidability();
+    }
+
+    case CMapEditorPluginEvent::Type::StartTest: {
+      +++MTB_StartTest+++
+
+      if (MTB_Setting_UseDefaultTestMode) {
+        MTB_StartTest();
+      }
+    }
+
+    case CMapEditorPluginEvent::Type::StartValidation: {
+      +++MTB_StartValidation+++
+
+      if (MTB_Setting_UseDefaultValidation) {
+        MTB_StartValidation();
+      }
+    }
+
+    case CMapEditorPluginEvent::Type::EditObjectives: {
+      +++MTB_EditObjectives+++
+    }
+  }
+}
+
+// Section used when the map type is in the test mode or validation.
+if (MTB_Private_IsSwitchedToPlayground) {
+  +++Playground_Before+++
+
+  if (MTB_Private_PlaygroundIsValidation) {
+    +++Validation_Before+++
+  } else {
+    +++Test_Before+++
+  }
+
+  // Load items.
+  Mode.ItemList_Begin();
+  +++Playground_ItemList+++
+  Mode.ItemList_End();
+
+  MTB_EnterPlayground();
+
+  +++Playground_Init+++
+
+  if (MTB_Private_PlaygroundIsValidation) {
+    +++Validation_Init+++
+  } else {
+    +++Test_Init+++
+  }
+
+  // Play the default intro sequence.
+  if (MTB_Private_PlaygroundIsValidation && MTB_Setting_UseDefaultIntro) {
+    Mode.UIManager.UIAll.UISequence = CUIConfig::EUISequence::Intro;
+
+    while (!Mode.UIManager.UIAll.UISequenceIsCompleted) {
+      MTB_Yield();
+
+      +++Validation_Intro+++
+    }
+  }
+
+  Mode.UIManager.UIAll.UISequence = CUIConfig::EUISequence::Playing;
+
+  +++Playground_Start+++
+
+  if (MTB_Private_PlaygroundIsValidation) {
+    +++Validation_Start+++
+  } else {
+    +++Test_Start+++
+  }
+
+  while (MTB_Private_IsSwitchedToPlayground) {
+    MTB_Yield();
+
+    +++Playground_PlayLoop+++
+
+    if (MTB_Private_PlaygroundIsValidation) {
+      +++Validation_PlayLoop+++
+    } else {
+      +++Test_PlayLoop+++
+    }
+
+    // Leave the playground.
+    if (ValidationEndRequested && MTB_Private_IsSwitchedToPlayground) {
+      MTB_Private_IsSwitchedToPlayground = False;
+    }
+  }
+
+  +++Playground_End+++
+
+  if (MTB_Private_PlaygroundIsValidation) {
+    +++Validation_End+++
+  } else {
+    +++Test_End+++
+  }
+
+  Mode.UIManager.UILayerDestroyAll();
+
+  MTB_LeavePlayground();
+
+  Mode.ClientManiaAppUrl = "";
+  Audio.LimitSceneSoundVolumedB = 0.0;
+  MTB_Private_PlaygroundIsValidation = False;
+}
+***
+
+// ---------------------------------- //
+// Functions
+// ---------------------------------- //
+
+/**
+ * Yields the script.
+ * Should be the only function that is used for yielding, ever.
+ */
+Void MTB_Yield() {
+  +++MTB_Yield+++
+  yield;
+}
+
+/**
+ * Load in the map type's game mode.
+ */
+Void MTB_EnterPlayground() {
+  if (!IsSwitchedToPlayground) {
+    RequestEnterPlayground();
+  }
+  while (!IsSwitchedToPlayground || Mode == Null || Mode.AllPlayers.count <= 0) {
+    MTB_Yield();
+  }
+}
+
+/**
+ * Unload the map type's game mode.
+ */
+Void MTB_LeavePlayground() {
+  if (IsSwitchedToPlayground) {
+    RequestLeavePlayground();
+  }
+  while (IsSwitchedToPlayground) {
+    MTB_Yield();
+  }
+}
+
+CMapType::ValidationStatus MTB_Private_UpdateValidability() {
+  +++MTB_UpdateValidability+++
+
+  // Fallback to unmodified value.
+  return ValidationStatus;
+}
+
+/**
+ * Run the map type's validation check.
+ */
+Void MTB_UpdateValidability() {
+  declare ValidationResult = MTB_Private_UpdateValidability();
+
+  +++MTB_BeforeValidationStatus+++
+
+  if (ValidationStatus != ValidationResult) {
+    ValidationStatus = ValidationResult;
+  }
+
+  if (ValidationStatus != CMapType::ValidationStatus::Validated && MTB_Setting_UseAutoResetObjectives) {
+    +++MTB_ResetObjectives+++
+  }
+}
+
+/**
+ * Enter the test mode.
+ */
+Void MTB_StartTest() {
+  MTB_Private_IsSwitchedToPlayground = True;
+  MTB_Private_PlaygroundIsValidation = False;
+}
+
+/**
+ * Leave the test mode.
+ */
+Void MTB_StopTest() {
+  MTB_Private_IsSwitchedToPlayground = False;
+}
+
+/**
+ * Enter validation mode.
+ */
+Void MTB_StartValidation() {
+  MTB_Private_IsSwitchedToPlayground = True;
+  MTB_Private_PlaygroundIsValidation = True;
+}
+
+/**
+ * Leave the validation mode.
+ */
+Void MTB_StopValidation() {
+  MTB_StopTest();
+}
+
+// ---------------------------------- //
+// Main function
+// ---------------------------------- //
+main() {
+  EnableMapTypeStartTest = True;
+
+  +++MTB_Settings+++
+  +++MTB_LoadLibraries+++
+  +++MTB_LogVersions+++
+
+  Log::DisplayScripts();
+
+  +++MTB_Init+++
+  +++MTB_Start+++
+
+  MTB_UpdateValidability();
+
+  while (True) {
+    MTB_Yield();
+
+    +++MTB_Loop+++
+  }
+
+  +++MTB_End+++
+  +++MTB_UnloadLibraries+++
+
+  UILayerDestroyAll();
+}

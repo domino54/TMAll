@@ -1,0 +1,162 @@
+/**
+ * Base for a Trackmania map type.
+ *
+ * @name MapTypeTrackmania.Script.txt
+ * @author domino54
+ * @version 2024-10-18
+ */
+
+#RequireContext CTmMapType
+
+#Extends "MapTypes/Base/MapTypeBase.Script.txt"
+
+#Const TM_Version     "2024-10-18"
+#Const TM_ScriptName  "MapTypes/Base/MapTypeTrackmania.Script.txt"
+
+#Include "Libs/Trackmania/Ingame/UI/UI.Script.txt" as GameUI
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+declare Boolean MTB_Setting_UseDefaultTest;
+declare Boolean MTB_Setting_UseDefaultGameUI;
+
+// ---------------------------------- //
+// Settings
+// ---------------------------------- //
+***MTB_Settings***
+***
+MTB_Setting_UseDefaultTest = True;
+MTB_Setting_UseDefaultGameUI = True;
+***
+
+// ---------------------------------- //
+// Log versions
+// ---------------------------------- //
+***MTB_LogVersions***
+***
+Log::RegisterScript(TM_ScriptName, TM_Version);
+Log::RegisterScript(GameUI::ScriptName, GameUI::Version);
+***
+
+// ---------------------------------- //
+// Before test
+// ---------------------------------- //
+***Test_Before***
+***
+if (MTB_Setting_UseDefaultTest) {
+  ValidationEndNoConfirm = True;
+}
+***
+
+// ---------------------------------- //
+// Init playground
+// ---------------------------------- //
+***Playground_Init***
+***
+declare Player <=> Mode.AllPlayers[0];
+***
+
+// ---------------------------------- //
+// Start test
+// ---------------------------------- //
+***Test_Start***
+***
+if (MTB_Setting_UseDefaultTest) {
+  Player.Score.Clear();
+
+  TM_LoadGameUI();
+  TM_StartRace(Player, Mode.Now);
+
+  Mode.CutOffTimeLimit = -1;
+}
+***
+
+// ---------------------------------- //
+// Test loop
+// ---------------------------------- //
+***Test_PlayLoop***
+***
+if (MTB_Setting_UseDefaultTest) {
+  foreach (Event in Mode.PendingEvents) {
+    if (Event.Type == CTmModeEvent::EType::WayPoint && Event.IsEndRace) {
+      Mode.Discard(Event);
+    } else {
+      Mode.PassOn(Event);
+    }
+  }
+
+  if (!Player.IsSpawned || Player.RaceStartTime <= 0) {
+    TM_LoadGameUI();
+    TM_StartRace(Player, Mode.Now);
+  }
+}
+***
+
+// ---------------------------------- //
+// End test
+// ---------------------------------- //
+***Test_End***
+***
+if (MTB_Setting_UseDefaultTest) {
+  TM_SetDefaultUIToHide(False);
+}
+***
+
+// ---------------------------------- //
+// Functions
+// ---------------------------------- //
+
+/**
+ * Set the visibility of the game's default UI.
+ *
+ * @param _Hide Whether to hide the default UI or not.
+ */
+Void TM_SetDefaultUIToHide(Boolean _Hide) {
+  Mode.UIManager.UIAll.OverlayHideBackground           = _Hide;
+  Mode.UIManager.UIAll.OverlayHideNotices              = _Hide;
+  Mode.UIManager.UIAll.OverlayHideMapInfo              = _Hide;
+  Mode.UIManager.UIAll.OverlayHideOpponentsInfo        = _Hide;
+  Mode.UIManager.UIAll.OverlayHideChat                 = _Hide;
+  Mode.UIManager.UIAll.OverlayHideCheckPointList       = _Hide;
+  Mode.UIManager.UIAll.OverlayHideCountdown            = _Hide;
+  Mode.UIManager.UIAll.OverlayHideChrono               = _Hide;
+  Mode.UIManager.UIAll.OverlayHideSpeedAndDist         = _Hide;
+  Mode.UIManager.UIAll.OverlayHidePersonnalBestAndRank = _Hide;
+  Mode.UIManager.UIAll.OverlayHidePosition             = _Hide;
+  Mode.UIManager.UIAll.OverlayHideMultilapInfos        = _Hide;
+  Mode.UIManager.UIAll.OverlayHideSpectatorControllers = _Hide;
+  Mode.UIManager.UIAll.OverlayHideSpectatorInfos       = _Hide;
+  Mode.UIManager.UIAll.OverlayChatHideAvatar           = _Hide;
+}
+
+/**
+ * Load the MP4 Trackmania UI.
+ */
+Void TM_LoadGameUI() {
+  if (!MTB_Setting_UseDefaultGameUI) {
+    return;
+  }
+
+  TM_SetDefaultUIToHide(True);
+
+  GameUI::Load(Mode, "", 0, False);
+  GameUI::SetNbLaps(Map.TMObjective_NbLaps, Map.TMObjective_IsLapRace);
+  GameUI::SetVisibilityInGame(True);
+  GameUI::SetShowInGame(True);
+}
+
+/**
+ * Start a race for a player.
+ *
+ * @param _Player The player to start the race for.
+ * @param _StartTime When to start the race, relative to the game mode time.
+ */
+Void TM_StartRace(CTmPlayer _Player, Integer _StartTime) {
+  declare Player <=> _Player;
+
+  +++TMPlayground_StartRace+++
+
+  _Player.RaceStartTime = _StartTime;
+  _Player.IsSpawned = True;
+}
