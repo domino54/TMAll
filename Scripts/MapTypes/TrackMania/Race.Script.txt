@@ -3,16 +3,16 @@
  *
  * @name Race.Script.txt
  * @author domino54
- * @version 2024-10-18
+ * @version 2024-10-24
  */
 
 #Extends "MapTypes/Base/MapTypeTMAll.Script.txt"
 
-#Const Version    "2024-10-18"
+#Const Version    "2024-10-24"
 #Const ScriptName "MapTypes/TrackMania/Race.Script.txt"
 
 #Include "Libs/Nadeo/Common/Ingame/MapType.Script.txt" as MapType
-#Include "Libs/Nadeo/MP4/TitlePackMaker/MapEditor/UI/Validation.Script.txt" as UI_Validation
+#Include "Libs/TrackMania/Ingame/UI/UIValidation.Script.txt" as UI_Validation
 #Include "Libs/Trackmania/Ingame/Game.Script.txt" as Game
 
 // ---------------------------------- //
@@ -138,7 +138,7 @@ InitUIIngame();
 Mode.CutOffTimeLimit = -1;
 G_BestTime = Map.TMObjective_AuthorTime;
 
-UI_Validation::Load(True);
+UI_Validation::Load();
 UI_Validation::SetTime(G_BestTime, -1);
 
 TM_StartRace(Player, Mode.Now + Game::GetSpawnDuration());
@@ -269,7 +269,7 @@ if (Map.TMObjective_AuthorTime > 0) {
  * Initializes the game UI.
  */
 Void InitUIIngame() {
-  Game::Load(Mode, "Trackbuilder");
+  Game::Load(Mode, _("Validate the track"));
   Game::SetNbLaps(Map.TMObjective_NbLaps, Map.TMObjective_IsLapRace);
 }
 

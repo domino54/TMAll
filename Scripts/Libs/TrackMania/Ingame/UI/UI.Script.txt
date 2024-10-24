@@ -1892,9 +1892,19 @@ Void IsTrackbuilder(Boolean _IsTrackbuilder) {
 	Net_LibUI_IsEditor = _IsTrackbuilder;
 }
 
+Void Unload()
+{
+	Layers::Destroy(C_LAYERNAME_UI);
+	Layers::Destroy(C_LAYERNAME_TIMEOUT);
+	Layers::Destroy("CampaignHelper");
+}
+
 Void Load(CTmMode _Mode, Text _ModeName, Integer _SpawnDuration, Boolean _IsRanking) 
 {
-	Layers::DestroyAll();
+	// They seriously did that?
+	// Layers::DestroyAll();
+	Unload();
+
 	LoadVolumes();
 	foreach(Player in Players)
 	{

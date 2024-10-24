@@ -3,10 +3,10 @@
  *
  * @name MapTypeBase.Script.txt
  * @author domino54
- * @version 2024-10-18
+ * @version 2024-10-24
  */
 
-#Const MTB_Version      "2024-10-18"
+#Const MTB_Version      "2024-10-24"
 #Const MTB_ScriptName   "MapTypes/Base/MapTypeBase.Script.txt"
 
 #Include "Libs/Nadeo/Env.Script.txt" as Env
@@ -156,11 +156,14 @@ if (MTB_Private_IsSwitchedToPlayground) {
   }
 
   +++Playground_End+++
+  +++Playground_After+++
 
   if (MTB_Private_PlaygroundIsValidation) {
     +++Validation_End+++
+    +++Validation_After+++
   } else {
     +++Test_End+++
+    +++Test_After+++
   }
 
   Mode.UIManager.UILayerDestroyAll();
@@ -184,6 +187,19 @@ if (MTB_Private_IsSwitchedToPlayground) {
 Void MTB_Yield() {
   +++MTB_Yield+++
   yield;
+}
+
+/**
+ * Sleep the script.
+ *
+ * @param _Duration How long to sleep the script.
+ */
+Void MTB_Sleep(Integer _Duration) {
+  declare End = Now + _Duration;
+
+  while (Now < End) {
+    MTB_Yield();
+  }
 }
 
 /**
@@ -229,6 +245,8 @@ Void MTB_UpdateValidability() {
     ValidationStatus = ValidationResult;
   }
 
+  +++MTB_AfterValidationStatus+++
+
   if (ValidationStatus != CMapType::ValidationStatus::Validated && MTB_Setting_UseAutoResetObjectives) {
     +++MTB_ResetObjectives+++
   }
@@ -268,6 +286,7 @@ Void MTB_StopValidation() {
 // Main function
 // ---------------------------------- //
 main() {
+  LayersDefaultManialinkVersion = 3;
   EnableMapTypeStartTest = True;
 
   +++MTB_Settings+++
@@ -277,9 +296,10 @@ main() {
   Log::DisplayScripts();
 
   +++MTB_Init+++
-  +++MTB_Start+++
 
   MTB_UpdateValidability();
+
+  +++MTB_Start+++
 
   while (True) {
     MTB_Yield();

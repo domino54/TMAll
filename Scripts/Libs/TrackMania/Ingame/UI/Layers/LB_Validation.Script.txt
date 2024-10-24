@@ -1,0 +1,199 @@
+#Include "TextLib" as TL
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
+#Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt" as Manialink
+#Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" as Colors
+#Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt" as DesignManialinks
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "Libs/Trackmania/Ingame/UI/Layers/Inject_QuadsSelector.Script.txt" as Inject_QuadsSelector
+#Include "Libs/Trackmania/Ingame/UI/Layers/Inject_SoloMapInfosBase.Script.txt" as Inject_SoloMapInfosBase
+
+Text Build() {
+  declare Integer Count_InstancesY = 2;
+  declare Integer Count_InstancesX = 1;
+  declare Real PosXFirstQuad = 0.0;
+  declare Real PosYFirstQuad = 20.0;
+
+  declare Real SizeXQuad = 77.0;
+  declare Real SizeYQuad = 10.0;
+  declare Real MarginY_Button = 4.0;
+  declare Real MarginX_Button = 4.0;
+
+  declare Text MainFont = Font::GetFontName("Main");
+  declare Text SubFont = Font::GetFontName("SubTitle");
+
+  declare Text MLText = """
+<manialink version="3" name="L_Validation">
+  <frame id="Frame_All">
+    <frame id="Frame_Menu" pos="0 0" hidden="0">
+    <quad z-index="-4" pos="0 0" size="960 180" valign="center" halign="center" style="Bgs1" substyle="BgDialogBlur" opacity="0." bluramount="0."/>
+    {{{Inject_SoloMapInfosBase::InjectInManialink()}}}
+    {{{Inject_QuadsSelector::InjectInManialink(Count_InstancesY, Count_InstancesX)}}}
+  </frame>
+</frame>
+
+<script><!--
+
+#Const DebugName  "L_Validations"
+
+#Const C_QuadMedalImgColor [
+  0 => {{{Colors::GetColor("GreenMaster")}}},
+  1 => {{{Colors::GetColor("GoldShiny")}}},
+  2 => {{{Colors::GetColor("SilverShiny")}}},
+  3 => {{{Colors::GetColor("BronzeShiny")}}},
+  4 => <0.0, 0.0, 0.0>
+]
+
+{{{Manialink::GetIncludes()}}}
+{{{DesignManialinks::Includes()}}}
+
+{{{Manialink::Load()}}}
+{{{TextLibExt::InjectTimeToText()}}}
+
+{{{DesignManialinks::Declares()}}}
+{{{Inject_SoloMapInfosBase::InjectInGlobal()}}}
+
+{{{Inject_QuadsSelector::InjectInFunction()}}}
+{{{Inject_SoloMapInfosBase::InjectInFunction()}}}
+
+Void SetTime(Integer _BestTime, Integer _YourTime) {
+  declare PlayersName  = [_("Last Time"), _("Best Time")];
+  declare PlayersTime = [TimeToText(_YourTime)];
+  declare PlayersColor = [C_QuadMedalImgColor[0]];
+
+  if (_BestTime > 0) {
+    PlayersTime.add(TimeToText(_BestTime));
+    PlayersColor.add(C_QuadMedalImgColor[0]);
+  } else {
+    PlayersTime.add("-:--.---");
+    PlayersColor.add(C_QuadMedalImgColor[4]);
+  }
+
+  SetTimeInfo_SoloMapInfosBase(PlayersName, PlayersTime, PlayersColor);
+}
+
+Void Confirm(Boolean _Validate) {
+  declare netwrite Net_LibUIValidation_AnswerUpdate for Teams[0] = -1;
+  declare netwrite Net_LibUIValidation_Answer for Teams[0] = True;
+  declare netwrite Net_LibUIValidation_Distance for Teams[0] = 0.0;
+
+  Net_LibUIValidation_Answer = _Validate;
+  Net_LibUIValidation_AnswerUpdate = Now;
+  Net_LibUIValidation_Distance = InputPlayer.Distance;
+}
+
+Void PressSelect() {
+  switch (G_ButtonFocus) {
+    case 0: Confirm(False); //Restart
+    case 1: Confirm(True); //Quit
+  }
+
+  EnableMenuNavigation(True, False, Null, 0);
+}
+
+Void SendInfo() {
+  declare netread Integer[Integer] Net_TimesOnMap for UI;
+  declare Integer[Integer] TimesOnMap;
+
+  for (I, 0, 3) {
+    if (Net_TimesOnMap.existskey(I)) {
+      TimesOnMap[I] = Net_TimesOnMap[I];
+    } else {
+      TimesOnMap[I] = 0;
+    }
+  }
+
+  declare Text[] LabelMedals = [
+    _("Improve"),
+    _("Validate & exit")
+  ];
+
+  SetButtons(LabelMedals);
+}
+
+Void Init() {
+  SendInfo();
+}
+
+Void ShowPage() {
+  CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::Resume);
+  EnableMenuNavigation(True, False, Null, 2);
+
+  AnimShow_QuadSelect();
+
+  //ClearChoose();
+  FocusButton();
+}
+
+main() {
+  Init();
+
+  {{{Inject_SoloMapInfosBase::InjectInMain()}}}
+
+  declare Boolean Prev_Visibility;
+
+  declare netread Net_LibUIValidation_BestTime for Teams[0] = 0;
+  declare netread Net_LibUIValidation_YourTime for Teams[0] = 0;
+  declare PrevBestTime = -1;
+  declare PrevYourTime = -1;
+
+  SetTime(Net_LibUIValidation_BestTime, Net_LibUIValidation_YourTime);
+
+  while (True) {
+    yield;
+
+    if (Prev_Visibility != PageIsVisible) {
+      if (PageIsVisible) {
+        ShowPage();
+      }
+
+      Prev_Visibility = PageIsVisible;
+    }
+
+    if (PrevBestTime != Net_LibUIValidation_BestTime || PrevYourTime != Net_LibUIValidation_YourTime) {
+      PrevBestTime = Net_LibUIValidation_BestTime;
+      PrevYourTime = Net_LibUIValidation_YourTime;
+
+      SetTime(Net_LibUIValidation_BestTime, Net_LibUIValidation_YourTime);
+    }
+
+    if (!PageIsVisible) {
+      continue;
+    }
+
+    {{{Inject_SoloMapInfosBase::InjectInWhile()}}}
+
+    DesignManialinks_Loop();
+    LibManialink_AnimLoop();
+
+    {{{Inject_QuadsSelector::InjectInWhile("PressSelect();")}}}
+
+    foreach (Event in PendingEvents) {
+      switch (Event.Type) {
+        case CMlEvent::Type::MenuNavigation: {
+          switch (Event.MenuNavAction) {
+            case CMlEvent::EMenuNavAction::Cancel: {
+              Confirm(True); //Quit
+            }
+          }
+        }
+
+        case CMlEvent::Type::PluginCustomEvent: {
+          switch (Event.PluginCustomEventType) {
+            case "Show" : {
+              ShowPage();
+            }
+            case "Hide" : {
+              //EnableMenuNavigation(True,False,Null,0);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+--></script>
+</manialink>
+""";
+
+return MLText;
+}

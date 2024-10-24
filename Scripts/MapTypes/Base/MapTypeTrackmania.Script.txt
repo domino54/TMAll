@@ -3,14 +3,14 @@
  *
  * @name MapTypeTrackmania.Script.txt
  * @author domino54
- * @version 2024-10-18
+ * @version 2024-10-24
  */
 
 #RequireContext CTmMapType
 
 #Extends "MapTypes/Base/MapTypeBase.Script.txt"
 
-#Const TM_Version     "2024-10-18"
+#Const TM_Version     "2024-10-24"
 #Const TM_ScriptName  "MapTypes/Base/MapTypeTrackmania.Script.txt"
 
 #Include "Libs/Trackmania/Ingame/UI/UI.Script.txt" as GameUI
@@ -46,6 +46,8 @@ Log::RegisterScript(GameUI::ScriptName, GameUI::Version);
 ***
 if (MTB_Setting_UseDefaultTest) {
   ValidationEndNoConfirm = True;
+
+  TM_SetDefaultUIToHide(True);
 }
 ***
 

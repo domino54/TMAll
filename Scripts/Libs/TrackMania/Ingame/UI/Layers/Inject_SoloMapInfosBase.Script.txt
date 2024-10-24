@@ -129,6 +129,11 @@ Text InjectInMain()
 		Label_Mode.SetText("{{{_("Hot Seat")}}}");
 		Label_Mode2.SetText("");
 	}
+	else if(Net_ModeName != "")
+	{
+		Label_Mode.SetText(Net_ModeName);
+		Label_Mode2.SetText("");
+	}
 	else
 	{
 		Label_Mode.SetText("");
