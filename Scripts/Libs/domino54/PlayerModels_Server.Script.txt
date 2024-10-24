@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2024-10-05
+ * @version 2024-10-24
  */
 
-#Const Version      "2024-10-05"
+#Const Version      "2024-10-24"
 #Const ScriptName   "Libs/domino54/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
@@ -359,39 +359,44 @@ Text GetMapPlayerModelId() {
 }
 
 /**
- * Pick a random skin for the player and remember it until they leave.
+ * Pick a random skin for the player and remember it until the title is unloaded.
  */
-Text GetPlayerRandomizedSkinId(CUser _User, Text _ModelId) {
-  declare Text[Text] LibPlayerModels_RandomizedSkins for _User;
+Text GetPlayerRandomizedSkinId(Text _Login, Text _ModelId) {
+  declare Text[Text][Text] LibPlayerModels_RandomizedSkins for LoadedTitle;
 
-  // Preference not set, and there's already a random skin assigned.
-  if (LibPlayerModels_RandomizedSkins.existskey(_ModelId)) {
-    return LibPlayerModels_RandomizedSkins[_ModelId];
+  // Login not initialized in the store yet.
+  if (!LibPlayerModels_RandomizedSkins.existskey(_Login)) {
+    LibPlayerModels_RandomizedSkins[_Login] = [];
+  }
+
+  // There's already a random skin assigned to the model id.
+  if (LibPlayerModels_RandomizedSkins[_Login].existskey(_ModelId)) {
+    return LibPlayerModels_RandomizedSkins[_Login][_ModelId];
   }
 
   // Pick a random skin and keep it on the server side.
   declare SkinId = PMData::GetRandomSkinIdByModelId(_ModelId, False);
 
   if (SkinId != "") {
-    LibPlayerModels_RandomizedSkins[_ModelId] = SkinId;
+    LibPlayerModels_RandomizedSkins[_Login][_ModelId] = SkinId;
   }
 
   return SkinId;
 }
 
 /**
- * Get the player skin preference or a randomixed skin.
+ * Get the player skin preference or a randomized skin.
  */
-Text GetPlayerSkinId(CUser _User, Text _ModelId) {
+Text GetPlayerSkinId(Text _Login, Text _ModelId) {
   declare BaseModelId = PMData::GetBaseModelId(_ModelId);
-  declare PlayerPreferenceId = CSPlayers::GetPlayerSkinId(_User.Login, BaseModelId);
+  declare PlayerPreferenceId = CSPlayers::GetPlayerSkinId(_Login, BaseModelId);
 
   // Return the preference if it is set.
   if (PlayerPreferenceId != "") {
     return PlayerPreferenceId;
   }
 
-  return GetPlayerRandomizedSkinId(_User, BaseModelId);
+  return GetPlayerRandomizedSkinId(_Login, BaseModelId);
 }
 
 /**
@@ -403,7 +408,7 @@ Text[][Text] GetLocalPlayerSkinIds() {
   // Users array exists in both game modes and maptypes.
   foreach (User in Users) {
     foreach (BaseModelId => __ in PMData::GetAllModels()) {
-      declare PlayerPreferenceId = GetPlayerSkinId(User, BaseModelId);
+      declare PlayerPreferenceId = GetPlayerSkinId(User.Login, BaseModelId);
       if (PlayerPreferenceId == "") continue;
 
       if (Result.existskey(PlayerPreferenceId)) {
@@ -456,7 +461,7 @@ Void AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCu
  * Assign a model to a player (automatic skin).
  */
 Void AssignModel(CPlayer _Player, Text _ModelId, Boolean _PreferCustom) {
-  declare SkinId = GetPlayerSkinId(_Player.User, _ModelId);
+  declare SkinId = GetPlayerSkinId(_Player.User.Login, _ModelId);
 
   AssignModel(_Player, _ModelId, SkinId, _PreferCustom);
 }
