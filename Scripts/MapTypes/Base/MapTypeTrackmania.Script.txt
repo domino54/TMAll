@@ -18,6 +18,9 @@
 // ---------------------------------- //
 // Global variables
 // ---------------------------------- //
+
+declare CGhost MTB_Private_PersonalBestGhost;
+
 declare Boolean MTB_Setting_UseDefaultTest;
 declare Boolean MTB_Setting_UseDefaultGameUI;
 
@@ -149,6 +152,15 @@ Void TM_LoadGameUI() {
 }
 
 /**
+ * Set the opponent ghost during test.
+ *
+ * @param _Ghost The ghost to race against.
+ */
+Void TM_SetPersonalBestGhost(CGhost _Ghost) {
+  MTB_Private_PersonalBestGhost = _Ghost;
+}
+
+/**
  * Start a race for a player.
  *
  * @param _Player The player to start the race for.
@@ -161,4 +173,12 @@ Void TM_StartRace(CTmPlayer _Player, Integer _StartTime) {
 
   _Player.RaceStartTime = _StartTime;
   _Player.IsSpawned = True;
+
+  Mode.RaceGhost_RemoveAll();
+
+  if (MTB_Private_PersonalBestGhost != Null) {
+    Mode.RaceGhost_Add(MTB_Private_PersonalBestGhost, True);
+  }
+
+  +++TMPlayground_RaceGhosts+++
 }

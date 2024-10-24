@@ -21,7 +21,6 @@
 
 declare Integer G_BestTime;
 declare Integer[] G_BestCheckpointsTimes;
-declare CGhost G_BestPlayerGhost;
 
 // ---------------------------------- //
 // Log versions
@@ -123,6 +122,8 @@ MapType::ResetObjectives();
 // ---------------------------------- //
 ***Validation_Init***
 ***
+ValidationSetCheckpointTimes(G_BestCheckpointsTimes);
+
 ValidationEndNoConfirm = False;
 Player.Score.Clear();
 TM_StartRace(Player, -1);
@@ -158,15 +159,6 @@ if (Player.RaceStartTime <= 0 && Game::IsWaiting(Player)) {
 
   InitUIIngame();
   Game::StartRace(Player, Mode.Now + Game::GetSpawnDuration(), False);
-
-  if (G_BestCheckpointsTimes.count > 0) {
-    Game::SetOpponent(0, G_BestCheckpointsTimes);
-  }
-
-  if (G_BestPlayerGhost != Null) {
-    Mode.RaceGhost_RemoveAll();
-    Mode.RaceGhost_Add(G_BestPlayerGhost, True);
-  }
 }
 
 // Events
@@ -202,7 +194,11 @@ foreach (Event in Mode.PendingEvents) {
   // Update checkpoints times
   if (G_BestTime > 0 && PlayerCheckpointsTimes.count > 0 && (Map.TMObjective_AuthorTime <= 0 || G_BestTime < Map.TMObjective_AuthorTime)) {
     G_BestCheckpointsTimes = PlayerCheckpointsTimes;
-    G_BestPlayerGhost = Mode.ScoreMgr.Playground_GetPlayerGhost(Player);
+
+    TM_SetPersonalBestGhost(Mode.ScoreMgr.Playground_GetPlayerGhost(Player));
+
+    // Update opponent here so it is delivered to the UI in time.
+    ValidationSetCheckpointTimes(G_BestCheckpointsTimes);
   }
 
   // Try again?
@@ -271,6 +267,18 @@ if (Map.TMObjective_AuthorTime > 0) {
 Void InitUIIngame() {
   Game::Load(Mode, _("Validate the track"));
   Game::SetNbLaps(Map.TMObjective_NbLaps, Map.TMObjective_IsLapRace);
+  Game::SetOpposingTeamLabelsVisibility(CUIConfig::ELabelsVisibility::Never);
+}
+
+/**
+ * Set the opponent times during validation.
+ *
+ * @param _CheckpointTimes Checkpoint times shown in the splits.
+ */
+Void ValidationSetCheckpointTimes(Integer[] _CheckpointTimes) {
+  if (_CheckpointTimes.count > 0) {
+    Game::SetOpponent(0, _CheckpointTimes);
+  }
 }
 
 /**

@@ -398,7 +398,7 @@ Text Private_GetMLRace(Real _Scale, Vec2 _PosRatio, Real _SpecialScale, Vec2 _Cl
 		{
 			declare Real PosY = 1.8 - 7.8*I;
 				ML ^= """	
-			<frameinstance id="Frame_Player{{{I}}}"  z-index="1"	pos="-10 {{{PosY}}}" modelid="FrameModel_PlayerInfo" />
+			<frameinstance id="Frame_Player{{{I}}}"  z-index="1"	pos="-10 {{{PosY}}}" modelid="FrameModel_PlayerInfo" hidden="1" />
 		""";
 		}
 				ML ^= """	
@@ -1159,7 +1159,7 @@ Void AnimShowUI()
 	declare netread Integer[][] Net_OpponentsCheckpointsTime for UI;
 
 	//if(Net_ModeName == "Campaign_Solo" || Net_ModeName == "VersusReplay" || Net_ModeName == "SingleMapMode")
-	if(Net_OpponentsCheckpointsTime.existskey(0) && Net_OpponentsCheckpointsTime[0].count > 0 && Net_IsRanking)
+	if(Net_OpponentsCheckpointsTime.existskey(0) && Net_OpponentsCheckpointsTime[0].count > 0/* && Net_IsRanking*/)
 	{
 		Frame_RacePosition.Show();
 		declare Integer Decale = 0;

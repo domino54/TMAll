@@ -119,6 +119,7 @@ Void ShowPage() {
   EnableMenuNavigation(True, False, Null, 2);
 
   AnimShow_QuadSelect();
+  AnimShow_SoloMapInfosBase();
 
   //ClearChoose();
   FocusButton();
