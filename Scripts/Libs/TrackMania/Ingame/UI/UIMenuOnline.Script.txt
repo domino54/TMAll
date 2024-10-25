@@ -1,0 +1,76 @@
+/**
+ * Validation UI
+ */
+
+#Const Version    "2024-10-26"
+#Const ScriptName "Libs/Trackmania/Ingame/UI/UI_MenuOnline.Script.txt"
+
+#Include "TextLib" as TL
+#Include "Libs/Nadeo/Common/Ingame/IngameLayers.Script.txt" as Layers
+#Include "Libs/Trackmania/Ingame/Medals.Script.txt" as Medals
+#Include "Libs/Trackmania/Ingame/UI/Layers/LB_MenuOnline.Script.txt" as LB_MenuOnline
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_LAYERNAME_MENUONLINE "Layer_MenuOnline"
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Text G_ModeName;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Void Private_SetModeName(CPlayer _Player) {
+  if (_Player == Null) return;
+
+  declare UI <=> UIManager.GetUI(_Player);
+
+  // I dare not question why Nadeo did not make this for Teams[0]
+  declare netwrite Text Net_ModeName for UI;
+  declare netwrite Text Net_ModeName2 for UI;
+
+  Net_ModeName = G_ModeName;
+  Net_ModeName2 = ServerName;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+// ---------------------------------- //
+/// Unload the library
+Void Unload() {
+  Layers::Destroy(C_LAYERNAME_MENUONLINE);
+}
+
+// ---------------------------------- //
+/// Load the library
+Void Load(Text _ModeName) {
+  Unload();
+
+  G_ModeName = _ModeName;
+
+  foreach (Player in AllPlayers) {
+    Private_SetModeName(Player);
+  }
+
+  Layers::Create(C_LAYERNAME_MENUONLINE, LB_MenuOnline::Build());
+  Layers::SetType(C_LAYERNAME_MENUONLINE, CUILayer::EUILayerType::InGameMenu);
+  Layers::Attach(C_LAYERNAME_MENUONLINE);
+  //Layers::SetAnimationTypeOut(C_LAYERNAME_MENUONLINE, CUILayer::EUILayerAnimation::LeftFast);
+}
+
+Void Yield() {
+  foreach (Event in PendingEvents) {
+    // Works in CTmMode and CSmMode if that is ever happening.
+    if (Event.Type^"" != "::EType::OnPlayerAdded") continue;
+
+    Private_SetModeName(Event.Player);
+  }
+}

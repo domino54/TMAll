@@ -3,7 +3,7 @@
  */
 #Extends "Modes/TrackMania/Base/ModeTrackmania.Script.txt"
 
-#Const MB_TMAll_Version     "2024-10-05"
+#Const MB_TMAll_Version     "2024-10-26"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
 #Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
@@ -14,6 +14,7 @@
 #Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
+#Include "Libs/TrackMania/Ingame/UI/UIMenuOnline.Script.txt" as UIMenuOnline
 
 // ---------------------------------- //
 // Global variables
@@ -36,6 +37,7 @@ Log::RegisterScript(Openplanet_OnlineData::ScriptName, Openplanet_OnlineData::Ve
 Log::RegisterScript(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
 Log::RegisterScript(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
 Log::RegisterScript(TextLibExt::ScriptName, TextLibExt::Version);
+Log::RegisterScript(UIMenuOnline::ScriptName, UIMenuOnline::Version);
 ***
 
 ***MB_Private_Settings***
@@ -64,6 +66,8 @@ while (PlayerModels_Data::Loading()) {
 // ---------------------------------- //
 ***MB_Private_StartServer***
 ***
+UIMenuOnline::Load(ModeInfo::GetName());
+
 ItemList_Begin();
 PlayerModels_Server::Load(This);
 +++TMAll_ItemList+++
@@ -99,6 +103,7 @@ if (TMAll_Settings_AutoIntroSequenceModel) {
 HttpClient::Yield();
 Openplanet_OnlineData::Yield();
 CustomSkins_OnlineData::Yield();
+UIMenuOnline::Yield();
 ***
 
 // ---------------------------------- //
@@ -112,6 +117,7 @@ CustomSkins_OnlineData::Unload();
 GameplayCoefs_Server::Unload();
 PlayerModels_Server::Unload(This);
 PlayerModels_Data::Unload();
+UIMenuOnline::Unload();
 ***
 
 // ---------------------------------- //

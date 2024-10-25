@@ -3,7 +3,7 @@
  */
 
 #Const Version    "2024-10-24"
-#Const ScriptName "Libs/Trackmania/Ingame/UI/YUValidation.Script.txt"
+#Const ScriptName "Libs/Trackmania/Ingame/UI/UI_Validation.Script.txt"
 
 #Include "TextLib" as TL
 #Include "Libs/Nadeo/Common/Ingame/IngameLayers.Script.txt" as Layers

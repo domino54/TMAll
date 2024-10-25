@@ -165,7 +165,7 @@ Text InjectInFunction()
 			{
 				declare CMlFrame Frame_Button        <=> (Page.MainFrame.GetFirstChild("Frame_Button"^I) as CMlFrame);
 				declare CMlFrame Frame_ButtonContent <=> (Frame_Button.GetFirstChild("Frame_ButtonContent") as CMlFrame);
-				Frame_ButtonContent.RelativePosition.X = {{{-G_SizeXQuad}}};
+				Frame_ButtonContent.RelativePosition.X = {{{-G_SizeXQuad}}} - 0.25; // Prevent black lines
 
 				LibManialink_AnimStop(Frame_ButtonContent);
 				LibManialink_SetTargetPosition(Frame_ButtonContent, <0., 0.>);

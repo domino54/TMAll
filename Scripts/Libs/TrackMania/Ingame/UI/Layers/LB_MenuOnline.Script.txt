@@ -1,0 +1,307 @@
+#Include "TextLib" as TL
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
+#Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt" as Manialink
+#Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" as Colors
+#Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt" as DesignManialinks
+#Include "Libs/Trackmania/Ingame/UI/Layers/Inject_QuadsSelector.Script.txt" as Inject_QuadsSelector
+#Include "Libs/Trackmania/Ingame/UI/Layers/Inject_SoloMapInfosBase.Script.txt" as Inject_SoloMapInfosBase
+
+Text Build() {
+  declare Integer Count_InstancesY = 6;
+  declare Integer Count_InstancesX = 1;
+
+  declare Text MLText = """
+<manialink version="3" name="L_UIMenuOnline">
+  <frame id="Frame_All" z-index="1000">
+    <frame id="Frame_Menu" pos="0 0" hidden="0">
+    <quad z-index="-4" pos="0 0" size="960 180" valign="center" halign="center" style="Bgs1" substyle="BgDialogBlur" opacity="1" bluramount="0"/>
+    {{{Inject_SoloMapInfosBase::InjectInManialink()}}}
+    {{{Inject_QuadsSelector::InjectInManialink(Count_InstancesY, Count_InstancesX)}}}
+  </frame>
+</frame>
+
+<script><!--
+
+#Const DebugName "L_MenuOnline"
+
+#Const C_QuadMedalImgColor [
+  0 => {{{Colors::GetColor("GreenMaster")}}},
+  1 => {{{Colors::GetColor("GoldShiny")}}},
+  2 => {{{Colors::GetColor("SilverShiny")}}},
+  3 => {{{Colors::GetColor("BronzeShiny")}}},
+  4 => <0.0, 0.0, 0.0>
+]
+
+{{{Manialink::GetIncludes()}}}
+{{{DesignManialinks::Includes()}}}
+
+{{{Manialink::Load()}}}
+{{{TextLibExt::InjectTimeToText()}}}
+
+declare Integer G_IgnoreInputsUntil;
+
+{{{DesignManialinks::Declares()}}}
+{{{Inject_SoloMapInfosBase::InjectInGlobal()}}}
+
+{{{Inject_QuadsSelector::InjectInFunction()}}}
+{{{Inject_SoloMapInfosBase::InjectInFunction()}}}
+
+// TODO: Move this to Medals.Script.txt
+Integer GetMedalForTime(Integer _Time) {
+  if (_Time <= 0) return 4;
+  if (_Time <= Map.TMObjective_AuthorTime)  return 0;
+  if (_Time <= Map.TMObjective_GoldTime)    return 1;
+  if (_Time <= Map.TMObjective_SilverTime)  return 2;
+  if (_Time <= Map.TMObjective_BronzeTime)  return 3;
+  return 4;
+}
+
+Void SetBigMedal(Integer _Medal) {
+  declare Quad_Medal <=> (Page.MainFrame.GetFirstChild("Quad_Medal") as CMlQuad);
+
+  Quad_Medal.Visible = _Medal < 4 && C_QuadMedalImgColor.existskey(_Medal);
+
+  if (Quad_Medal.Visible) {
+    Quad_Medal.Colorize = C_QuadMedalImgColor[_Medal];
+  }
+}
+
+Void SetTime(Integer _LastTime, Integer _BestTime) {
+  declare LastMedal = GetMedalForTime(_LastTime);
+  declare BestMedal = GetMedalForTime(_BestTime);
+
+  declare PlayersName = [_("Last Time"), _("Best Time")];
+  declare PlayersTime = ["-:--.---", "-:--.---"];
+  declare PlayersColor = [C_QuadMedalImgColor[LastMedal], C_QuadMedalImgColor[BestMedal]];
+
+  if (_LastTime > 0) {
+    PlayersTime[0] = TimeToText(_LastTime);
+  }
+
+  if (_BestTime > 0) {
+    PlayersTime[1] = TimeToText(_BestTime);
+  }
+
+  SetBigMedal(BestMedal);
+  SetTimeInfo_SoloMapInfosBase(PlayersName, PlayersTime, PlayersColor);
+}
+
+Void SendInfo(Boolean _IsSpectating) {
+  declare Text[] LabelMedals = [
+    _("Resume"),
+    _("Help"),
+    _("Spectator"),
+    _("Advanced options"),
+    _("Manage server"),
+    _("Quit")
+  ];
+
+  declare Text SpectatingIcon;
+
+  if (_IsSpectating) {
+    // This is known in the professional environment as "padding"
+    SpectatingIcon = "                       ";
+  }
+
+  SetButtons(LabelMedals, ["", "", SpectatingIcon], [], []);
+}
+
+Void Init() {
+  SendInfo(IsSpectatorClient);
+}
+
+Void SetUIHidden(Boolean _Hidden) {
+  ClientUI.AltMenuNoDefaultScores = _Hidden;
+  ClientUI.AltMenuNoCustomScores = _Hidden;
+  ClientUI.OverlayHideChat = _Hidden;
+
+  if (_Hidden) {
+    ClientUI.ScoreTableVisibility = CUIConfig::EVisibility::ForcedHidden;
+  } else {
+    ClientUI.ScoreTableVisibility = CUIConfig::EVisibility::None;
+  }
+}
+
+Void ShowPage() {
+  SetUIHidden(True);
+
+  // CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::Resume);
+  EnableMenuNavigation(True, False, Null, 2);
+
+  G_IgnoreInputsUntil = Now + 100;
+
+  AnimShow_QuadSelect();
+  AnimShow_SoloMapInfosBase();
+
+  //ClearChoose();
+  FocusButton();
+}
+
+Void HidePage() {
+  SetUIHidden(False);
+
+  EnableMenuNavigation(False, False, Null, 0);
+}
+
+Void Button_Resume() {
+  CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::Resume);
+}
+
+Void Button_Help() {
+  ShowModeHelp();
+}
+
+Void Button_Spectator() {
+  RequestSpectatorClient(!IsSpectatorClient);
+}
+
+Void Button_AdvancedMenu() {
+  CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::AdvancedMenu);
+}
+
+Void Button_ServerSettings() {
+  CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::ServerSettings);
+}
+
+Void Button_Quit() {
+  CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::Quit);
+}
+
+Void PressSelect() {
+  switch (G_ButtonFocus) {
+    case 0: {
+      Button_Resume();
+    }
+    case 1: {
+      Button_Help();
+    }
+    case 2: {
+      Button_Spectator();
+    }
+    case 3: {
+      Button_AdvancedMenu();
+    }
+    case 4: {
+      Button_ServerSettings();
+    }
+    case 5: {
+      Button_Quit();
+    }
+  }
+}
+
+main() {
+  Init();
+
+  {{{Inject_SoloMapInfosBase::InjectInMain()}}}
+
+  declare Boolean Prev_Visibility;
+  declare Boolean Prev_IsSpectatorClient;
+  declare Prev_ModeName = Net_ModeName;
+
+  declare PrevLastTime = -1;
+  declare PrevBestTime = -1;
+
+  if (InputPlayer != Null && InputPlayer.Score != Null) {
+    PrevLastTime = InputPlayer.Score.PrevRace.Time;
+    PrevBestTime = InputPlayer.Score.BestRace.Time;
+  }
+
+  SetTime(PrevLastTime, PrevBestTime);
+
+  while (True) {
+    yield;
+
+    if (Prev_Visibility != PageIsVisible) {
+      if (PageIsVisible) {
+        ShowPage();
+      } else {
+        HidePage();
+      }
+
+      Prev_Visibility = PageIsVisible;
+    }
+
+    if (!PageIsVisible) {
+      continue;
+    }
+
+    // Don't inject, it changes the big medal
+    // Inject_SoloMapInfosBase::InjectInWhile()
+
+    DesignManialinks_Loop();
+    LibManialink_AnimLoop();
+
+    {{{Inject_QuadsSelector::InjectInWhile("PressSelect();")}}}
+
+    if (InputPlayer != Null && InputPlayer.Score != Null && PrevLastTime != InputPlayer.Score.PrevRace.Time || PrevBestTime != InputPlayer.Score.BestRace.Time) {
+      PrevLastTime = InputPlayer.Score.PrevRace.Time;
+      PrevBestTime = InputPlayer.Score.BestRace.Time;
+
+      SetTime(PrevLastTime, PrevBestTime);
+    }
+
+    if (Prev_IsSpectatorClient != IsSpectatorClient) {
+      Prev_IsSpectatorClient = IsSpectatorClient;
+
+      SendInfo(IsSpectatorClient);
+    }
+
+    // Should only be used on online servers
+    if (Prev_ModeName != Net_ModeName) {
+      Prev_ModeName = Net_ModeName;
+
+      Label_Mode.SetText(Net_ModeName);
+      Label_Mode2.SetText(Net_ModeName2);
+      Quad_Barre.Visible = Net_ModeName != "";
+    }
+
+    foreach (Event in PendingEvents) {
+      switch (Event.Type) {
+        case CMlScriptEvent::Type::MenuNavigation: {
+          switch (Event.MenuNavAction) {
+            case CMlScriptEvent::EMenuNavAction::Cancel: {
+              Button_Resume();
+            }
+          }
+        }
+
+        case CMlScriptEvent::Type::PluginCustomEvent: {
+          switch (Event.PluginCustomEventType) {
+            case "Show" : {
+              ShowPage();
+            }
+            case "Hide" : {
+              //EnableMenuNavigation(True,False,Null,0);
+            }
+          }
+        }
+
+        case CMlScriptEvent::Type::KeyPress: {
+          if (Event.KeyName == "F1") {
+            CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::NormalMenu);
+          }
+        }
+      }
+    }
+
+    foreach (Event in Input.PendingEvents) {
+      if (Now < G_IgnoreInputsUntil || Event.IsAutoRepeat) continue;
+
+      switch (Event.Button) {
+        case CInputEvent::EButton::Menu: {
+          Button_Resume();
+        }
+        case CInputEvent::EButton::View: {
+          CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::NormalMenu);
+        }
+      }
+    }
+  }
+}
+--></script>
+</manialink>
+""";
+
+return MLText;
+}

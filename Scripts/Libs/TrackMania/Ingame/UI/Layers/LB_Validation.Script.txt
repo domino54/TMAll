@@ -3,26 +3,15 @@
 #Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt" as Manialink
 #Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" as Colors
 #Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt" as DesignManialinks
-#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_QuadsSelector.Script.txt" as Inject_QuadsSelector
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_SoloMapInfosBase.Script.txt" as Inject_SoloMapInfosBase
 
 Text Build() {
   declare Integer Count_InstancesY = 2;
   declare Integer Count_InstancesX = 1;
-  declare Real PosXFirstQuad = 0.0;
-  declare Real PosYFirstQuad = 20.0;
-
-  declare Real SizeXQuad = 77.0;
-  declare Real SizeYQuad = 10.0;
-  declare Real MarginY_Button = 4.0;
-  declare Real MarginX_Button = 4.0;
-
-  declare Text MainFont = Font::GetFontName("Main");
-  declare Text SubFont = Font::GetFontName("SubTitle");
 
   declare Text MLText = """
-<manialink version="3" name="L_Validation">
+<manialink version="3" name="L_UIValidation">
   <frame id="Frame_All">
     <frame id="Frame_Menu" pos="0 0" hidden="0">
     <quad z-index="-4" pos="0 0" size="960 180" valign="center" halign="center" style="Bgs1" substyle="BgDialogBlur" opacity="0." bluramount="0."/>
@@ -33,7 +22,7 @@ Text Build() {
 
 <script><!--
 
-#Const DebugName  "L_Validations"
+#Const DebugName "L_Validation"
 
 #Const C_QuadMedalImgColor [
   0 => {{{Colors::GetColor("GreenMaster")}}},
@@ -91,23 +80,7 @@ Void PressSelect() {
 }
 
 Void SendInfo() {
-  declare netread Integer[Integer] Net_TimesOnMap for UI;
-  declare Integer[Integer] TimesOnMap;
-
-  for (I, 0, 3) {
-    if (Net_TimesOnMap.existskey(I)) {
-      TimesOnMap[I] = Net_TimesOnMap[I];
-    } else {
-      TimesOnMap[I] = 0;
-    }
-  }
-
-  declare Text[] LabelMedals = [
-    _("Improve"),
-    _("Validate & exit")
-  ];
-
-  SetButtons(LabelMedals);
+  SetButtons([_("Improve"), _("Validate & exit")]);
 }
 
 Void Init() {
