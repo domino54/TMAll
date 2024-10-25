@@ -3,12 +3,12 @@
  *
  * @name Race.Script.txt
  * @author domino54
- * @version 2024-10-24
+ * @version 2024-10-25
  */
 
 #Extends "MapTypes/Base/MapTypeTMAll.Script.txt"
 
-#Const Version    "2024-10-24"
+#Const Version    "2024-10-25"
 #Const ScriptName "MapTypes/TrackMania/Race.Script.txt"
 
 #Include "Libs/Nadeo/Common/Ingame/MapType.Script.txt" as MapType
@@ -142,7 +142,7 @@ G_BestTime = Map.TMObjective_AuthorTime;
 UI_Validation::Load();
 UI_Validation::SetTime(G_BestTime, -1);
 
-TM_StartRace(Player, Mode.Now + Game::GetSpawnDuration());
+ValidationStartRace(Player, Mode.Now + Game::GetSpawnDuration());
 
 Game::SetKeepPlayersSpawned(True);
 ***
@@ -154,11 +154,10 @@ Game::SetKeepPlayersSpawned(True);
 ***
 Game::Loop();
 
+// Respawn the player.
 if (Player.RaceStartTime <= 0 && Game::IsWaiting(Player)) {
-  +++TMPlayground_StartRace+++
-
   InitUIIngame();
-  Game::StartRace(Player, Mode.Now + Game::GetSpawnDuration(), False);
+  ValidationStartRace(Player, Mode.Now + Game::GetSpawnDuration());
 }
 
 // Events
@@ -268,6 +267,18 @@ Void InitUIIngame() {
   Game::Load(Mode, _("Validate the track"));
   Game::SetNbLaps(Map.TMObjective_NbLaps, Map.TMObjective_IsLapRace);
   Game::SetOpposingTeamLabelsVisibility(CUIConfig::ELabelsVisibility::Never);
+}
+
+/**
+ * Start a race for a player during validation.
+ *
+ * @param _Player The player to start the race for.
+ * @param _StartTime When to start the race, relative to the game mode time.
+ */
+Void ValidationStartRace(CTmPlayer _Player, Integer _StartTime) {
+  // Ugly fix, need things from both libraries to apply to the player.
+  Game::StartRace(_Player, _StartTime);
+  TM_StartRace(_Player, _StartTime);
 }
 
 /**

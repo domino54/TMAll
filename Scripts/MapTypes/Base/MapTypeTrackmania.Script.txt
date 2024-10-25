@@ -3,14 +3,14 @@
  *
  * @name MapTypeTrackmania.Script.txt
  * @author domino54
- * @version 2024-10-24
+ * @version 2024-10-25
  */
 
 #RequireContext CTmMapType
 
 #Extends "MapTypes/Base/MapTypeBase.Script.txt"
 
-#Const TM_Version     "2024-10-24"
+#Const TM_Version     "2024-10-25"
 #Const TM_ScriptName  "MapTypes/Base/MapTypeTrackmania.Script.txt"
 
 #Include "Libs/Trackmania/Ingame/UI/UI.Script.txt" as GameUI
@@ -20,9 +20,11 @@
 // ---------------------------------- //
 
 declare CGhost MTB_Private_PersonalBestGhost;
+declare CTaskResult_Ghost MTB_Private_PBGhostTaskResult;
 
 declare Boolean MTB_Setting_UseDefaultTest;
 declare Boolean MTB_Setting_UseDefaultGameUI;
+declare Text MTB_Setting_PBGhostScoreContext;
 
 // ---------------------------------- //
 // Settings
@@ -31,6 +33,7 @@ declare Boolean MTB_Setting_UseDefaultGameUI;
 ***
 MTB_Setting_UseDefaultTest = True;
 MTB_Setting_UseDefaultGameUI = True;
+MTB_Setting_PBGhostScoreContext = "";
 ***
 
 // ---------------------------------- //
@@ -40,6 +43,33 @@ MTB_Setting_UseDefaultGameUI = True;
 ***
 Log::RegisterScript(TM_ScriptName, TM_Version);
 Log::RegisterScript(GameUI::ScriptName, GameUI::Version);
+***
+
+// ---------------------------------- //
+// Init map type
+// ---------------------------------- //
+***MTB_Init***
+***
+// Load the personal best ghost when opening a map.
+if (Map.MapInfo.MapUid != "") {
+  MTB_Private_PBGhostTaskResult = ScoreMgr.Map_GetRecordGhost(UserMgr.MainUser.Id, Map.MapInfo.MapUid, MTB_Setting_PBGhostScoreContext);
+}
+***
+
+// ---------------------------------- //
+// Before test
+// ---------------------------------- //
+***MTB_Loop***
+***
+// Set the personal best ghost when ready.
+if (MTB_Private_PBGhostTaskResult != Null && !MTB_Private_PBGhostTaskResult.IsProcessing) {
+  if (MTB_Private_PBGhostTaskResult.Ghost != Null) {
+    TM_SetPersonalBestGhost(MTB_Private_PBGhostTaskResult.Ghost);
+  }
+
+  ScoreMgr.TaskResult_Release(MTB_Private_PBGhostTaskResult.Id);
+  MTB_Private_PBGhostTaskResult = Null;
+}
 ***
 
 // ---------------------------------- //
@@ -157,6 +187,10 @@ Void TM_LoadGameUI() {
  * @param _Ghost The ghost to race against.
  */
 Void TM_SetPersonalBestGhost(CGhost _Ghost) {
+  if (MTB_Private_PersonalBestGhost != Null) {
+    DataFileMgr.Ghost_Release(MTB_Private_PersonalBestGhost.Id);
+  }
+
   MTB_Private_PersonalBestGhost = _Ghost;
 }
 
