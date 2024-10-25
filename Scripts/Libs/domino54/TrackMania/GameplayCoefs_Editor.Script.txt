@@ -1,10 +1,10 @@
 /**
  * @name GameplayCoefs_Editor.Script.txt
  * @author domino54
- * @version 2024-10-05
+ * @version 2024-10-25
  */
 
-#Const Version      "2024-10-05"
+#Const Version      "2024-10-25"
 #Const ScriptName   "Libs/domino54/TrackMania/GameplayCoefs_Editor.Script.txt"
 
 #Include "MathLib" as ML
@@ -29,14 +29,14 @@
 // Global variables
 // ---------------------------------- //
 
-declare Boolean C_LibGameplayCoefs_DialogIsOpen;
-declare Boolean C_LibGameplayCoefs_AutoOpenDialog;
-declare Boolean C_LibGameplayCoefs_RequestOpenDialog;
-declare Boolean C_LibGameplayCoefs_PrevHideEditorInterface;
+declare Boolean G_LibGameplayCoefs_DialogIsOpen;
+declare Boolean G_LibGameplayCoefs_AutoOpenDialog;
+declare Boolean G_LibGameplayCoefs_RequestOpenDialog;
+declare Boolean G_LibGameplayCoefs_PrevHideEditorInterface;
 
-declare Real C_LibGameplayCoefs_MapPlayerModelAccelCoef;
-declare Real C_LibGameplayCoefs_MapPlayerModelControlCoef;
-declare Real C_LibGameplayCoefs_MapPlayerModelGravityCoef;
+declare Real G_LibGameplayCoefs_MapPlayerModelAccelCoef;
+declare Real G_LibGameplayCoefs_MapPlayerModelControlCoef;
+declare Real G_LibGameplayCoefs_MapPlayerModelGravityCoef;
 
 // ---------------------------------- //
 // Private functions
@@ -343,22 +343,22 @@ Void Private_ApplyMapValuesFromLayer() {
 // ---------------------------------- //
 
 Void HideDialog() {
-  if (!C_LibGameplayCoefs_DialogIsOpen) {
+  if (!G_LibGameplayCoefs_DialogIsOpen) {
     return;
   }
 
   Layers::SetVisibility(C_LibGameplayCoefs_ButtonManialinkLayerId, True);
   Layers::Destroy(C_LibGameplayCoefs_EditorManialinkLayerId);
 
-  C_LibGameplayCoefs_DialogIsOpen = False;
+  G_LibGameplayCoefs_DialogIsOpen = False;
 
-  HideEditorInterface = C_LibGameplayCoefs_PrevHideEditorInterface;
+  HideEditorInterface = G_LibGameplayCoefs_PrevHideEditorInterface;
 
   Audio.PlaySoundEvent(CAudioManager::ELibSound::HideDialog, 0, 0.0);
 }
 
 Void ShowDialog() {
-  if (C_LibGameplayCoefs_DialogIsOpen) {
+  if (G_LibGameplayCoefs_DialogIsOpen) {
     return;
   }
 
@@ -367,9 +367,9 @@ Void ShowDialog() {
 
   Private_SendMapValuesToLayer();
 
-  C_LibGameplayCoefs_DialogIsOpen = True;
-  C_LibGameplayCoefs_RequestOpenDialog = False;
-  C_LibGameplayCoefs_PrevHideEditorInterface = HideEditorInterface;
+  G_LibGameplayCoefs_DialogIsOpen = True;
+  G_LibGameplayCoefs_RequestOpenDialog = False;
+  G_LibGameplayCoefs_PrevHideEditorInterface = HideEditorInterface;
 
   HideEditorInterface = True;
 
@@ -419,12 +419,12 @@ Void NormalizeCoefsIfUninitialized(Real _AccelCoef, Real _ControlCoef, Real _Gra
 }
 
 Void Unload() {
-  HideEditorInterface = C_LibGameplayCoefs_PrevHideEditorInterface;
+  HideEditorInterface = G_LibGameplayCoefs_PrevHideEditorInterface;
 
-  C_LibGameplayCoefs_MapPlayerModelAccelCoef = 1.0;
-  C_LibGameplayCoefs_MapPlayerModelControlCoef = 1.0;
-  C_LibGameplayCoefs_MapPlayerModelGravityCoef = 1.0;
-  C_LibGameplayCoefs_RequestOpenDialog = False;
+  G_LibGameplayCoefs_MapPlayerModelAccelCoef = 1.0;
+  G_LibGameplayCoefs_MapPlayerModelControlCoef = 1.0;
+  G_LibGameplayCoefs_MapPlayerModelGravityCoef = 1.0;
+  G_LibGameplayCoefs_RequestOpenDialog = False;
 
   Layers::Destroy(C_LibGameplayCoefs_ButtonManialinkLayerId);
 }
@@ -432,7 +432,7 @@ Void Unload() {
 Void Load(Boolean _AutoOpen) {
   Unload();
 
-  C_LibGameplayCoefs_AutoOpenDialog = _AutoOpen;
+  G_LibGameplayCoefs_AutoOpenDialog = _AutoOpen;
 
   Layers::Create(C_LibGameplayCoefs_ButtonManialinkLayerId, Private_CreateButtonManialinkLayer());
 }
@@ -442,7 +442,7 @@ Void Load() {
 }
 
 Boolean IsDialogRequested() {
-  return C_LibGameplayCoefs_RequestOpenDialog;
+  return G_LibGameplayCoefs_RequestOpenDialog;
 }
 
 Void Loop() {
@@ -451,7 +451,7 @@ Void Loop() {
 
     switch (Event.CustomEventType) {
       case C_LibGameplayCoefs_OpenDialogEvent: {
-        C_LibGameplayCoefs_RequestOpenDialog = True;
+        G_LibGameplayCoefs_RequestOpenDialog = True;
       }
       case C_LibGameplayCoefs_ApplyChangesEvent: {
         Private_ApplyMapValuesFromLayer();
@@ -463,7 +463,7 @@ Void Loop() {
     }
   }
 
-  if (IsDialogRequested() && C_LibGameplayCoefs_AutoOpenDialog) {
+  if (IsDialogRequested() && G_LibGameplayCoefs_AutoOpenDialog) {
     ShowDialog();
   }
 }

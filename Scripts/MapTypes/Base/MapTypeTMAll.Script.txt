@@ -1,0 +1,181 @@
+/**
+ * Base for a Trackmania² Multienvironment map type.
+ *
+ * @name MapTypeTMAll.Script.txt
+ * @author domino54
+ * @version 2024-10-18
+ */
+
+#Extends "MapTypes/Base/MapTypeTrackmania.Script.txt"
+
+#Const TMAll_Version      "2024-10-18"
+#Const TMAll_ScriptName   "MapTypes/Base/MapTypeTMAll.Script.txt"
+
+#Include "TextLib" as TL
+#Include "Libs/domino54/TrackMania/GameplayCoefs_Editor.Script.txt" as GameplayCoefs_Editor
+#Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
+#Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
+#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
+#Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+#Include "Libs/domino54/CustomSkins_LocalData.Script.txt" as CustomSkins_LocalData
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const G_LibTMAllEditor_NormalizeAssetId "gameplaycoefs:normalize"
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Boolean TMAll_Private_HasProbedMapPlayerModelName;
+
+// ---------------------------------- //
+// Log versions
+// ---------------------------------- //
+***MTB_LogVersions***
+***
+Log::RegisterScript(TMAll_ScriptName, TMAll_Version);
+Log::RegisterScript(CustomSkins_LocalData::ScriptName, CustomSkins_LocalData::Version);
+Log::RegisterScript(GameplayCoefs_Editor::ScriptName, GameplayCoefs_Editor::Version);
+Log::RegisterScript(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
+Log::RegisterScript(HttpClient::ScriptName, HttpClient::Version);
+Log::RegisterScript(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
+Log::RegisterScript(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
+***
+
+// ---------------------------------- //
+// Load libraries
+// ---------------------------------- //
+***MTB_LoadLibraries***
+***
+HttpClient::Load();
+CustomSkins_LocalData::Load();
+GameplayCoefs_Editor::Load(False);
+GameplayCoefs_Server::Load();
+PlayerModels_Data::Load();
+
+while (PlayerModels_Data::Loading()) {
+  MTB_Yield();
+}
+***
+
+// ---------------------------------- //
+// Yield
+// ---------------------------------- //
+***MTB_Yield***
+***
+HttpClient::Yield();
+GameplayCoefs_Editor::Loop();
+***
+
+// ---------------------------------- //
+// Map type loop
+// ---------------------------------- //
+***MTB_Loop***
+***
+if (GameplayCoefs_Editor::IsDialogRequested()) {
+  TMAll_OpenGameplayCeofsEditor();
+}
+***
+
+// ---------------------------------- //
+// Before playground
+// ---------------------------------- //
+***Playground_Before***
+***
+// Pull values from the map.
+TMAll_ProbeMapPlayerModelName();
+TMAll_NormalizeCoefsIfUninitialized();
+
+GameplayCoefs_Server::ReadValuesFromMap(Map);
+
+// Yield only once, because it is enough to poll the selected player skins.
+CustomSkins_LocalData::Yield();
+***
+
+// ---------------------------------- //
+// Load items
+// ---------------------------------- //
+***Playground_ItemList***
+***
+PlayerModels_Server::Load(Mode, PlayerModels_Server::K_Options {
+  ModelIdAllowlist = [PlayerModels_Server::GetMapPlayerModelId()],
+  SkinIdAllowlist = PlayerModels_Server::GetLocalPlayerSkinIds()
+});
+***
+
+***TMPlayground_StartRace***
+***
+GameplayCoefs_Server::AssignPlayerCoefs(Player);
+PlayerModels_Server::AssignModel(Player);
+***
+
+// ---------------------------------- //
+// End playground
+// ---------------------------------- //
+***Playground_End***
+***
+PlayerModels_Server::Unload(Mode);
+***
+
+// ---------------------------------- //
+// Unload libraries
+// ---------------------------------- //
+***MTB_UnloadLibraries***
+***
+HttpClient::Unload();
+CustomSkins_LocalData::Unload();
+GameplayCoefs_Editor::Unload();
+GameplayCoefs_Server::Unload();
+PlayerModels_Data::Unload();
+***
+
+// ---------------------------------- //
+// Functions
+// ---------------------------------- //
+
+/**
+ * Unless already done once, enter the playground temporarily to read the model name of the map.
+ */
+Void TMAll_ProbeMapPlayerModelName() {
+  if (TMAll_Private_HasProbedMapPlayerModelName) {
+    return;
+  }
+
+  TM_SetDefaultUIToHide(True);
+  MTB_EnterPlayground();
+  PlayerModels_Server::SetMapProperties(Mode.Map.CollectionName, Mode.MapPlayerModelName);
+  MTB_LeavePlayground();
+  TM_SetDefaultUIToHide(False);
+
+  TMAll_Private_HasProbedMapPlayerModelName = True;
+}
+
+Void TMAll_NormalizeCoefsIfUninitialized() {
+  TMAll_ProbeMapPlayerModelName();
+
+  declare ModelId = PlayerModels_Server::GetMapPlayerModelId();
+  declare NeedsNormalize = PlayerModels_Data::GetPlayerModelAsset(ModelId, G_LibTMAllEditor_NormalizeAssetId, "");
+
+  if (TL::RegexFind("^1|true$", NeedsNormalize, "i").count <= 0) {
+    return;
+  }
+
+  declare GameplayInfo = PlayerModels_Data::GetPlayerModelGameplayInfo(ModelId);
+
+  GameplayCoefs_Editor::NormalizeCoefsIfUninitialized(GameplayInfo.AccelCoef, GameplayInfo.ControlCoef, GameplayInfo.GravityCoef);
+}
+
+Void TMAll_OpenGameplayCeofsEditor() {
+  TMAll_NormalizeCoefsIfUninitialized();
+
+  declare ModelId = PlayerModels_Server::GetMapPlayerModelId();
+  declare GameplayInfo = PlayerModels_Data::GetPlayerModelGameplayInfo(ModelId);
+  declare IsUnited = PlayerModels_Data::GetPlayerModelIsUnitedVehicle(ModelId);
+
+  GameplayCoefs_Editor::ShowDialog();
+  GameplayCoefs_Editor::SetMapPlayerModelCoefs(GameplayInfo.AccelCoef, GameplayInfo.ControlCoef, GameplayInfo.GravityCoef);
+  GameplayCoefs_Editor::SetMinGameplayCoefs(IsUnited);
+}

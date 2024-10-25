@@ -1,0 +1,88 @@
+/**
+ * Validation UI
+ */
+
+#Const Version    "2024-10-24"
+#Const ScriptName "Libs/Trackmania/Ingame/UI/UI_Validation.Script.txt"
+
+#Include "TextLib" as TL
+#Include "Libs/Nadeo/Common/Ingame/IngameLayers.Script.txt" as Layers
+#Include "Libs/Trackmania/Ingame/Medals.Script.txt" as Medals
+#Include "Libs/Trackmania/Ingame/UI/Layers/LB_Validation.Script.txt" as LB_Validation
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_LAYERNAME_VALIDATION "Layer_Validation"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+// ---------------------------------- //
+/** Set the times to display in the UI
+ *
+ * @param _BestTime The best validation time in ms
+ * @param _YourTime The player validation time in ms
+ */
+Void SetTime(Integer _BestTime, Integer _YourTime) {
+  declare netwrite Integer Net_LibUIValidation_BestTime for Mode.Teams[0];
+  declare netwrite Integer Net_LibUIValidation_YourTime for Mode.Teams[0];
+
+  Net_LibUIValidation_BestTime = _BestTime;
+  Net_LibUIValidation_YourTime = _YourTime;
+}
+
+Void SetVisibility(Boolean _Visible) {
+  Layers::SetVisibility(C_LAYERNAME_VALIDATION, _Visible);
+}
+
+Void Show() {
+  SetVisibility(True);
+}
+
+Void Hide() {
+  SetVisibility(False);
+}
+
+// ---------------------------------- //
+/** Check the last time the answer was updated
+*
+* @return       The last time the answer was updated
+*/
+Integer GetAnswerUpdate() {
+  declare netread Net_LibUIValidation_AnswerUpdate for Mode.Teams[0] = -1;
+  return Net_LibUIValidation_AnswerUpdate;
+}
+
+// ---------------------------------- //
+/** Check the last answer given by the player
+ *
+ * @return       The last answer
+ */
+Boolean GetAnswer() {
+  Hide();
+
+  declare netread Net_LibUIValidation_Answer for Mode.Teams[0] = True;
+  return Net_LibUIValidation_Answer;
+}
+
+// ---------------------------------- //
+/// Unload the library
+Void Unload() {
+  Layers::Destroy(C_LAYERNAME_VALIDATION);
+}
+
+// ---------------------------------- //
+/// Load the library
+Void Load() {
+  Unload();
+
+  Layers::Create(C_LAYERNAME_VALIDATION, LB_Validation::Build());
+  Layers::Attach(C_LAYERNAME_VALIDATION);
+  Layers::SetAnimationTypeOut(C_LAYERNAME_VALIDATION, CUILayer::EUILayerAnimation::LeftFast);
+  Layers::SetVisibility(C_LAYERNAME_VALIDATION, False);
+
+  SetTime(0, 0);
+}

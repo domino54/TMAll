@@ -64,6 +64,7 @@ Text Build() {
 		{{{Manialink::Load()}}}
 		{{{Inject_SoloMapInfosBase::InjectInGlobal()}}}
 
+		declare Integer G_IgnoreInputsUntil;
 		
 		{{{Inject_QuadsSelector::InjectInFunction()}}}
 		{{{Inject_SoloMapInfosBase::InjectInFunction()}}}
@@ -106,6 +107,8 @@ Text Build() {
 			
 			declare netwrite Integer 	Net_PlayerRestartChoice 			for UI;
 			Net_PlayerRestartChoice = -1;
+
+			G_IgnoreInputsUntil = Now + 100;
 
 			AnimShow_QuadSelect();
 			AnimShow_SoloMapInfosBase();
@@ -220,6 +223,16 @@ Text Build() {
 									//EnableMenuNavigation(True,False,Null,0);
 								}
 							}
+						}
+					}
+				}
+
+				foreach (Event in Input.PendingEvents) {
+					if (Now < G_IgnoreInputsUntil || Event.IsAutoRepeat) continue;
+
+					switch (Event.Button) {
+						case CInputEvent::EButton::Menu: {
+							Button_Resume();
 						}
 					}
 				}

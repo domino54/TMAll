@@ -553,7 +553,8 @@ Void Unload() {
 			Update_Global_Ranking(Player);
 		}
 	}
-	Layers::DestroyAll();
+	// Fix validation UI? Later see if anything breaks without it.
+	// Layers::DestroyAll();
 }
 
 Void SetIsUgcTrack(Boolean _IsUgcTrack) {
@@ -594,7 +595,7 @@ Void ConstructCheckPrivilegeMenuLayer() {
 	--></script>
 	""";
 	
-	Layers::Create("CheckPrivilegeMenuLayer", ML);
+	//Layers::Create("CheckPrivilegeMenuLayer", ML);
 	//Layers::Attach("CheckPrivilegeMenuLayer");
 }
 

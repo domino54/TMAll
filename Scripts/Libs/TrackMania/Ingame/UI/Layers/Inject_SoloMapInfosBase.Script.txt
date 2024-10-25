@@ -107,8 +107,10 @@ Text InjectInMain()
 	declare Text AuthorNickName = TL::Compose( _("By %1"), Map.MapInfo.AuthorNickName);
 				
 	declare netread Text    Net_ModeName      for UI;
+	declare netread Text    Net_ModeName2     for UI;
 	declare CMlLabel Label_Mode  <=> (Page.MainFrame.GetFirstChild("Label_Mode")    as CMlLabel);
 	declare CMlLabel Label_Mode2 <=> (Page.MainFrame.GetFirstChild("Label_Mode2")   as CMlLabel);
+	declare CMlQuad Quad_Barre   <=> (Page.MainFrame.GetFirstChild("Quad_Barre")    as CMlQuad);
 	if(Net_ModeName == "VersusReplay")
 	{
 		Label_Mode.SetText("{{{_("Versus")}}}");
@@ -129,14 +131,17 @@ Text InjectInMain()
 		Label_Mode.SetText("{{{_("Hot Seat")}}}");
 		Label_Mode2.SetText("");
 	}
+	else if(Net_ModeName != "")
+	{
+		Label_Mode.SetText(Net_ModeName);
+		Label_Mode2.SetText(Net_ModeName2);
+	}
 	else
 	{
 		Label_Mode.SetText("");
 		Label_Mode2.SetText("");
-		declare CMlQuad Quad_Barre   <=> (Page.MainFrame.GetFirstChild("Quad_Barre")    as CMlQuad);
-		Quad_Barre.Hide();
 	}
-
+	Quad_Barre.Visible = Net_ModeName != "";
 
 	declare Text UserName       = LocalUser.Name;
 	
