@@ -139,6 +139,7 @@
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Traffic",
+        "garage:card": "./Card/Card_TrafficCar.webp",
         "garage:tab_icon": "./TabIcon/TabIcon_TrafficCar.webp"
       }
     }
