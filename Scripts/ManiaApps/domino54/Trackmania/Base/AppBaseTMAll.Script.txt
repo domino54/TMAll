@@ -1,0 +1,61 @@
+#RequireContext CManiaAppPlayground
+
+/**
+ * Base mania app for Trackmania² Multienvironment online UI.
+ *
+ * @name MapTypeTMAll.Script.txt
+ * @author domino54
+ * @version 2024-10-26
+ */
+#Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
+
+#Const TMAll_Version      "2024-10-26"
+#Const TMAll_ScriptName   "ManiaApps/domino54/TrackMania/Base/AppBaseTMAll.Script.txt"
+
+#Include "ManiaApps/Nadeo/TrackMania/UI_Client.Script.txt" as UI
+#Include "Libs/domino54/CustomSkins/CustomSkins_Client.Script.txt" as CustomSkins
+#Include "Libs/domino54/MenuOnline/MenuOnline_Client.Script.txt" as MenuOnline
+
+// ---------------------------------- //
+// Load libraries
+// ---------------------------------- //
+***AB_LoadLibraries***
+***
+UI::Load();
+CustomSkins::Load();
+MenuOnline::Load("");
+
+// Chase compatibility.
++++LoadLibraries+++
+***
+
+// ---------------------------------- //
+// Log script versions
+// ---------------------------------- //
+***AB_LogVersions***
+***
+Log::RegisterScript(UI::ScriptName, UI::Version);
+Log::RegisterScript(CustomSkins::ScriptName, CustomSkins::Version);
+Log::RegisterScript(MenuOnline::ScriptName, MenuOnline::Version);
+***
+
+// ---------------------------------- //
+// Yield
+// ---------------------------------- //
+***AB_Yield***
+***
+UI::Yield();
+***
+
+// ---------------------------------- //
+// Unload libraries
+// ---------------------------------- //
+***AB_UnloadLibraries***
+***
+UI::Unload();
+CustomSkins::Unload();
+MenuOnline::Unload();
+
+// Chase compatibility.
++++UnloadLibraries+++
+***

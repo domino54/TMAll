@@ -1,4 +1,12 @@
-#Include "TextLib" as TL
+/**
+ * @name LB_MenuOnline.Script.txt
+ * @author domino54
+ * @version 2024-10-26
+ */
+
+#Const Version    "2024-10-26"
+#Const ScriptName "Libs/domino54/MenuOnline/LB_MenuOnline.Script.txt"
+
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 #Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt" as Manialink
 #Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" as Colors
@@ -6,12 +14,28 @@
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_QuadsSelector.Script.txt" as Inject_QuadsSelector
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_SoloMapInfosBase.Script.txt" as Inject_SoloMapInfosBase
 
-Text Build() {
+#Const C_ManialinkLayerId "L_UIMenuOnline"
+
+Text Private_InjectGetModeName(Text _ModeName) {
+  declare ReturnValue = "Playground.ServerInfo.ModeName";
+
+  if (_ModeName != "") {
+    ReturnValue = "\"\"\"" ^ _ModeName ^ "\"\"\"";
+  }
+
+  return """
+Text GetModeName() {
+  return {{{ReturnValue}}};
+}
+  """;
+}
+
+Text Build(Text _ModeName) {
   declare Integer Count_InstancesY = 6;
   declare Integer Count_InstancesX = 1;
 
-  declare Text MLText = """
-<manialink version="3" name="L_UIMenuOnline">
+  return """
+<manialink version="3" name="{{{C_ManialinkLayerId}}}">
   <frame id="Frame_All" z-index="1000">
     <frame id="Frame_Menu" pos="0 0" hidden="0">
     <quad z-index="-4" pos="0 0" size="960 180" valign="center" halign="center" style="Bgs1" substyle="BgDialogBlur" opacity="1" bluramount="0"/>
@@ -22,14 +46,21 @@ Text Build() {
 
 <script><!--
 
-#Const DebugName "L_MenuOnline"
-
 #Const C_QuadMedalImgColor [
   0 => {{{Colors::GetColor("GreenMaster")}}},
   1 => {{{Colors::GetColor("GoldShiny")}}},
   2 => {{{Colors::GetColor("SilverShiny")}}},
   3 => {{{Colors::GetColor("BronzeShiny")}}},
   4 => <0.0, 0.0, 0.0>
+]
+
+#Const C_PredefiendModeNames [
+  "Chase" => _("Chase"),
+  "Cup" => _("Cup"),
+  "Laps" => _("Laps"),
+  "Rounds" => _("Rounds"),
+  "Team" => _("Team"),
+  "TimeAttack" => _("Time Attack")
 ]
 
 {{{Manialink::GetIncludes()}}}
@@ -45,6 +76,7 @@ declare Integer G_IgnoreInputsUntil;
 
 {{{Inject_QuadsSelector::InjectInFunction()}}}
 {{{Inject_SoloMapInfosBase::InjectInFunction()}}}
+{{{Private_InjectGetModeName(_ModeName)}}}
 
 // TODO: Move this to Medals.Script.txt
 Integer GetMedalForTime(Integer _Time) {
@@ -84,6 +116,21 @@ Void SetTime(Integer _LastTime, Integer _BestTime) {
 
   SetBigMedal(BestMedal);
   SetTimeInfo_SoloMapInfosBase(PlayersName, PlayersTime, PlayersColor);
+}
+
+Void SetModeName(Text _ModeName, Text _ServerName) {
+  declare Label_Mode <=> (Page.MainFrame.GetFirstChild("Label_Mode") as CMlLabel);
+  declare Label_Mode2 <=> (Page.MainFrame.GetFirstChild("Label_Mode2") as CMlLabel);
+  declare Quad_Barre <=> (Page.MainFrame.GetFirstChild("Quad_Barre") as CMlQuad);
+
+  if (C_PredefiendModeNames.existskey(_ModeName)) {
+    Label_Mode.SetText(C_PredefiendModeNames[_ModeName]);
+  } else {
+    Label_Mode.SetText(_ModeName);
+  }
+
+  Label_Mode2.SetText(_ServerName);
+  Quad_Barre.Show();
 }
 
 Void SendInfo(Boolean _IsSpectating) {
@@ -197,7 +244,6 @@ main() {
 
   declare Boolean Prev_Visibility;
   declare Boolean Prev_IsSpectatorClient;
-  declare Prev_ModeName = Net_ModeName;
 
   declare PrevLastTime = -1;
   declare PrevBestTime = -1;
@@ -208,6 +254,11 @@ main() {
   }
 
   SetTime(PrevLastTime, PrevBestTime);
+
+  declare Prev_ModeName = GetModeName();
+  declare Prev_ServerName = Playground.ServerInfo.ServerName;
+
+  SetModeName(Prev_ModeName, Prev_ServerName);
 
   while (True) {
     yield;
@@ -248,12 +299,11 @@ main() {
     }
 
     // Should only be used on online servers
-    if (Prev_ModeName != Net_ModeName) {
-      Prev_ModeName = Net_ModeName;
+    if (Prev_ModeName != GetModeName() || Prev_ServerName != Playground.ServerInfo.ServerName) {
+      Prev_ModeName = GetModeName();
+      Prev_ServerName = Playground.ServerInfo.ServerName;
 
-      Label_Mode.SetText(Net_ModeName);
-      Label_Mode2.SetText(Net_ModeName2);
-      Quad_Barre.Visible = Net_ModeName != "";
+      SetModeName(Prev_ModeName, Prev_ServerName);
     }
 
     foreach (Event in PendingEvents) {
@@ -301,7 +351,5 @@ main() {
 }
 --></script>
 </manialink>
-""";
-
-return MLText;
+  """;
 }

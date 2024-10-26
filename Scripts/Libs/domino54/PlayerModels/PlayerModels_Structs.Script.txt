@@ -5,7 +5,7 @@
  */
 
 #Const Version      "2024-10-05"
-#Const ScriptName   "Libs/domino54/PlayerModels_Structs.Script.txt"
+#Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Structs.Script.txt"
 
 // ---------------------------------- //
 // Structs

@@ -7,14 +7,11 @@
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
 #Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
-#Include "Libs/domino54/CustomSkins_OnlineData.Script.txt" as CustomSkins_OnlineData
-#Include "Libs/domino54/CustomSkins_Players.Script.txt" as CustomSkins_Players
+#Include "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt" as CustomSkins
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
-#Include "Libs/domino54/Openplanet_OnlineData.Script.txt" as Openplanet_OnlineData
-#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
-#Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+#Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PlayerModels_Data
+#Include "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt" as PlayerModels_Server
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
-#Include "Libs/TrackMania/Ingame/UI/UIMenuOnline.Script.txt" as UIMenuOnline
 
 // ---------------------------------- //
 // Global variables
@@ -29,15 +26,12 @@ declare Boolean TMAll_Settings_AutoIntroSequenceModel;
 ***MB_Private_LogVersions***
 ***
 Log::RegisterScript(MB_TMAll_ScriptName, MB_TMAll_Version);
-Log::RegisterScript(CustomSkins_OnlineData::ScriptName, CustomSkins_OnlineData::Version);
-Log::RegisterScript(CustomSkins_Players::ScriptName, CustomSkins_Players::Version);
+Log::RegisterScript(CustomSkins::ScriptName, CustomSkins::Version);
 Log::RegisterScript(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
 Log::RegisterScript(HttpClient::ScriptName, HttpClient::Version);
-Log::RegisterScript(Openplanet_OnlineData::ScriptName, Openplanet_OnlineData::Version);
 Log::RegisterScript(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
 Log::RegisterScript(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
 Log::RegisterScript(TextLibExt::ScriptName, TextLibExt::Version);
-Log::RegisterScript(UIMenuOnline::ScriptName, UIMenuOnline::Version);
 ***
 
 ***MB_Private_Settings***
@@ -51,8 +45,7 @@ TMAll_Settings_AutoIntroSequenceModel = True;
 ***MB_Private_LoadLibraries***
 ***
 HttpClient::Load();
-Openplanet_OnlineData::Load();
-CustomSkins_OnlineData::Load();
+CustomSkins::Load(This);
 GameplayCoefs_Server::Load();
 PlayerModels_Data::Load();
 
@@ -66,8 +59,6 @@ while (PlayerModels_Data::Loading()) {
 // ---------------------------------- //
 ***MB_Private_StartServer***
 ***
-UIMenuOnline::Load(ModeInfo::GetName());
-
 ItemList_Begin();
 PlayerModels_Server::Load(This);
 +++TMAll_ItemList+++
@@ -101,9 +92,7 @@ if (TMAll_Settings_AutoIntroSequenceModel) {
 ***MB_Private_Yield***
 ***
 HttpClient::Yield();
-Openplanet_OnlineData::Yield();
-CustomSkins_OnlineData::Yield();
-UIMenuOnline::Yield();
+CustomSkins::OnlineYield();
 ***
 
 // ---------------------------------- //
@@ -112,12 +101,10 @@ UIMenuOnline::Yield();
 ***MB_Private_UnloadLibraries***
 ***
 HttpClient::Unload();
-Openplanet_OnlineData::Unload();
-CustomSkins_OnlineData::Unload();
+CustomSkins::Unload();
 GameplayCoefs_Server::Unload();
 PlayerModels_Server::Unload(This);
 PlayerModels_Data::Unload();
-UIMenuOnline::Unload();
 ***
 
 // ---------------------------------- //

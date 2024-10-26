@@ -1,0 +1,20 @@
+/**
+ * Base mania app for Trackmania online game modes.
+ *
+ * Nadeo ManiaApps are extending from this file, so TMAll hijacks it to extend from AppBaseTMAll instead.
+ *
+ * Affects game modes: Chase, Cup, Laps, Rounds, Team, TimeAttack.
+ */
+#Extends "ManiaApps/domino54/TrackMania/Base/AppBaseTMAll.Script.txt"
+
+***AB_LoadLibraries***
+***
+// Chase compatibility.
++++LoadLibraries+++
+***
+
+***AB_UnloadLibraries***
+***
+// Chase compatibility.
++++UnloadLibraries+++
+***

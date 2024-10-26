@@ -7,7 +7,7 @@
  * Based on Nadeo's standard AppBase.Script.txt without #RequireContext.
  */
 
-#Const AB_Version     "2023-10-05"
+#Const AB_Version     "2024-10-05"
 #Const AB_ScriptName  "ManiaApps/domino54/AppBase.Script.txt"
 
 #Include "Libs/Nadeo/Env.Script.txt" as Env
@@ -97,7 +97,7 @@ main() {
   // Start app
   +++AB_StartApp+++
 
-  while(True) {
+  while (True) {
     AB_Yield();
 
     +++AB_AppLoop+++
