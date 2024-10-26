@@ -210,6 +210,12 @@ Text InjectInWhile(Text _ActionWhenSelect, Text _ActionWhenCancel, Text _ActionW
 							G_ButtonFocus -= 1;
 							FocusButton();
 						}
+						else
+						{
+							UnFocusButton();
+							G_ButtonFocus = {{{G_Count_InstancesY-1}}};
+							FocusButton();
+						}
 					}
 					case CMlEvent::EMenuNavAction::Down : {
 						//log("G_ButtonFocus: "^ G_ButtonFocus);
@@ -217,6 +223,12 @@ Text InjectInWhile(Text _ActionWhenSelect, Text _ActionWhenCancel, Text _ActionW
 						{
 							UnFocusButton();
 							G_ButtonFocus += 1;
+							FocusButton();
+						}
+						else
+						{
+							UnFocusButton();
+							G_ButtonFocus = 0;
 							FocusButton();
 						}
 					}
