@@ -8,81 +8,101 @@
       "Id": "tmvalley:azurswift",
       "AppliesTo": "trackmania:valleycar",
       "Name": "AzurSwift",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/AzurSwift.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_AzurSwift.webp"
+      }
     },
     {
       "Id": "tmvalley:grass99tm",
       "AppliesTo": "trackmania:valleycar",
       "Name": "Grass99TM",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/Grass99TM.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Grass99TM.webp"
+      }
     },
     {
       "Id": "tmvalley:kingmustard",
       "AppliesTo": "trackmania:valleycar",
       "Name": "KingMustard",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/KingMustard.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_KingMustard.webp"
+      }
     },
     {
       "Id": "tmvalley:redturn",
       "AppliesTo": "trackmania:valleycar",
       "Name": "RedTurn",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/RedTurn.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_RedTurn.webp"
+      }
     },
     {
       "Id": "tmvalley:shadowmantis",
       "AppliesTo": "trackmania:valleycar",
       "Name": "ShadowMantis",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/ShadowMantis.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_ShadowMantis.webp"
+      }
     },
     {
       "Id": "tmvalley:straightblue",
       "AppliesTo": "trackmania:valleycar",
       "Name": "StraightBlue",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/StraightBlue.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_StraightBlue.webp"
+      }
     },
     {
       "Id": "tmvalley:thewasp",
       "AppliesTo": "trackmania:valleycar",
       "Name": "TheWasp",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/TheWasp.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_TheWasp.webp"
+      }
     },
     {
       "Id": "tmvalley:trigen",
       "AppliesTo": "trackmania:valleycar",
       "Name": "TriGen",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/TriGen.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_TriGen.webp"
+      }
     },
     {
       "Id": "tmvalley:whitelegend",
       "AppliesTo": "trackmania:valleycar",
       "Name": "WhiteLegend",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/WhiteLegend.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_WhiteLegend.webp"
+      }
     },
     {
       "Id": "tmvalley:windleaf",
       "AppliesTo": "trackmania:valleycar",
       "Name": "Windleaf",
-      "Rarity": 2,
       "SkinPath": "Skins/Models/ValleyCar/Windleaf.zip",
-      "Author": "NADEO"
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Windleaf.webp"
+      }
     }
   ]
 }
