@@ -38,6 +38,7 @@
       "LoadAs": "ItemAndArchetype",
       "Assets": {
         "garage:name": "Valley",
+        "garage:card": "./Card/Card_ValleyCar.webp",
         "garage:tab_icon": "./TabIcon/TabIcon_ValleyCar.webp"
       }
     },
@@ -139,6 +140,7 @@
       "LoadAs": "Item",
       "Assets": {
         "garage:name": "Traffic",
+        "garage:card": "./Card/Card_TrafficCar.webp",
         "garage:tab_icon": "./TabIcon/TabIcon_TrafficCar.webp"
       }
     }

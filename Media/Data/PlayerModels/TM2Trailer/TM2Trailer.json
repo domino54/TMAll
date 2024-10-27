@@ -1,0 +1,68 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tm2trailer:skins",
+  "Name": "Trackmania 2 Trailer/Store Skins",
+  "Skins": [
+    {
+      "Id": "tm2trailer:grally9",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "G-Rally9",
+      "SkinPath": "Skins/Models/ValleyCar/G-Rally9.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_G-Rally9.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:mpracing",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "MP-Racing",
+      "SkinPath": "Skins/Models/ValleyCar/MP-Racing.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_MP-Racing.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:redclap",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "RedClap",
+      "SkinPath": "Skins/Models/ValleyCar/RedClap.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_RedClap.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:renaissance",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "Renaissance",
+      "SkinPath": "Skins/Models/ValleyCar/Renaissance.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Renaissance.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:subsept",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "Sub-Sept",
+      "SkinPath": "Skins/Models/ValleyCar/Sub-Sept.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Sub-Sept.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:swift82",
+      "AppliesTo": "trackmania:valleycar",
+      "Name": "Swift-82",
+      "SkinPath": "Skins/Models/ValleyCar/Swift-82.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Swift-82.webp"
+      }
+    }
+  ]
+}

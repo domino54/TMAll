@@ -38,7 +38,7 @@
 	</editor>
 	<solo>
 		<!-- either campaign or playlist-->
-		<mode name=""/>
+		<mode name="Modes\TrackMania\SingleMap.Script.txt"/>
 		<datapack name=""/>
 		<default_maprecord_type>2</default_maprecord_type>
 		<score_context>

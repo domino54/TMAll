@@ -4,21 +4,21 @@
 /**
  * @name Garage.Script.txt
  * @author domino54
- * @version 2024-10-05
+ * @version 2024-10-26
  */
 
 #Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
 
-#Const Version    "2024-10-05"
+#Const Version    "2024-10-26"
 #Const ScriptName "ManiaApps/Garage.Script.txt"
 
 #Setting S_ScriptEnvironment "development"
 
 #Include "TextLib" as TL
 #Include "ColorLib" as CL
-#Include "Libs/domino54/CustomSkins_Client.Script.txt" as CustomSkins_Client
+#Include "Libs/domino54/CustomSkins/CustomSkins_Client.Script.txt" as CustomSkins
 #Include "Libs/domino54/Garage/ServerComm.Script.txt" as GarageServer
-#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PMData
+#Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PMData
 #Include "ManiaApps/domino54/Common/MenuTabs.Script.txt" as MenuTabs
 #Include "ManiaApps/domino54/Common/SkinSelection.Script.txt" as SkinSelection
 #Include "ManiaApps/domino54/Common/TitleLogoControls.Script.txt" as TitleLogoControls
@@ -50,7 +50,7 @@
 ***
 Log::RegisterScript(ScriptName, Version);
 Log::RegisterScript(GarageBg::ScriptName, GarageBg::Version);
-Log::RegisterScript(CustomSkins_Client::ScriptName, CustomSkins_Client::Version);
+Log::RegisterScript(CustomSkins::ScriptName, CustomSkins::Version);
 Log::RegisterScript(GarageServer::ScriptName, GarageServer::Version);
 Log::RegisterScript(MenuTabs::ScriptName, MenuTabs::Version);
 Log::RegisterScript(PMData::ScriptName, PMData::Version);
@@ -116,7 +116,7 @@ foreach (Event in PendingEvents) {
       GarageServer::SetPreviewSkinId(LocalUser, Event.CustomEventData[0]);
     }
     case SkinSelection::C_LibSkinSelection_EventType_SetApplied: {
-      CustomSkins_Client::SetPlayerSkinId(Persistent_Garage_LastPlayerModelId, Event.CustomEventData[0]);
+      CustomSkins::SetPlayerSkinId(Persistent_Garage_LastPlayerModelId, Event.CustomEventData[0]);
     }
   }
 
@@ -174,7 +174,7 @@ Void UpdateCurrentModel(Text _ModelId) {
   Persistent_Garage_LastPlayerModelId = _ModelId;
 
   declare SkinOptions = GetSkinOptions(_ModelId);
-  declare InitialPreviewSkinId = CustomSkins_Client::GetPlayerSkinId(_ModelId);
+  declare InitialPreviewSkinId = CustomSkins::GetPlayerSkinId(_ModelId);
 
   GarageServer::SetPreviewModelId(LocalUser, _ModelId);
   GarageServer::SetPreviewSkinId(LocalUser, InitialPreviewSkinId);

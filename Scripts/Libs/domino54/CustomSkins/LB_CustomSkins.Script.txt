@@ -1,0 +1,45 @@
+/**
+ * @name LB_CustomSkins.Script.txt
+ * @author domino54
+ * @version 2024-10-26
+ */
+
+#Const Version      "2024-10-26"
+#Const ScriptName   "Libs/domino54/CustomSkins/CustomSkins/LB_CustomSkins.Script.txt"
+
+#Const C_ManialinkLayerId     "customskins:onlinedata"
+#Const C_PlayerDataUpdateId   "customskins:playerdata"
+
+Text Build() {
+  return """
+<manialink version="3" name="{{{C_ManialinkLayerId}}}">
+<script><!--
+
+main() {
+  // Without this, the server cannot find us via GetPlayer(Event.UI)
+  wait(InputPlayer != Null && Players.existskey(InputPlayer.Id));
+
+  declare persistent Integer Persistent_LibCustomSkins_LastUpdate for LocalUser;
+  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for LocalUser;
+  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for LocalUser;
+
+  declare PrevUpdate = -1;
+
+  while (True) {
+    wait(PrevUpdate != Persistent_LibCustomSkins_LastUpdate);
+
+    PrevUpdate = Persistent_LibCustomSkins_LastUpdate;
+
+    declare EventData = [
+      Persistent_LibCustomSkins_ModelIdToSkinId.tojson(),
+      Persistent_LibCustomSkins_UseCustomOverArchetype.tojson()
+    ];
+
+    SendCustomEvent("{{{C_PlayerDataUpdateId}}}", EventData);
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

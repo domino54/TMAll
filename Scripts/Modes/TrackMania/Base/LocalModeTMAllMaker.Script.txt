@@ -3,17 +3,16 @@
  */
 #Extends "Modes/TrackMania/ModeBase.Script.txt"
 
-#Const MB_TMAll_Version     "2024-08-01"
+#Const MB_TMAll_Version     "2024-10-26"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
 #Include "Libs/Nadeo/Env.Script.txt" as Env
 #Include "Libs/Nadeo/Log.Script.txt" as Log
 #Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
-#Include "Libs/domino54/CustomSkins_LocalData.Script.txt" as CustomSkins_LocalData
+#Include "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt" as CustomSkins
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
-#Include "Libs/domino54/Openplanet_LocalData.Script.txt" as Openplanet_LocalData
-#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
-#Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+#Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PlayerModels_Data
+#Include "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt" as PlayerModels_Server
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
 
 /// Environment in which the script runs
@@ -27,10 +26,9 @@
 MB_LogVersion(MB_TMAll_ScriptName, MB_TMAll_Version);
 MB_LogVersion(Env::ScriptName, Env::Version);
 MB_LogVersion(Log::ScriptName, Log::Version);
-MB_LogVersion(CustomSkins_LocalData::ScriptName, CustomSkins_LocalData::Version);
+MB_LogVersion(CustomSkins::ScriptName, CustomSkins::Version);
 MB_LogVersion(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
 MB_LogVersion(HttpClient::ScriptName, HttpClient::Version);
-MB_LogVersion(Openplanet_LocalData::ScriptName, Openplanet_LocalData::Version);
 MB_LogVersion(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
 MB_LogVersion(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
 MB_LogVersion(TextLibExt::ScriptName, TextLibExt::Version);
@@ -45,10 +43,7 @@ Env::Load();
 Env::Set(S_ScriptEnvironment);
 Log::Load();
 HttpClient::Load();
-CustomSkins_LocalData::Load();
-// Yield only once, because only the selected skins will be loaded.
-CustomSkins_LocalData::Yield();
-Openplanet_LocalData::Load();
+CustomSkins::Load(This);
 GameplayCoefs_Server::Load();
 PlayerModels_Data::Load();
 
@@ -98,7 +93,7 @@ HttpClient::Yield();
 ***
 HttpClient::Unload();
 PlayerModels_Server::Unload(This);
-CustomSkins_LocalData::Unload();
+CustomSkins::Unload();
 GameplayCoefs_Server::Unload();
 PlayerModels_Data::Unload();
 Log::Unload();

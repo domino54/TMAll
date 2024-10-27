@@ -1,17 +1,16 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2024-10-24
+ * @version 2024-10-26
  */
 
-#Const Version      "2024-10-24"
+#Const Version      "2024-10-26"
 #Const ScriptName   "Libs/domino54/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
 #Include "Libs/Nadeo/Log.Script.txt" as Log
-#Include "Libs/domino54/CustomSkins_Players.Script.txt" as CSPlayers
-#Include "Libs/domino54/Openplanet_Players.Script.txt" as OPPlayers
-#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PMData
+#Include "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt" as CustomSkins
+#Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PMData
 
 // ---------------------------------- //
 // Constants
@@ -389,7 +388,7 @@ Text GetPlayerRandomizedSkinId(Text _Login, Text _ModelId) {
  */
 Text GetPlayerSkinId(Text _Login, Text _ModelId) {
   declare BaseModelId = PMData::GetBaseModelId(_ModelId);
-  declare PlayerPreferenceId = CSPlayers::GetPlayerSkinId(_Login, BaseModelId);
+  declare PlayerPreferenceId = CustomSkins::GetPlayerSkinId(_Login, BaseModelId);
 
   // Return the preference if it is set.
   if (PlayerPreferenceId != "") {
@@ -435,7 +434,6 @@ Boolean GetModelRequiresUnlock(Text _ModelId) {
  * Check if the player requires additional special unlock to assign the model.
  */
 Boolean GetPlayerRequiresUnlock(Text _Login) {
-  //return !OPPlayers::HasOpenplanet(_Login);
   return True;
 }
 
@@ -443,7 +441,7 @@ Boolean GetPlayerRequiresUnlock(Text _Login) {
  * Check if the player model should override an archetype.
  */
 Boolean GetPlayerPreferCustom(Text _Login, Text _ModelId) {
-  if (CSPlayers::GetPlayerUseCustomOverArchetype(_Login, _ModelId)) {
+  if (CustomSkins::GetPlayerUseCustomOverArchetype(_Login, _ModelId)) {
     return True;
   }
 
