@@ -1,10 +1,10 @@
 /**
  * @name LB_MenuOnline.Script.txt
  * @author domino54
- * @version 2024-10-26
+ * @version 2024-10-30
  */
 
-#Const Version    "2024-10-26"
+#Const Version    "2024-10-30"
 #Const ScriptName "Libs/domino54/MenuOnline/LB_MenuOnline.Script.txt"
 
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
@@ -131,6 +131,25 @@ Void SetModeName(Text _ModeName, Text _ServerName) {
 
   Label_Mode2.SetText(_ServerName);
   Quad_Barre.Show();
+}
+
+Void SetMapInfo(Text _MapName, Text _AuthorName, Text _CountryFlagUrl) {
+  declare Label_TitleBody <=> (Page.GetFirstChild("Label_TitleBody") as CMlLabel);
+  declare Label_Author <=> (Page.GetFirstChild("Label_Author") as CMlLabel);
+  declare Quad_Flag <=> (Page.GetFirstChild("Quad_Flag") as CMlQuad);
+
+  declare AuthorNickName = TL::Compose(_("By %1"), _AuthorName);
+  declare LabelWidth = Label_Author.ComputeWidth(AuthorNickName);
+  declare Flag = _CountryFlagUrl;
+
+  if (Flag == "file://ZoneFlags/Path/") {
+    Flag = "file://ZoneFlags/Path/World";
+  }
+
+  Label_TitleBody.SetText(_MapName);
+  Label_Author.SetText(AuthorNickName);
+  Quad_Flag.RelativePosition.X = LabelWidth - 32.0;
+  Quad_Flag.ChangeImageUrl(Flag);
 }
 
 Void SendInfo(Boolean _IsSpectating) {
@@ -260,6 +279,14 @@ main() {
 
   SetModeName(Prev_ModeName, Prev_ServerName);
 
+  declare Text Prev_MapUid;
+
+  if (Map != Null) {
+    Prev_MapUid = Map.MapInfo.MapUid;
+
+    SetMapInfo(Map.MapName, Map.AuthorNickName, Map.AuthorZoneIconUrl);
+  }
+
   while (True) {
     yield;
 
@@ -298,6 +325,13 @@ main() {
       SendInfo(IsSpectatorClient);
     }
 
+    // Map has changed
+    if (Map != Null && Prev_MapUid != Map.MapInfo.MapUid) {
+      Prev_MapUid = Map.MapInfo.MapUid;
+
+      SetMapInfo(Map.MapName, Map.AuthorNickName, Map.AuthorZoneIconUrl);
+    }
+
     // Should only be used on online servers
     if (Prev_ModeName != GetModeName() || Prev_ServerName != Playground.ServerInfo.ServerName) {
       Prev_ModeName = GetModeName();
@@ -312,17 +346,6 @@ main() {
           switch (Event.MenuNavAction) {
             case CMlScriptEvent::EMenuNavAction::Cancel: {
               Button_Resume();
-            }
-          }
-        }
-
-        case CMlScriptEvent::Type::PluginCustomEvent: {
-          switch (Event.PluginCustomEventType) {
-            case "Show" : {
-              ShowPage();
-            }
-            case "Hide" : {
-              //EnableMenuNavigation(True,False,Null,0);
             }
           }
         }
