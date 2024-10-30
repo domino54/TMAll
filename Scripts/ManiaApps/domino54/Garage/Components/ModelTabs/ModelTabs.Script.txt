@@ -1,0 +1,92 @@
+/**
+ * @name ModelTabs.Script.txt
+ * @author domino54
+ * @version 2024-10-30
+ */
+
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/ModelTabs/ModelTabs.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/ModelTabs/LB_ModelTabs.Script.txt" as LB_ModelTabs
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_ModelTabs"
+
+#Const C_CustomEventType_ActiveTab    "menu_tabs:active_tab"
+#Const C_CustomEventType_SetHeader    "menu_tabs:set_header"
+#Const C_CustomEventType_SetColor     "menu_tabs:set_color"
+#Const C_CustomEventType_UpdateTabs   "menu_tabs:update_tabs"
+#Const C_CustomEventType_SetTabId     "menu_tabs:set_tab_id"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_MenuTab {
+  Text Id;
+  Text Label;
+  Text IconUrl;
+}
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetHeaderText(Text _Value) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+  declare Text MenuTabsHeaderText for Layer.LocalPage;
+
+  MenuTabsHeaderText = _Value;
+  LayerCustomEvent(Layer, C_CustomEventType_SetHeader, []);
+}
+
+Void SetColor(Vec3 _Color) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+  declare Vec3 MenuTabsLineColor for Layer.LocalPage;
+
+  MenuTabsLineColor = _Color;
+  LayerCustomEvent(Layer, C_CustomEventType_SetColor, []);
+}
+
+Void SetTabsData(K_MenuTab[] _TabsData) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+
+  declare K_MenuTab[] MenuTabsData for Layer.LocalPage;
+
+  MenuTabsData = _TabsData;
+
+  LayerCustomEvent(Layer, C_CustomEventType_UpdateTabs, []);
+}
+
+Void SetActiveTabId(Text _ActiveTabId) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+
+  LayerCustomEvent(Layer, C_CustomEventType_SetTabId, [_ActiveTabId]);
+}
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB_ModelTabs::Build());
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}

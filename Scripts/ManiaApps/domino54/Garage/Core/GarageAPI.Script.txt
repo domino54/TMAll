@@ -1,0 +1,219 @@
+/**
+ * @name GarageAPI.Script.txt
+ * @author domino54
+ * @version 2024-10-30
+ */
+
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt"
+
+#Include "TextLib" as TL
+#Include "Libs/domino54/CustomSkins/CustomSkins_Client.Script.txt" as CustomSkins
+#Include "Libs/domino54/Garage/ServerComm.Script.txt" as GarageServer
+#Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PMData
+#Include "Libs/domino54/PlayerModels/PlayerModels_Structs.Script.txt" as PMStructs
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Garage/"
+
+#Const C_GarageAssetId_ModelAliasName   "garage:name"
+#Const C_GarageAssetId_ModelTabIcon     "garage:tab_icon"
+#Const C_GarageAssetId_SkinCardIcon     "garage:card"
+
+#Const C_GarageDefaultModelTabIcon      "TabIcon_Default.webp"
+#Const C_GarageDefaultSkinCardIcon      "SkinCard_Default.webp"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct PMStructs::K_Model as K_Model
+#Struct PMStructs::K_Skin as K_Skin
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Text G_LibGarageAPI_PreviewModelId;
+declare Text G_LibGarageAPI_PreviewSkinId;
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  PMData::Unload();
+}
+
+Void Load() {
+  Unload();
+
+  PMData::Load();
+}
+
+Boolean IsLoading() {
+  return PMData::Loading();
+}
+
+Boolean IsPlayground() {
+  return (This is CManiaAppPlayground);
+}
+
+Boolean IsLoadingScreen() {
+  declare CNod Context = This;
+  if (!(Context is CManiaAppPlayground)) return False;
+  return (Context as CManiaAppPlayground).Playground.IsLoadingScreen;
+}
+
+Void SendModeEvent(Text _CustomEventName, Text[] _CustomEventData) {
+  declare CNod Context = This;
+  if (!(Context is CManiaAppPlayground)) return;
+  (Context as CManiaAppPlayground).SendCustomEvent(_CustomEventName, _CustomEventData);
+}
+
+Integer GetGameTime() {
+  declare CNod Context = This;
+  if (!(Context is CManiaAppPlayground)) return Now;
+  return (Context as CManiaAppPlayground).Playground.GameTime;
+}
+
+Boolean IsServerReady() {
+  return !IsLoadingScreen() && GarageServer::IsHideBackground(LocalUser, GetGameTime());
+}
+
+Void CloseBrowser() {
+  declare CNod Context = This;
+  if (!(Context is CManiaAppBrowser)) return;
+  (Context as CManiaAppBrowser).BrowserQuit();
+}
+
+Void Close() {
+  if (IsPlayground()) {
+    SendModeEvent(GarageServer::C_CustomEventType_StopServer, []);
+  } else {
+    CloseBrowser();
+  }
+}
+
+K_Model[] GetSelectableModels() {
+  return PMData::GetModelsList();
+}
+
+K_Skin[] GetSelectableSkins(Text _ModelId) {
+  declare K_Skin[Text] SkinsToSort;
+
+  foreach (Skin in PMData::GetSkinsListByModelId(_ModelId)) {
+    SkinsToSort[TL::ToUpperCase("""{{{Skin.IsCustom}}}|{{{Skin.SortIndex}}}|{{{Skin.Name}}}|{{{Skin.Id}}}""")] = Skin;
+  }
+
+  SkinsToSort = SkinsToSort.sortkey();
+
+  declare K_Skin[] Result;
+
+  foreach (Skin in SkinsToSort) {
+    Result.add(Skin);
+  }
+
+  return Result;
+}
+
+Text[] GetSelectableModelIds() {
+  declare Text[] Result;
+
+  foreach (Model in PMData::GetModelsList()) {
+    Result.add(Model.Id);
+  }
+
+  return Result;
+}
+
+Text[] GetSelectableSkinIds(Text _ModelId) {
+  declare Text[] Result;
+
+  foreach (Skin in PMData::GetSkinsListByModelId(_ModelId)) {
+    Result.add(Skin.Id);
+  }
+
+  return Result;
+}
+
+Text GetSkinId() {
+  return G_LibGarageAPI_PreviewSkinId;
+}
+
+Void SetSkinId(Text _SkinId) {
+  G_LibGarageAPI_PreviewSkinId = _SkinId;
+
+  GarageServer::SetPreviewSkinId(LocalUser, _SkinId);
+}
+
+Text GetLastModelId() {
+  declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
+
+  return Persistent_Garage_LastPlayerModelId;
+}
+
+Text GetInitialModelId() {
+  declare ModelIds = GetSelectableModelIds();
+  declare LastModelId = GetLastModelId();
+
+  if (ModelIds.exists(LastModelId)) {
+    return LastModelId;
+  }
+
+  if (ModelIds.count > 0) {
+    return ModelIds[0];
+  }
+
+  return "";
+}
+
+Text GetSelectedSkinId(Text _ModelId) {
+  return CustomSkins::GetPlayerSkinId(_ModelId);
+}
+
+Void SetSelectedSkinId(Text _ModelId, Text _SkinId) {
+  return CustomSkins::SetPlayerSkinId(_ModelId, _SkinId);
+}
+
+Text GetModelId() {
+  return G_LibGarageAPI_PreviewModelId;
+}
+
+Void SetModelId(Text _ModelId) {
+  G_LibGarageAPI_PreviewModelId = _ModelId;
+
+  declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
+
+  Persistent_Garage_LastPlayerModelId = _ModelId;
+
+  declare PlayerSkinId = GetSelectedSkinId(_ModelId);
+  declare SkinIds = GetSelectableSkinIds(_ModelId);
+
+  GarageServer::SetPreviewModelId(LocalUser, _ModelId);
+
+  if (SkinIds.exists(PlayerSkinId)) {
+    SetSkinId(PlayerSkinId);
+  }
+  else if (SkinIds.count > 0) {
+    SetSkinId(SkinIds[0]);
+  }
+  else {
+    SetSkinId("");
+  }
+}
+
+Text GetModelName(Text _ModelId, Text _Fallback) {
+  return PMData::GetPlayerModelAsset(_ModelId, C_GarageAssetId_ModelAliasName, _Fallback);
+}
+
+Text GetModelIconUrl(Text _ModelId) {
+  return PMData::GetPlayerModelAsset(_ModelId, C_GarageAssetId_ModelTabIcon, C_ImgBase^C_GarageDefaultModelTabIcon);
+}
+
+Text GetSkinIconUrl(Text _SkinId) {
+  return PMData::GetSkinAsset(_SkinId, C_GarageAssetId_SkinCardIcon, C_ImgBase^C_GarageDefaultSkinCardIcon);
+}

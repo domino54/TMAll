@@ -1,50 +1,34 @@
 /**
- * @name MenuTabs.Script.txt
+ * @name LB_ModelTabs.Script.txt
  * @author domino54
- * @version 2024-10-15
+ * @version 2024-10-30
  */
 
-#Const Version      "2024-10-15"
-#Const ScriptName   "ManiaApps/domino54/Common/MenuTabs.Script.txt"
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/ModelTabs/LB_ModelTabs.Script.txt"
 
-#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
 
-// ---------------------------------- //
-// Constants
-// ---------------------------------- //
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons"
 
-#Const C_LibMenuTabs_ManialinkLayerId       "menu_tabs:main"
-#Const C_LibMenuTabs_MenuTabButtonWidth     22.0
-#Const C_LibMenuTabs_NbButtonsScreen        6
-#Const C_LibMenuTabs_NbButtonsBudget        1
-#Const C_LibMenuTabs_EventType_ActiveTab    "menu_tabs:active_tab"
-#Const C_LibMenuTabs_EventType_SetHeader    "menu_tabs:set_header"
-#Const C_LibMenuTabs_EventType_SetColor     "menu_tabs:set_color"
-#Const C_LibMenuTabs_EventType_UpdateTabs   "menu_tabs:update_tabs"
+#Const C_MenuTabButtonWidth   22.0
+#Const C_NbButtonsScreen      6
+#Const C_NbButtonsBudget      1
 
-// ---------------------------------- //
-// Structs
-// ---------------------------------- //
+#Const C_CustomEventType_ActiveTab    "menu_tabs:active_tab"
+#Const C_CustomEventType_SetHeader    "menu_tabs:set_header"
+#Const C_CustomEventType_SetColor     "menu_tabs:set_color"
+#Const C_CustomEventType_UpdateTabs   "menu_tabs:update_tabs"
+#Const C_CustomEventType_SetTabId     "menu_tabs:set_tab_id"
 
-#Struct K_MenuTab {
-  Text Id;
-  Text Label;
-  Text IconUrl;
-}
-
-// ---------------------------------- //
-// Private functions
-// ---------------------------------- //
-
-Text Private_CreateManialinkLayer() {
+Text Build() {
   declare ButtonInstances = "";
 
-  declare SizeX = C_LibMenuTabs_MenuTabButtonWidth;
+  declare SizeX = C_MenuTabButtonWidth;
   declare HalfX = SizeX / 2;
 
-  for (I, 0, C_LibMenuTabs_NbButtonsScreen + C_LibMenuTabs_NbButtonsBudget - 1) {
+  for (I, 0, C_NbButtonsScreen + C_NbButtonsBudget - 1) {
     ButtonInstances ^= """<frameinstance modelid="FrameModel_MenuTabsButton" hidden="1" />""";
   }
 
@@ -52,9 +36,10 @@ Text Private_CreateManialinkLayer() {
   declare SubFont = Font::GetFontName("SubTitle");
 
   return """
-<manialink version="3" name="{{{C_LibMenuTabs_ManialinkLayerId}}}">
+<manialink version="3" name="L_ModelTabs">
 <stylesheet>
-  <style class="ArrowMore" halign="center" valign="center" size="8 8" image="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/SmallArrowRight.dds" />
+  <style class="ArrowMore" halign="center" valign="center" size="8 8" image="{{{C_ImgBase}}}/SmallArrowRight.dds" />
+  <style class="ArrowButton" halign="center" valign="center" size="8 8" image="{{{C_ImgBase}}}/Empty.dds" imagefocus="{{{C_ImgBase}}}/CircleSmall.dds" opacity="0.25" />
 </stylesheet>
 
 <framemodel id="FrameModel_MenuTabsButton">
@@ -73,30 +58,34 @@ Text Private_CreateManialinkLayer() {
   </frame>
 </framemodel>
 
-<frame id="Frame_MenuTabsContainer" pos="-50 63" z-index="1">
-  <quad id="Quad_Icon" pos="-10 9" size="14 14" halign="center" valign="center" image="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_GarageBig.dds" colorize="FFF" />
-  <label id="Label_HeaderText" pos="0 11" halign="left" valign="center2" size="44" textfont="{{{MainFont}}}" textsize="9" textcolor="FFF" textemboss="1" textprefix="$t" />
+<frame id="Frame_AnimSlideIn">
+  <frame id="Frame_MenuTabsContainer" pos="-50 63" z-index="1">
+    <label id="Label_HeaderText" pos="0 11" halign="left" valign="center2" size="44" textfont="{{{MainFont}}}" textsize="9" textcolor="FFF" textemboss="1" textprefix="$t" />
 
-  <quad class="LineColor" halign="left" valign="bottom" size="26 1.25" bgcolor="FFF" />
-  <quad class="LineColor" halign="left" valign="bottom" size="50 0.25" bgcolor="FFF" />
+    <quad class="LineColor" halign="left" valign="bottom" size="26 1.25" bgcolor="FFF" />
+    <quad class="LineColor" halign="left" valign="bottom" size="50 0.25" bgcolor="FFF" />
 
-  <frame id="Frame_MoreLeft" pos="46 5" rot="180">
-    <quad id="Quad_MoreLeft" class="ArrowMore" hidden="1" />
-  </frame>
-  <frame id="Frame_MoreRight" pos="186 5">
-    <quad id="Quad_MoreRight" class="ArrowMore" hidden="1" />
-  </frame>
+    <frame id="Frame_MoreLeft" pos="46 5" hidden="1">
+      <quad id="Quad_MoreLeft" class="ArrowMore" rot="180" />
+      <quad id="Quad_MoreLeftButton" class="ArrowButton Focus" scriptevents="1" />
+    </frame>
 
-  <frame id="Frame_ScrollContainer" pos="50 -2" rot="-90" halign="left" valign="top" size="30 132" scroll="1" scrollgrid="0 {{{SizeX / 4}}}">
-    <frame rot="90">
-      <quad id="Quad_LineStart" class="LineColor" pos="0 2" halign="right" valign="bottom" size="200 0.25" bgcolor="FFF" />
-      <quad id="Quad_LineEnd" class="LineColor" pos="0 2" halign="left" valign="bottom" size="200 0.25" bgcolor="FFF" />
+    <frame id="Frame_MoreRight" pos="186 5" hidden="1">
+      <quad id="Quad_MoreRight" class="ArrowMore" />
+      <quad id="Quad_MoreRightButton" class="ArrowButton Focus" scriptevents="1" />
+    </frame>
 
-      <frame id="Frame_ButtonsInstances" pos="0 2">
-        {{{ButtonInstances}}}
+    <frame id="Frame_ScrollContainer" pos="50 -2" rot="-90" halign="left" valign="top" size="30 132" scroll="1" scrollgrid="0 {{{SizeX / 4}}}" scrollmax="0 100000">
+      <frame rot="90">
+        <quad id="Quad_LineStart" class="LineColor" pos="0 2" halign="right" valign="bottom" size="200 0.25" bgcolor="FFF" />
+        <quad id="Quad_LineEnd" class="LineColor" pos="0 2" halign="left" valign="bottom" size="200 0.25" bgcolor="FFF" />
+
+        <frame id="Frame_ButtonsInstances" pos="0 2">
+          {{{ButtonInstances}}}
+        </frame>
+
+        <quad id="Quad_ScrollTarget" halign="left" valign="bottom" size="0 60" scriptevents="1" />
       </frame>
-
-      <quad id="Quad_ScrollTarget" halign="left" valign="bottom" size="0 60" scriptevents="1" />
     </frame>
   </frame>
 </frame>
@@ -185,22 +174,39 @@ Void SetActiveTabIndex(Integer _Index) {
   }
 }
 
-Void ScrollIntoIndex(Integer _Index, Boolean _Instant) {
+Void ScrollIntoOffset(Real _Offset, Boolean _Instant) {
   declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
   declare Quad_AnimDummy <=> (Page.GetFirstChild("Quad_AnimDummy") as CMlQuad);
 
   Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
 
-  declare Offset = Frame_ScrollContainer.Size.Y / -2 + _Index * {{{SizeX}}} + {{{HalfX}}};
-  declare Clamped = ML::Clamp(Offset, Frame_ScrollContainer.ScrollMin.X, Frame_ScrollContainer.ScrollMax.Y);
+  declare Real VirtualScrollMaxY for Frame_ScrollContainer;
+  declare Clamped = ML::Clamp(_Offset, Frame_ScrollContainer.ScrollMin.Y, VirtualScrollMaxY);
 
   AnimMgr.Flush(Quad_AnimDummy);
 
+  if (Frame_ScrollContainer.ScrollOffset.Y == Clamped) {
+    return;
+  }
+
+  Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
+
   if (_Instant) {
+    Quad_AnimDummy.RelativePosition_V3.Y = Clamped;
     Frame_ScrollContainer.ScrollOffset.Y = Clamped;
   } else {
-    AnimMgr.Add(Quad_AnimDummy, "<quad pos='0 "^Clamped^"' />", 250, CAnimManager::EAnimManagerEasing::QuadOut);
+    AnimMgr.Add(Quad_AnimDummy, "<quad pos='0 "^Clamped^"' />", 125, CAnimManager::EAnimManagerEasing::QuadOut);
   }
+}
+
+Void ScrollIntoOffset(Real _Offset) {
+  ScrollIntoOffset(_Offset, False);
+}
+
+Void ScrollIntoIndex(Integer _Index, Boolean _Instant) {
+  declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
+
+  ScrollIntoOffset(Frame_ScrollContainer.Size.Y / -2 + _Index * {{{SizeX}}} + {{{HalfX}}}, _Instant);
 }
 
 Void ScrollIntoIndex(Integer _Index) {
@@ -208,12 +214,15 @@ Void ScrollIntoIndex(Integer _Index) {
 }
 
 main() {
+  declare Frame_AnimSlideIn <=> (Page.GetFirstChild("Frame_AnimSlideIn") as CMlFrame);
   declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
   declare Quad_ScrollTarget <=> (Page.GetFirstChild("Quad_ScrollTarget") as CMlQuad);
   declare Quad_LineEnd <=> (Page.GetFirstChild("Quad_LineEnd") as CMlQuad);
   declare Quad_AnimDummy <=> (Page.GetFirstChild("Quad_AnimDummy") as CMlQuad);
 
+  declare Frame_MoreLeft <=> (Page.GetFirstChild("Frame_MoreLeft") as CMlFrame);
   declare Quad_MoreLeft <=> (Page.GetFirstChild("Quad_MoreLeft") as CMlQuad);
+  declare Frame_MoreRight <=> (Page.GetFirstChild("Frame_MoreRight") as CMlFrame);
   declare Quad_MoreRight <=> (Page.GetFirstChild("Quad_MoreRight") as CMlQuad);
 
   declare Frame_ButtonsInstances <=> (Page.GetFirstChild("Frame_ButtonsInstances") as CMlFrame);
@@ -223,30 +232,91 @@ main() {
     Frame_TabButtons.add((Control as CMlFrame));
   }
 
+  declare Real VirtualScrollMaxY for Frame_ScrollContainer;
+
   declare Text MenuTabsHeaderText for Page;
   declare Vec3 MenuTabsLineColor for Page;
   declare K_MenuTab[] MenuTabsData for Page;
-  declare Text ActiveTabId for Page;
 
   SetHeaderText(MenuTabsHeaderText);
   SetLineColor(MenuTabsLineColor);
 
   declare StartIndex = 0;
+  declare Text ActiveTabId;
   declare Text[] AllTabIds;
 
   declare PrevStartIndex = -1000;
   declare PrevScrollOffsetY = 0.0;
   declare PrevAnimPosY = 0.0;
-
-  // EnableMenuNavigation(True, False, Null, 0);
+  declare PrevPageIsVisible = !PageIsVisible;
 
   while (True) {
     // Can't yield here or the events are missed.
 
-    if (PrevAnimPosY != Quad_AnimDummy.RelativePosition_V3.Y) {
-      PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
+    if (PrevPageIsVisible != PageIsVisible) {
+      PrevPageIsVisible = PageIsVisible;
 
-      Frame_ScrollContainer.ScrollOffset.Y = PrevAnimPosY;
+      if (PageIsVisible) {
+        AnimMgr.Flush(Frame_AnimSlideIn);
+        Frame_AnimSlideIn.RelativePosition_V3.X = 300.0;
+        AnimMgr.Add(Frame_AnimSlideIn, "<frame pos='0 0' />", 500, CAnimManager::EAnimManagerEasing::CubicOut);
+      }
+    }
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type != CMlScriptEvent::Type::PluginCustomEvent) {
+        continue;
+      }
+
+      switch (Event.CustomEventType) {
+        case "{{{C_CustomEventType_SetHeader}}}": {
+          SetHeaderText(MenuTabsHeaderText);
+        }
+        case "{{{C_CustomEventType_SetColor}}}": {
+          SetLineColor(MenuTabsLineColor);
+        }
+        case "{{{C_CustomEventType_UpdateTabs}}}": {
+          PrevScrollOffsetY = -1.0;
+          PrevStartIndex = -1000;
+
+          VirtualScroll_ResetControls();
+
+          AllTabIds.clear();
+
+          foreach (MenuTab in MenuTabsData) {
+            AllTabIds.add(MenuTab.Id);
+          }
+
+          if (!AllTabIds.exists(ActiveTabId)) {
+            ActiveTabId = "";
+          }
+
+          if (ActiveTabId == "" && AllTabIds.count > 0) {
+            ActiveTabId = AllTabIds[0];
+          }
+
+          declare MaxWidth = ML::Max(0.0, {{{SizeX}}} * MenuTabsData.count);
+
+          VirtualScrollMaxY = ML::Max(0.0, MaxWidth - Frame_ScrollContainer.Size.Y);
+          Quad_ScrollTarget.Size.X = MenuTabsData.count * {{{SizeX}}};
+          Quad_LineEnd.RelativePosition_V3.X = Quad_ScrollTarget.Size.X;
+
+          ScrollIntoIndex(AllTabIds.keyof(ActiveTabId), True);
+        }
+        case "{{{C_CustomEventType_SetTabId}}}": {
+          declare NewActiveTabId = Event.CustomEventData[0];
+
+          if (AllTabIds.exists(NewActiveTabId)) {
+            ActiveTabId = NewActiveTabId;
+            ScrollIntoIndex(AllTabIds.keyof(ActiveTabId), True);
+          }
+        }
+      }
+    }
+
+    if (!PageIsVisible) {
+      yield;
+      continue;
     }
 
     foreach (Event in PendingEvents) {
@@ -254,6 +324,8 @@ main() {
         if (Event.Control.HasClass("Focus")) {
           Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
         }
+
+        declare ActiveTabIndex = AllTabIds.keyof(ActiveTabId);
 
         if (Event.ControlId == "Quad_MenuTabTrigger") {
           declare Index = VirtualScroll_GetIndex(Event.Control.Parent);
@@ -263,8 +335,16 @@ main() {
             ActiveTabId = MenuTab.Id;
 
             SetActiveTabIndex(Index);
-            SendCustomEvent("{{{C_LibMenuTabs_EventType_ActiveTab}}}", [ActiveTabId]);
+            SendCustomEvent("{{{C_CustomEventType_ActiveTab}}}", [ActiveTabId]);
           }
+        }
+
+        else if (Event.ControlId == "Quad_MoreLeftButton" && StartIndex > 0) {
+          ScrollIntoOffset(Frame_ScrollContainer.ScrollOffset.Y - Frame_ScrollContainer.Size.Y);
+        }
+
+        else if (Event.ControlId == "Quad_MoreRightButton" && StartIndex < MenuTabsData.count - {{{C_NbButtonsScreen}}}) {
+          ScrollIntoOffset(Frame_ScrollContainer.ScrollOffset.Y + Frame_ScrollContainer.Size.Y);
         }
       }
 
@@ -293,96 +373,77 @@ main() {
           }
         }
       }
-
-      else if (Event.Type == CMlScriptEvent::Type::PluginCustomEvent) {
-        switch (Event.CustomEventType) {
-          case "{{{C_LibMenuTabs_EventType_SetHeader}}}": {
-            SetHeaderText(MenuTabsHeaderText);
-          }
-          case "{{{C_LibMenuTabs_EventType_SetColor}}}": {
-            SetLineColor(MenuTabsLineColor);
-          }
-          case "{{{C_LibMenuTabs_EventType_UpdateTabs}}}": {
-            PrevScrollOffsetY = -1.0;
-            PrevStartIndex = -1000;
-
-            VirtualScroll_ResetControls();
-
-            AllTabIds.clear();
-
-            foreach (MenuTab in MenuTabsData) {
-              AllTabIds.add(MenuTab.Id);
-            }
-
-            declare ActiveTabIndex = AllTabIds.keyof(ActiveTabId);
-            declare MaxWidth = ML::Max(0.0, {{{SizeX}}} * MenuTabsData.count);
-
-            Frame_ScrollContainer.ScrollMax.Y = ML::Max(0.0, MaxWidth - Frame_ScrollContainer.Size.Y);
-            Quad_ScrollTarget.Size.X = MenuTabsData.count * {{{SizeX}}};
-            Quad_LineEnd.RelativePosition_V3.X = Quad_ScrollTarget.Size.X;
-            yield; // Unfortunately have to wait, because scroll does not update in the same frame.
-            ScrollIntoIndex(ActiveTabIndex, True);
-          }
-        }
-      }
-    }
-
-    if (!PageIsVisible) {
-      yield;
-      continue;
     }
 
     foreach (Event in Input.PendingEvents) {
       if (Event.Type != CInputEvent::EType::PadButtonPress) continue;
 
+      declare ActiveTabIndex = AllTabIds.keyof(ActiveTabId);
+      declare ChangeTabIndex = -1;
+
       switch (Event.Button) {
         case CInputEvent::EButton::L1: {
-          declare ActiveTabIndex = AllTabIds.keyof(ActiveTabId);
-          if (ActiveTabIndex <= 0) continue;
+          if (ActiveTabIndex <= 0) {
+            Frame_ScrollContainer.ScrollBumpTop();
+            continue;
+          }
 
-          ActiveTabIndex -= 1;
-          ActiveTabId = AllTabIds[ActiveTabIndex];
-
-          SetActiveTabIndex(ActiveTabIndex);
-          ScrollIntoIndex(ActiveTabIndex);
-          SendCustomEvent("{{{C_LibMenuTabs_EventType_ActiveTab}}}", [ActiveTabId]);
-
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+          ChangeTabIndex = ActiveTabIndex - 1;
         }
 
         case CInputEvent::EButton::R1: {
-          declare ActiveTabIndex = AllTabIds.keyof(ActiveTabId);
-          if (ActiveTabIndex >= AllTabIds.count - 1) continue;
+          if (ActiveTabIndex >= AllTabIds.count - 1) {
+            Frame_ScrollContainer.ScrollBumpBottom();
+            continue;
+          }
 
-          ActiveTabIndex += 1;
-          ActiveTabId = AllTabIds[ActiveTabIndex];
-
-          SetActiveTabIndex(ActiveTabIndex);
-          ScrollIntoIndex(ActiveTabIndex);
-          SendCustomEvent("{{{C_LibMenuTabs_EventType_ActiveTab}}}", [ActiveTabId]);
-
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+          ChangeTabIndex = ActiveTabIndex + 1;
         }
+      }
+
+      if (ChangeTabIndex >= 0) {
+        ActiveTabIndex = ChangeTabIndex;
+        ActiveTabId = AllTabIds[ActiveTabIndex];
+
+        SetActiveTabIndex(ActiveTabIndex);
+        ScrollIntoIndex(ActiveTabIndex);
+        SendCustomEvent("{{{C_CustomEventType_ActiveTab}}}", [ActiveTabId]);
+
+        Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
       }
     }
 
-    // Content hidden on the left
-    Quad_MoreLeft.Visible = Frame_ScrollContainer.ScrollAnimOffset.Y > 1;
+    // Copy scroll offset from animation
+    if (PrevAnimPosY != Quad_AnimDummy.RelativePosition_V3.Y) {
+      PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
 
-    if (Quad_MoreLeft.Visible) {
+      Frame_ScrollContainer.ScrollOffset.Y = PrevAnimPosY;
+    }
+
+    // Clamp to fake scroll max
+    if (Frame_ScrollContainer.ScrollOffset.Y > VirtualScrollMaxY + 0.1) {
+      Frame_ScrollContainer.ScrollOffset.Y = VirtualScrollMaxY;
+
+      Frame_ScrollContainer.ScrollBumpBottom();
+    }
+
+    // Content hidden on the left
+    Frame_MoreLeft.Visible = Frame_ScrollContainer.ScrollAnimOffset.Y > 1;
+
+    if (Frame_MoreLeft.Visible) {
       declare Coef = ML::Sin(Now * ML::PI() / 500);
 
-      Quad_MoreLeft.RelativePosition_V3.X = Coef / 2;
+      Quad_MoreLeft.RelativePosition_V3.X = -Coef / 4;
       Quad_MoreLeft.Opacity = 0.5 + (Coef + 1) / 4;
     }
 
     // Content hidden on the right
-    Quad_MoreRight.Visible = Frame_ScrollContainer.ScrollAnimOffset.Y < Frame_ScrollContainer.ScrollMax.Y - 1;
+    Frame_MoreRight.Visible = Frame_ScrollContainer.ScrollAnimOffset.Y < VirtualScrollMaxY - 1;
 
-    if (Quad_MoreRight.Visible) {
+    if (Frame_MoreRight.Visible) {
       declare Coef = ML::Sin(Now * ML::PI() / 500);
 
-      Quad_MoreRight.RelativePosition_V3.X = Coef / 2;
+      Quad_MoreRight.RelativePosition_V3.X = Coef / 4;
       Quad_MoreRight.Opacity = 0.5 + (Coef + 1) / 4;
     }
 
@@ -412,67 +473,4 @@ main() {
 --></script>
 </manialink>
   """;
-}
-
-// ---------------------------------- //
-// Public functions
-// ---------------------------------- //
-
-Void SetVisibility(Boolean _IsVisible) {
-  Layers::SetVisibility(C_LibMenuTabs_ManialinkLayerId, _IsVisible);
-}
-
-Void Unload() {
-  Layers::Destroy(C_LibMenuTabs_ManialinkLayerId);
-}
-
-Void Load() {
-  Unload();
-
-  Layers::Create(C_LibMenuTabs_ManialinkLayerId, Private_CreateManialinkLayer());
-}
-
-Void SetHeaderText(Text _Value) {
-  declare Layer <=> Layers::Get(C_LibMenuTabs_ManialinkLayerId);
-  declare Text MenuTabsHeaderText for Layer.LocalPage;
-
-  MenuTabsHeaderText = _Value;
-  LayerCustomEvent(Layer, C_LibMenuTabs_EventType_SetHeader, []);
-}
-
-Void SetColor(Vec3 _Color) {
-  declare Layer <=> Layers::Get(C_LibMenuTabs_ManialinkLayerId);
-  declare Vec3 MenuTabsLineColor for Layer.LocalPage;
-
-  MenuTabsLineColor = _Color;
-  LayerCustomEvent(Layer, C_LibMenuTabs_EventType_SetColor, []);
-}
-
-Void SetTabsData(K_MenuTab[] _TabsData, Text _ActiveTabId) {
-  declare Layer <=> Layers::Get(C_LibMenuTabs_ManialinkLayerId);
-
-  declare K_MenuTab[] MenuTabsData for Layer.LocalPage;
-  declare Text ActiveTabId for Layer.LocalPage;
-
-  MenuTabsData = _TabsData;
-
-  if (_ActiveTabId != "") {
-    ActiveTabId = _ActiveTabId;
-  }
-
-  declare Text[] ExistingTabIds;
-
-  foreach (TabData in MenuTabsData) {
-    ExistingTabIds.add(TabData.Id);
-  }
-
-  if (!ExistingTabIds.exists(ActiveTabId) && ExistingTabIds.count > 0) {
-    ActiveTabId = ExistingTabIds[0];
-  }
-
-  LayerCustomEvent(Layer, C_LibMenuTabs_EventType_UpdateTabs, []);
-}
-
-Void SetTabsData(K_MenuTab[] _TabsData) {
-  SetTabsData(_TabsData, "");
 }

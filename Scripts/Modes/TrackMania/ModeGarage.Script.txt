@@ -1,20 +1,20 @@
 /**
  * @name ModeGarage.Script.txt
  * @author domino54
- * @version 2024-10-05
+ * @version 2024-10-30
  */
 
 #RequireContext CTmMode
 
-#Const MB_Version     "2024-10-05"
+#Const MB_Version     "2024-10-30"
 #Const MB_ScriptName  "Modes/TrackMania/ModeGarage.Script.txt"
 
-#Include "Libs/Nadeo/Env.Script.txt" as Env
-#Include "Libs/Nadeo/Log.Script.txt" as Log
 #Include "Libs/domino54/Garage/ServerComm.Script.txt" as Garage
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
-#Include "Libs/domino54/PlayerModels_Data.Script.txt" as PlayerModels_Data
-#Include "Libs/domino54/PlayerModels_Server.Script.txt" as PlayerModels_Server
+#Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PlayerModels_Data
+#Include "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt" as PlayerModels_Server
+#Include "Libs/Nadeo/Env.Script.txt" as Env
+#Include "Libs/Nadeo/Log.Script.txt" as Log
 
 // ---------------------------------- //
 // Settings
@@ -81,10 +81,16 @@ PlayerModels_Server::Load(This, PlayerModels_Server::K_Options {
 ***
 ClientManiaAppUrl = C_ManiaAppUrl;
 MB_SetDefaultUIVisibility(False);
-UIManager.UIAll.ForceSpectator = True;
-UIManager.UIAll.UISequence = CUIConfig::EUISequence::None;
 HideOpponents = True;
 Replay_AutoStart = False;
+
+declare Text PrevPreviewModelId;
+declare Text PrevPreviewSkinId;
+declare Integer LastDespawnTime;
+
+// Spectating oneself prevents controlling of the car.
+UIManager.UIAll.ForceSpectator = True;
+UIManager.UIAll.SpectatorForcedTarget = Player.Id;
 ***
 
 // ---------------------------------- //
@@ -92,18 +98,9 @@ Replay_AutoStart = False;
 // ---------------------------------- //
 ***MB_InitMap***
 ***
-// Has to be called in InitMap, because reflections otherwise don't work.
 UIManager.UIAll.UISequence = CUIConfig::EUISequence::CustomMTClip_WithUIInteraction;
 UIManager.UIAll.UISequence_CustomMTClip = "HLoff_C_RFX";
-UIManager.UIAll.UISequence_CustomMTRefTime = Now - 2500;
-
-foreach (Player in Players) {
-  declare Text PrevPreviewModelId for Player;
-  declare Text PrevPreviewSkinId for Player;
-
-  PrevPreviewModelId = "";
-  PrevPreviewSkinId = "";
-}
+UIManager.UIAll.UISequence_CustomMTRefTime = Now - 2500 + 250 - 75; // Fade delay
 ***
 
 // ---------------------------------- //
@@ -116,7 +113,7 @@ HttpClient::Yield();
 foreach (Event in UIManager.PendingEvents) {
   if (Event.Type != CUIConfigEvent::EType::OnLayerCustomEvent) continue;
 
-  if (Event.CustomEventType == Garage::C_LibGarage_EventType_StopServer) {
+  if (Event.CustomEventType == Garage::C_CustomEventType_StopServer) {
     MB_Private_RunServer = False;
   }
 }
@@ -129,36 +126,31 @@ foreach (Event in UIManager.PendingEvents) {
 ***
 foreach (Event in PendingEvents) {
   // Ignore all game events.
-  PassOn(Event);
+  Discard(Event);
 }
 
-foreach (Player in Players) {
-  // This will be changed by the UI layer.
-  declare PreviewModelId = Garage::GetPreviewModelId(Player.User);
-  declare PreviewSkinId = Garage::GetPreviewSkinId(Player.User);
+// This will be changed by the UI layer.
+declare PreviewModelId = Garage::GetPreviewModelId(LocalUser);
+declare PreviewSkinId = Garage::GetPreviewSkinId(LocalUser);
 
-  declare Text PrevPreviewModelId for Player;
-  declare Text PrevPreviewSkinId for Player;
-  declare Integer LastDespawnTime for Player;
+// Why like this instead of events? Because it's more reliable.
+if ((PrevPreviewModelId != PreviewModelId || PrevPreviewSkinId != PreviewSkinId) && Now >= LastDespawnTime + C_RespawnCooldown) {
+  PrevPreviewModelId = PreviewModelId;
+  PrevPreviewSkinId = PreviewSkinId;
+  LastDespawnTime = Now;
 
-  // Why like this instead of events? Because it's more reliable.
-  if ((PrevPreviewModelId != PreviewModelId || PrevPreviewSkinId != PreviewSkinId) && Now >= LastDespawnTime + C_RespawnCooldown) {
-    PrevPreviewModelId = PreviewModelId;
-    PrevPreviewSkinId = PreviewSkinId;
-    LastDespawnTime = Now;
+  UnspawnPlayer(Player);
+}
 
-    UnspawnPlayer(Player);
-  }
+// Spawn player with the target model.
+if (!Player.IsSpawned) {
+  declare PreviewModelId = Garage::GetPreviewModelId(LocalUser);
+  declare PreviewSkinId = Garage::GetPreviewSkinId(LocalUser);
 
-  // Spawn players with the target model.
-  if (!Player.IsSpawned) {
-    declare PreviewModelId = Garage::GetPreviewModelId(Player.User);
-    declare PreviewSkinId = Garage::GetPreviewSkinId(Player.User);
+  PlayerModels_Server::AssignModel(Player, PreviewModelId, PreviewSkinId, True);
 
-    PlayerModels_Server::AssignModel(Player, PreviewModelId, PreviewSkinId, True);
-
-    SpawnPlayer(Player, 0, Now);
-  }
+  SpawnPlayer(Player, 0, Now);
+  Garage::HideBackground(LocalUser);
 }
 ***
 
@@ -245,6 +237,11 @@ Void MB_Private_ItemList() {
 main() {
   MB_Private_RunServer = True;
 
+  wait(Players.count >= 1);
+
+  declare Player <=> Players[0];
+  declare LocalUser <=> Users[0];
+
   while (MB_Private_ServerIsRunning()) {
     +++MB_LoadLibraries+++
     +++MB_LogVersions+++
@@ -255,13 +252,20 @@ main() {
     MB_Private_ItemList();
     MB_Private_LoadMap();
 
+    declare BarrierId = Synchro_AddBarrier();
+
+    while (!Synchro_BarrierReached(BarrierId)) {
+      MB_Yield();
+    }
+
     +++MB_InitMap+++
     +++MB_StartMap+++
 
     while (MB_Private_MatchIsRunning()) {
-      MB_Yield();
-
       +++MB_PlayLoop+++
+
+      // Have to yield at the end, to get updates as quickly as possible.
+      MB_Yield();
     }
 
     +++MB_EndMap+++
