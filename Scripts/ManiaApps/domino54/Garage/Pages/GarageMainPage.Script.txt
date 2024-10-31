@@ -10,6 +10,7 @@
 #Include "TextLib" as TL
 #Include "ColorLib" as CL
 #Include "ManiaApps/domino54/Garage/Components/ModelTabs/ModelTabs.Script.txt" as ModelTabs
+#Include "ManiaApps/domino54/Garage/Components/SkinAuthorName/SkinAuthorName.Script.txt" as SkinAuthorName
 #Include "ManiaApps/domino54/Garage/Components/SkinList/SkinList.Script.txt" as SkinList
 #Include "ManiaApps/domino54/Garage/Components/TitleLogoControls/TitleLogoControls.Script.txt" as TitleLogoControls
 #Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
@@ -63,6 +64,7 @@ Void Private_UpdateCurrentSkins(Text _ModelId) {
   SkinList::SetSkinsData(Private_CreateSkinOptions(_ModelId));
   SkinList::SetPreviewSkinId(GarageAPI::GetSkinId());
   SkinList::SetAppliedSkinId(GarageAPI::GetSelectedSkinId(_ModelId));
+  SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(GarageAPI::GetSkinId()));
 }
 
 // ---------------------------------- //
@@ -71,6 +73,7 @@ Void Private_UpdateCurrentSkins(Text _ModelId) {
 
 Void Unload() {
   ModelTabs::Unload();
+  SkinAuthorName::Unload();
   SkinList::Unload();
   TitleLogoControls::Unload();
 }
@@ -82,6 +85,7 @@ Void Load() {
   ModelTabs::Load();
   ModelTabs::SetHeaderText(_("Garage"));
   ModelTabs::SetColor(CL::HexToRgb("736AE6")); // TODO configurable
+  SkinAuthorName::Load();
   SkinList::Load();
 
   ModelTabs::SetTabsData(Private_CreateModelTabs());
@@ -93,12 +97,14 @@ Void Load() {
 Void Show() {
   TitleLogoControls::Show();
   ModelTabs::Show();
+  SkinAuthorName::Show();
   SkinList::Show();
 }
 
 Void Hide() {
   TitleLogoControls::Show();
   ModelTabs::Hide();
+  SkinAuthorName::Show();
   SkinList::Show();
 }
 
@@ -114,6 +120,8 @@ Void Loop() {
       }
       case SkinList::C_CustomEventType_SetPreviewSkinId: {
         GarageAPI::SetSkinId(Event.CustomEventData[0]);
+
+        SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(GarageAPI::GetSkinId()));
       }
       case SkinList::C_CustomEventType_SetAppliedSkinId: {
         GarageAPI::SetSelectedSkinId(GarageAPI::GetModelId(), Event.CustomEventData[0]);

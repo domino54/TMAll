@@ -29,9 +29,8 @@ declare Text G_PrevSkinId;
 
 Void Private_SetPreviewImageUrl(Text _ImageUrl) {
   declare Layer <=> Layers::Get(C_ManialinkLayerId);
-  declare Text PreviewImageUrl for Layer.LocalPage;
 
-  PreviewImageUrl = _ImageUrl;
+  LayerCustomEvent(Layer, LB_SkinPreview::C_CustomEventType_SetPreviewUrl, [_ImageUrl]);
 }
 
 // ---------------------------------- //

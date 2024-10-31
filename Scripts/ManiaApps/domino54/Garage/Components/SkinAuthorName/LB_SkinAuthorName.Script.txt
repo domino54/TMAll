@@ -1,0 +1,151 @@
+/**
+ * @name LB_SkinAuthorName.Script.txt
+ * @author domino54
+ * @version 2024-10-31
+ */
+
+#Const Version      "2024-10-31"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinAuthorName/LB_SkinAuthorName.Script.txt"
+
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+
+#Const C_CustomEventType_SetAuthorName  "skin_author:set_name"
+
+#Const C_Opacity        0.25
+#Const C_AnimDistance   3.0
+
+Text Build() {
+  declare MainFont = Font::GetFontName("Main");
+
+  return """
+<manialink version="3" name="L_SkinAuthorName">
+<stylesheet>
+  <style class="text" textsize="2" textcolor="FFF" textfont="{{{MainFont}}}" textprefix="$t" opacity="0.25" />
+</stylesheet>
+
+<frame id="Frame_SkinAuthorName" pos="0 -51">
+  <frame id="Frame_HorizontalOffset">
+    <frame id="Frame_AnimPaintBrush" pos="2 1.15">
+      <label id="Label_AnimPaintBrush" class="text" pos="0.5 0.5" halign="right" valign="top" textsize="1" text="" opacity="0" />
+    </frame>
+
+    <frame pos="3 0">
+      <label id="Label_SkinAuthorName0" class="text" pos="0 0" halign="left" valign="center2" opacity="0" />
+      <label id="Label_SkinAuthorName1" class="text" pos="0 0" halign="left" valign="center2" opacity="0" />
+    </frame>
+  </frame>
+</frame>
+
+<script><!--
+
+declare Text G_PrevAuthorName;
+
+Void AnimPaintBrushSwing() {
+  declare Frame <=> (Page.GetFirstChild("Frame_AnimPaintBrush") as CMlFrame);
+
+  declare EasingFunc = CAnimManager::EAnimManagerEasing::SineInOut;
+
+  AnimMgr.Flush(Frame);
+  AnimMgr.AddChain(Frame, "<frame rot='-15' />", 125, EasingFunc);
+  AnimMgr.AddChain(Frame, "<frame rot='15' />", 250, EasingFunc);
+  AnimMgr.AddChain(Frame, "<frame rot='0' />", 250, EasingFunc);
+}
+
+Void AnimOpacity(Real _Opacity, CAnimManager::EAnimManagerEasing _EasingFunc) {
+  declare Controls = [
+    Page.GetFirstChild("Frame_HorizontalOffset"),
+    Page.GetFirstChild("Label_AnimPaintBrush"),
+    Page.GetFirstChild("Label_SkinAuthorName0"),
+    Page.GetFirstChild("Label_SkinAuthorName1")
+  ];
+
+  foreach (Control in Controls) {
+    AnimMgr.Flush(Control);
+    AnimMgr.Add(Control, "<label opacity='"^_Opacity^"' />", 125, _EasingFunc);
+  }
+}
+
+Void AnimShow(Text _Value) {
+  declare Frame_HorizontalOffset <=> (Page.GetFirstChild("Frame_HorizontalOffset") as CMlFrame);
+  declare Label_SkinAuthorName0 <=> (Page.GetFirstChild("Label_SkinAuthorName0") as CMlLabel);
+  declare Label_SkinAuthorName1 <=> (Page.GetFirstChild("Label_SkinAuthorName1") as CMlLabel);
+
+  Label_SkinAuthorName1.Value = "";
+  Label_SkinAuthorName0.Value = _Value;
+
+  Frame_HorizontalOffset.RelativePosition_V3.X = (3.0 + Label_SkinAuthorName0.ComputeWidth(Label_SkinAuthorName0.Value)) / -2;
+
+  AnimOpacity({{{C_Opacity}}}, CAnimManager::EAnimManagerEasing::SineOut);
+  AnimPaintBrushSwing();
+}
+
+Void AnimHide() {
+  AnimOpacity(0.0, CAnimManager::EAnimManagerEasing::SineIn);
+}
+
+Void AnimChangeText(Text _Value) {
+  declare Frame_HorizontalOffset <=> (Page.GetFirstChild("Frame_HorizontalOffset") as CMlFrame);
+  declare Label_SkinAuthorName0 <=> (Page.GetFirstChild("Label_SkinAuthorName0") as CMlLabel);
+  declare Label_SkinAuthorName1 <=> (Page.GetFirstChild("Label_SkinAuthorName1") as CMlLabel);
+
+  Label_SkinAuthorName1.Value = Label_SkinAuthorName0.Value;
+  Label_SkinAuthorName0.Value = _Value;
+
+  AnimMgr.Flush(Frame_HorizontalOffset);
+  AnimMgr.Flush(Label_SkinAuthorName1);
+  AnimMgr.Flush(Label_SkinAuthorName0);
+
+  Label_SkinAuthorName1.Opacity = {{{C_Opacity}}};
+  Label_SkinAuthorName0.Opacity = 0.0;
+
+  declare EasingFunc = CAnimManager::EAnimManagerEasing::SineOut;
+  declare SizeX = 3.0 + Label_SkinAuthorName0.ComputeWidth(Label_SkinAuthorName0.Value);
+
+  AnimMgr.Add(Frame_HorizontalOffset, "<frame pos='"^(SizeX / -2)^" 0' />", 250, EasingFunc);
+  AnimMgr.Add(Label_SkinAuthorName1, "<label opacity='0' />", 250, EasingFunc);
+  AnimMgr.Add(Label_SkinAuthorName0, "<label opacity='{{{C_Opacity}}}' />", 250, EasingFunc);
+
+  AnimPaintBrushSwing();
+}
+
+Void SetAuthorName(Text _Value) {
+  if (G_PrevAuthorName == _Value) {
+    return;
+  }
+
+  declare IsVisible = _Value != "";
+  declare PrevIsVisible = G_PrevAuthorName != "";
+
+  if (PrevIsVisible != IsVisible) {
+    if (IsVisible) {
+      AnimShow(_Value);
+    } else {
+      AnimHide();
+    }
+  } else {
+    AnimChangeText(_Value);
+  }
+
+  G_PrevAuthorName = _Value;
+}
+
+main() {
+  while (True) {
+    wait(PendingEvents.count > 0);
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type != CMlScriptEvent::Type::PluginCustomEvent) continue;
+      if (Event.CustomEventType != "{{{C_CustomEventType_SetAuthorName}}}") continue;
+      if (!Event.CustomEventData.existskey(0)) continue;
+
+      SetAuthorName(Event.CustomEventData[0]);
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

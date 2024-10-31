@@ -224,3 +224,6 @@ Text GetSkinPreviewUrl(Text _SkinId) {
   return PMData::GetSkinAsset(_SkinId, C_GarageAssetId_SkinPreview, C_ImgBase^C_GarageDefaultSkinPreview);
 }
 
+Text GetSkinAuthorName(Text _SkinId) {
+  return PMData::GetSkinById(_SkinId).Author;
+}
