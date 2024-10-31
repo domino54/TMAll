@@ -1,0 +1,70 @@
+/**
+ * @name SkinPreview.Script.txt
+ * @author domino54
+ * @version 2024-10-31
+ */
+
+#Const Version      "2024-10-31"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinPreview/SkinPreview.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/SkinPreview/LB_SkinPreview.Script.txt" as LB_SkinPreview
+#Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_SkinPreview"
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Text G_PrevSkinId;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Void Private_SetPreviewImageUrl(Text _ImageUrl) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+  declare Text PreviewImageUrl for Layer.LocalPage;
+
+  PreviewImageUrl = _ImageUrl;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+
+  G_PrevSkinId = "";
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB_SkinPreview::Build());
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
+
+Void Loop() {
+  if (G_PrevSkinId == GarageAPI::GetSkinId()) {
+    return;
+  }
+
+  G_PrevSkinId = GarageAPI::GetSkinId();
+
+  Private_SetPreviewImageUrl(GarageAPI::GetSkinPreviewUrl(G_PrevSkinId));
+}

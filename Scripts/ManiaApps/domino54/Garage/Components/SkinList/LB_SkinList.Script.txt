@@ -85,7 +85,7 @@ Text Build() {
   </frame>
 </framemodel>
 
-<frame id="Frame_AnimSlideIn" pos="{{{C_ScreenFrameWidth / -2}}} -90" z-index="1">
+<frame id="Frame_AnimSlideIn" pos="{{{C_ScreenFrameWidth / -2}}} -90">
   <frame id="Frame_ScrollContainer" rot="-90" halign="left" valign="top" size="{{{SizeY + PaddingY * 3}}} {{{C_ScreenFrameWidth}}}" scroll="1" scrollgrid="0 {{{GridY}}}" scrollmax="0 100000">
     <frame rot="90">
       <frame id="Frame_SkinButtonInstances" pos="0 {{{PaddingY + C_ButtonGap + 1 + SizeY}}}">

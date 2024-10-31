@@ -31,7 +31,9 @@ Text Build(Boolean _SingleImage) {
   <style class="center" pos="0 0" halign="center" valign="center" keepratio="clip" />
 </stylesheet>
 
-{{{Quads}}}
+<frame z-index="-10">
+  {{{Quads}}}
+</frame>
 
 <script><!--
 

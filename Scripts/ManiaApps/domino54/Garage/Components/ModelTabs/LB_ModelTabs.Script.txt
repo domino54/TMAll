@@ -59,7 +59,7 @@ Text Build() {
 </framemodel>
 
 <frame id="Frame_AnimSlideIn">
-  <frame id="Frame_MenuTabsContainer" pos="-50 63" z-index="1">
+  <frame id="Frame_MenuTabsContainer" pos="-50 63">
     <label id="Label_HeaderText" pos="0 11" halign="left" valign="center2" size="44" textfont="{{{MainFont}}}" textsize="9" textcolor="FFF" textemboss="1" textprefix="$t" />
 
     <quad class="LineColor" halign="left" valign="bottom" size="26 1.25" bgcolor="FFF" />
