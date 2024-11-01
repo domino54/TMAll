@@ -1,0 +1,68 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tmunited:default",
+  "Name": "TrackMania United default skins",
+  "Skins": [
+    {
+      "Id": "tmunited:stadiumcar_ublack",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "United Black",
+      "SkinPath": "Skins/Models/StadiumCar/U_Black.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_StadiumCar_U_Black.webp"
+      }
+    },
+    {
+      "Id": "tmunited:stadiumcar_ublue",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "United Blue",
+      "SkinPath": "Skins/Models/StadiumCar/U_Blue.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_StadiumCar_U_Blue.webp"
+      }
+    },
+    {
+      "Id": "tmunited:stadiumcar_ugreen",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "United Green",
+      "SkinPath": "Skins/Models/StadiumCar/U_Green.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_StadiumCar_U_Green.webp"
+      }
+    },
+    {
+      "Id": "tmunited:stadiumcar_ured",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "United Red",
+      "SkinPath": "Skins/Models/StadiumCar/U_Red.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_StadiumCar_U_Red.webp"
+      }
+    },
+    {
+      "Id": "tmunited:stadiumcar_uwhite",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "United White",
+      "SkinPath": "Skins/Models/StadiumCar/U_White.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_StadiumCar_U_White.webp"
+      }
+    },
+    {
+      "Id": "tmunited:stadiumcar_uyellow",
+      "AppliesTo": "trackmania:stadiumcar",
+      "Name": "United Yellow",
+      "SkinPath": "Skins/Models/StadiumCar/U_Yellow.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_StadiumCar_U_Yellow.webp"
+      }
+    }
+  ]
+}
