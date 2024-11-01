@@ -1,0 +1,135 @@
+/**
+ * @name GarageMainPage.Script.txt
+ * @author domino54
+ * @version 2024-10-30
+ */
+
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt"
+
+#Include "TextLib" as TL
+#Include "ColorLib" as CL
+#Include "ManiaApps/domino54/Garage/Components/ModelTabs/ModelTabs.Script.txt" as ModelTabs
+#Include "ManiaApps/domino54/Garage/Components/SkinAuthorName/SkinAuthorName.Script.txt" as SkinAuthorName
+#Include "ManiaApps/domino54/Garage/Components/SkinList/SkinList.Script.txt" as SkinList
+#Include "ManiaApps/domino54/Garage/Components/TitleLogoControls/TitleLogoControls.Script.txt" as TitleLogoControls
+#Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_PageName "GarageMainPage"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct ModelTabs::K_MenuTab as K_MenuTab
+#Struct SkinList::K_SkinOption as K_SkinOption
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+K_MenuTab[] Private_CreateModelTabs() {
+  declare K_MenuTab[] Result;
+
+  foreach (Model in GarageAPI::GetSelectableModels()) {
+    Result.add(K_MenuTab {
+      Id = Model.Id,
+      Label = GarageAPI::GetModelName(Model.Id, Model.Name),
+      IconUrl = GarageAPI::GetModelIconUrl(Model.Id)
+    });
+  }
+
+  return Result;
+}
+
+K_SkinOption[] Private_CreateSkinOptions(Text _ModelId) {
+  declare K_SkinOption[] Result;
+
+  foreach (Skin in GarageAPI::GetSelectableSkins(_ModelId)) {
+    Result.add(K_SkinOption {
+      Id = Skin.Id,
+      Name = Skin.Name,
+      IconUrl = GarageAPI::GetSkinIconUrl(Skin.Id)
+    });
+  }
+
+  return Result;
+}
+
+Void Private_UpdateCurrentSkins(Text _ModelId) {
+  SkinList::SetSkinsData(Private_CreateSkinOptions(_ModelId));
+  SkinList::SetPreviewSkinId(GarageAPI::GetSkinId());
+  SkinList::SetAppliedSkinId(GarageAPI::GetSelectedSkinId(_ModelId));
+  SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(GarageAPI::GetSkinId()));
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  ModelTabs::Unload();
+  SkinAuthorName::Unload();
+  SkinList::Unload();
+  TitleLogoControls::Unload();
+}
+
+Void Load() {
+  Unload();
+
+  TitleLogoControls::Load();
+  ModelTabs::Load();
+  ModelTabs::SetHeaderText(_("Garage"));
+  ModelTabs::SetColor(CL::HexToRgb("736AE6")); // TODO configurable
+  SkinAuthorName::Load();
+  SkinList::Load();
+
+  ModelTabs::SetTabsData(Private_CreateModelTabs());
+  ModelTabs::SetActiveTabId(GarageAPI::GetModelId());
+
+  Private_UpdateCurrentSkins(GarageAPI::GetModelId());
+}
+
+Void Show() {
+  TitleLogoControls::Show();
+  ModelTabs::Show();
+  SkinAuthorName::Show();
+  SkinList::Show();
+}
+
+Void Hide() {
+  TitleLogoControls::Show();
+  ModelTabs::Hide();
+  SkinAuthorName::Show();
+  SkinList::Show();
+}
+
+Void Loop() {
+  foreach (Event in PendingEvents) {
+    if (Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
+
+    switch (Event.CustomEventType) {
+      case ModelTabs::C_CustomEventType_ActiveTab: {
+        GarageAPI::SetModelId(Event.CustomEventData[0]);
+
+        Private_UpdateCurrentSkins(GarageAPI::GetModelId());
+      }
+      case SkinList::C_CustomEventType_SetPreviewSkinId: {
+        GarageAPI::SetSkinId(Event.CustomEventData[0]);
+
+        SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(GarageAPI::GetSkinId()));
+      }
+      case SkinList::C_CustomEventType_SetAppliedSkinId: {
+        GarageAPI::SetSelectedSkinId(GarageAPI::GetModelId(), Event.CustomEventData[0]);
+      }
+    }
+
+    if (Event.CustomEventType == "GlobalB_Back") {
+      GarageAPI::Close();
+    }
+  }
+}

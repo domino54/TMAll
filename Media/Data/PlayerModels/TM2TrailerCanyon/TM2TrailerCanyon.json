@@ -1,0 +1,148 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tm2trailer:canyon",
+  "Name": "Trackmania² Canyon trailer hue shift dupes of existing skins",
+  "Skins": [
+    {
+      "Id": "tm2trailer:03old",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "03Old",
+      "SkinPath": "Skins/Models/CanyonCar/03Old.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_03Old.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:04old",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "04Old",
+      "SkinPath": "Skins/Models/CanyonCar/04Old.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_04Old.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:05oldblue",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "05OldBlue",
+      "SkinPath": "Skins/Models/CanyonCar/05OldBlue.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_05OldBlue.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:05oldgreen",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "05OldGreen",
+      "SkinPath": "Skins/Models/CanyonCar/05OldGreen.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_05OldGreen.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:05oldred",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "05OldRed",
+      "SkinPath": "Skins/Models/CanyonCar/05OldRed.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_05OldRed.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:99g",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "99G",
+      "SkinPath": "Skins/Models/CanyonCar/99G.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_99G.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:blue",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Blue",
+      "SkinPath": "Skins/Models/CanyonCar/Blue.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Blue.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:ginvert",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "GInvert",
+      "SkinPath": "Skins/Models/CanyonCar/GInvert.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_GInvert.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:gt500blue",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "GT500Blue",
+      "SkinPath": "Skins/Models/CanyonCar/GT500Blue.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_GT500Blue.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:konyma_b",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Konyma B",
+      "SkinPath": "Skins/Models/CanyonCar/Konyma_B.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Konyma_B.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:konyma_br",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Konyma BR",
+      "SkinPath": "Skins/Models/CanyonCar/Konyma_BR.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Konyma_BR.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:konyma_r",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Konyma R",
+      "SkinPath": "Skins/Models/CanyonCar/Konyma_R.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Konyma_R.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:konyma_w",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "Konyma W",
+      "SkinPath": "Skins/Models/CanyonCar/Konyma_W.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Konyma_W.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:tinvert",
+      "AppliesTo": "trackmania:canyoncar",
+      "Name": "TInvert",
+      "SkinPath": "Skins/Models/CanyonCar/TInvert.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_TInvert.webp"
+      }
+    }
+  ]
+}

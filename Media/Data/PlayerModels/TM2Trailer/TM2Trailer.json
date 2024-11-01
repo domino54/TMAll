@@ -63,6 +63,36 @@
       "Assets": {
         "garage:card": "./Card/Card_Swift-82.webp"
       }
+    },
+    {
+      "Id": "tm2trailer:lagooncar_corbett",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Corbett",
+      "SkinPath": "Skins/Models/LagoonCar/Corbett.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Corbett.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:lagooncar_mamba",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Mamba",
+      "SkinPath": "Skins/Models/LagoonCar/Mamba.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Mamba.webp"
+      }
+    },
+    {
+      "Id": "tm2trailer:lagooncar_yakuza",
+      "AppliesTo": "trackmania:lagooncar",
+      "Name": "Yakuza",
+      "SkinPath": "Skins/Models/LagoonCar/Yakuza.zip",
+      "Author": "NADEO",
+      "Assets": {
+        "garage:card": "./Card/Card_Yakuza.webp"
+      }
     }
   ]
 }

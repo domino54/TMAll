@@ -1,0 +1,44 @@
+/**
+ * @name TitleLogoControls.Script.txt
+ * @author domino54
+ * @version 2024-10-30
+ */
+
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/TitleLogoControls/TitleLogoControls.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/TitleLogoControls/LB_TitleLogoControls.Script.txt" as LB_TitleLogoControls
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId  "L_TitleLogoControls"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetVisibility(Boolean _IsVisible) {
+  Layers::SetVisibility(C_ManialinkLayerId, _IsVisible);
+}
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB_TitleLogoControls::Build());
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}

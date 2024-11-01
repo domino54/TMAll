@@ -1,0 +1,120 @@
+/**
+ * @name LB_TitleLogoControls.Script.txt
+ * @author domino54
+ * @version 2024-10-30
+ */
+
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/TitleLogoControls/LB_TitleLogoControls.Script.txt"
+
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
+
+Text Build() {
+  // TODO Value is missing if playing on server and menu was not loaded
+  declare Text ImgLogo for LocalUser;
+
+  declare QuadSize = <5.0, 5.0>;
+  declare MainFont = Font::GetFontName("Main");
+  declare SubFont = Font::GetFontName("SubTitle");
+
+  return """
+<manialink version="3" name="L_TitleLogoControls">
+<frame pos="-132 77">
+  <quad halign="left" valign="top" size="75 20" pos="-21 9" z-index="2" image="{{{ImgLogo}}}" keepratio="Fit" />
+</frame>
+
+<quad id="Quad_Icon" pos="-60 72" size="14 14" halign="center" valign="center" image="{{{C_ImgBase}}}/Logo_GarageBig.dds" colorize="FFF" />
+
+<frame id="Frame_BackButton" pos="-145 65">
+  <quad id="Quad_BackButton" pos="0 0" halign="left" valign="top" size="26 10" scriptevents="1" />
+  <quad id="Button_Cancel" pos="3 -5" halign="center" valign="center" size="{{{QuadSize.X + 3.0}}} {{{QuadSize.Y + 3.0}}}" opacity="1.0" keepratio="Fit" />
+  <quad id="Quad_BackIcon" pos="3 -5" halign="center" valign="center" size="{{{QuadSize.X}}} {{{QuadSize.Y}}}" image="{{{C_ImgBase}}}Global_Back.dds" />
+  <label id="Label_Back" pos="17 -5" halign="center" valign="center2" textsize="2" textemboss="1" textcolor="fff" textprefix="$t" text="{{{_("Back")}}}" textfont="{{{SubFont}}}" opacity="1.0"  />
+
+  <quad pos="26 -10" halign="right" valign="bottom" size="26 0.2" bgcolor="fff" opacity="0.7" />
+  <quad pos="26 -9.8" halign="right" valign="bottom" size="3 0.4" bgcolor="fff" opacity="0.7" />
+</frame>
+
+<frame id="Frame_HelpButton" pos="-113 65">
+  <quad id="Quad_HelpButton" pos="0 0" halign="left" valign="top" size="26 10" scriptevents="1" />
+  <quad id="Button_Cancel" pos="3 -5" halign="center" valign="center" size="{{{QuadSize.X + 3.0}}} {{{QuadSize.Y + 3.0}}}" opacity="1.0" keepratio="Fit" />
+  <quad id="Quad_HelpIcon" pos="3 -5" halign="center" valign="center" size="{{{QuadSize.X}}} {{{QuadSize.Y}}}" image="{{{C_ImgBase}}}Global_Help.dds" />
+  <label id="Label_Help" pos="17 -5" halign="center" valign="center2" textsize="2" textemboss="1" textcolor="fff" textprefix="$t" text="{{{_("Help")}}}" textfont="{{{SubFont}}}" opacity="1.0"  />
+
+  <quad pos="26 -10" halign="right" valign="bottom" size="26 0.2" bgcolor="fff" opacity="0.7" />
+  <quad pos="26 -9.8" halign="right" valign="bottom" size="3 0.4" bgcolor="fff" opacity="0.7" />
+</frame>
+
+<script><!--
+
+Void FocusButton(CMlControl _Control) {
+  foreach (Control in _Control.Parent.Controls) {
+    if (!(Control is CMlLabel)) {
+      continue;
+    }
+
+    declare Label <=> (Control as CMlLabel);
+
+    Label.TextColor = <1.0, 1.0, 1.0>;
+    Label.Scale = 1.05;
+  }
+}
+
+Void UnfocusButton(CMlControl _Control) {
+  foreach (Control in _Control.Parent.Controls) {
+    if (!(Control is CMlLabel)) {
+      continue;
+    }
+
+    declare Label <=> (Control as CMlLabel);
+
+    Label.TextColor = <0.95, 0.95, 0.95>;
+    Label.Scale = 1.0;
+  }
+}
+
+main() {
+  declare Quad_Icon <=> (Page.GetFirstChild("Quad_Icon") as CMlQuad);
+
+  declare PrevPageIsVisible = !PageIsVisible;
+
+  while (True) {
+    wait(PrevPageIsVisible != PageIsVisible || PendingEvents.count > 0);
+
+    if (PrevPageIsVisible != PageIsVisible) {
+      PrevPageIsVisible = PageIsVisible;
+
+      if (PageIsVisible) {
+        AnimMgr.Flush(Quad_Icon);
+        Quad_Icon.Opacity = 0.0;
+        AnimMgr.Add(Quad_Icon, "<quad opacity='1' />", 500, CAnimManager::EAnimManagerEasing::CubicOut);
+      }
+    }
+
+    foreach (Event in PendingEvents) {
+      switch (Event.Type) {
+        case CMlScriptEvent::Type::MouseClick: {
+          if (Event.ControlId == "Quad_BackButton") {
+            SendCustomEvent("GlobalB_Back", []);
+          }
+        }
+        case CMlScriptEvent::Type::MouseOver: {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+          FocusButton(Event.Control);
+        }
+        case CMlScriptEvent::Type::MouseOut: {
+          UnfocusButton(Event.Control);
+        }
+      }
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

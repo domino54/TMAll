@@ -1,0 +1,51 @@
+/**
+ * @name LB_GarageBackground.Script.txt
+ * @author domino54
+ * @version 2024-10-30
+ */
+
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/GarageBackground/LB_GarageBackground.Script.txt"
+
+#Const C_BaseUrl "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Garage/"
+
+Text Build(Boolean _SingleImage) {
+  declare Text Quads;
+
+  if (!_SingleImage) {
+    Quads ^= """<quad class="center" size="220 90" image="{{{C_BaseUrl}}}GarageBgPlatform.webp" z-index="-1" autoscale="0" pos="0 -30" />""";
+  }
+
+  Quads ^= """<quad class="center" size="{{{320 * 2}}} 180" image="{{{C_BaseUrl}}}GarageBg.webp" z-index="-2" autoscale="0" id="Quad_GarageBg" />""";
+
+  if (!_SingleImage) {
+    Quads ^= """
+      <quad class="center" size="{{{320 * 8}}} 180" image="{{{C_BaseUrl}}}GarageBgWide.webp" z-index="-3" autoscale="0" />
+      <quad class="center" size="320 180" bgcolor="0C0C0C" z-index="-4" />
+    """;
+  }
+
+  return """
+<manialink version="3" name="L_GarageBackground">
+<stylesheet>
+  <style class="center" pos="0 0" halign="center" valign="center" keepratio="clip" />
+</stylesheet>
+
+<frame z-index="-10">
+  {{{Quads}}}
+</frame>
+
+<script><!--
+
+declare Boolean HideBackground for Page;
+
+wait(HideBackground);
+
+declare Quad_GarageBg <=> (Page.GetFirstChild("Quad_GarageBg") as CMlQuad);
+
+AnimMgr.Add(Quad_GarageBg, "<quad opacity='0' />", 125, CAnimManager::EAnimManagerEasing::Linear);
+
+--></script>
+</manialink>
+  """;
+}

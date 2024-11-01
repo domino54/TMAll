@@ -1,0 +1,37 @@
+/**
+ * @name LB_SkinPreview.Script.txt
+ * @author domino54
+ * @version 2024-10-31
+ */
+
+#Const Version      "2024-10-31"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinPreview/LB_SkinPreview.Script.txt"
+
+#Const C_CustomEventType_SetPreviewUrl  "skin_preview:set_preview_url"
+
+Text Build() {
+  return """
+<manialink version="3" name="L_SkinPreview">
+<quad id="Quad_SkinPreview" pos="0 0" z-index="-5" halign="center" valign="center" size="180 180" keepratio="fit" autoscale="0" />
+<script><!--
+
+declare Quad_SkinPreview <=> (Page.GetFirstChild("Quad_SkinPreview") as CMlQuad);
+
+while (True) {
+  wait(PendingEvents.count > 0);
+
+  foreach (Event in PendingEvents) {
+    if (Event.Type != CMlScriptEvent::Type::PluginCustomEvent) continue;
+    if (Event.CustomEventType != "{{{C_CustomEventType_SetPreviewUrl}}}") continue;
+    if (!Event.CustomEventData.existskey(0)) continue;
+
+    Quad_SkinPreview.ChangeImageUrl(Event.CustomEventData[0]);
+  }
+
+  yield;
+}
+
+--></script>
+</manialink>
+  """;
+}

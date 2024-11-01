@@ -1,0 +1,75 @@
+/**
+ * @name SkinList.Script.txt
+ * @author domino54
+ * @version 2024-10-30
+ */
+
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinList/SkinList.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/SkinList/LB_SkinList.Script.txt" as LB_SkinList
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_SkinList"
+
+#Const C_CustomEventType_UpdateSkins         "skin_list:update_skins"
+#Const C_CustomEventType_SetPreviewSkinId    "skin_list:set_preview_skin_id"
+#Const C_CustomEventType_SetAppliedSkinId    "skin_list:set_applied_skin_id"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_SkinOption {
+  Text Id;
+  Text Name;
+  Text IconUrl;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetSkinsData(K_SkinOption[] _SkinsData) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+  declare K_SkinOption[] SkinsData for Layer.LocalPage;
+
+  SkinsData = _SkinsData;
+
+  LayerCustomEvent(Layer, C_CustomEventType_UpdateSkins, []);
+}
+
+Void SetPreviewSkinId(Text _PreviewSkinId) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+
+  LayerCustomEvent(Layer, C_CustomEventType_SetPreviewSkinId, [_PreviewSkinId]);
+}
+
+Void SetAppliedSkinId(Text _AppliedSkinId) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+
+  LayerCustomEvent(Layer, C_CustomEventType_SetAppliedSkinId, [_AppliedSkinId]);
+}
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB_SkinList::Build());
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}

@@ -123,8 +123,8 @@ Void UpdateRanking()
 
 Void LaunchGarage()
 {
-  declare Text GarageMapName = XMLController::GetGarageMapPath();
-	// declare Text GarageMapName = "TMAllMaker/Garage/TMAllMaker_Garage.Map.Gbx";
+	//declare Text GarageMapName = XMLController::GetGarageMapPath();
+	declare Text GarageMapName = "TMAllMaker/Garage/TMAllMaker_Garage.Map.Gbx";
 
 	if (GarageMapName == "") {
 		OpenLink("file://Media/ManiaApps/Garage.Script.txt", CManiaApp::ELinkType::ManialinkBrowser);
@@ -135,7 +135,7 @@ Void LaunchGarage()
 
 	wait(TitleFlow.IsReady);
 
-	LoadingScreen::SetLoadingType(0, "");
+	LoadingScreen::SetLoadingType(1, "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Garage/GarageBg.webp");
 	TitleFlow.PlayMap(GarageMapName, Mode, "");
 }
 

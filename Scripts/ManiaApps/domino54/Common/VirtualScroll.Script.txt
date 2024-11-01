@@ -1,10 +1,10 @@
 /**
  * @name VirtualScroll.Script.txt
  * @author domino54
- * @version 2024-10-05
+ * @version 2024-10-30
  */
 
-#Const Version      "2024-10-05"
+#Const Version      "2024-10-30"
 #Const ScriptName   "ManiaApps/domino54/Common/VirtualScroll.Script.txt"
 
 // ---------------------------------- //
@@ -21,6 +21,10 @@ Void VirtualScroll_ResetControls() {
 
 Integer VirtualScroll_GetIndex(CMlControl _Control) {
   declare CMlControl[Integer] Control_VirtualScrollItems for Page;
+
+  if (!Control_VirtualScrollItems.exists(_Control)) {
+    return -1;
+  }
 
   return Control_VirtualScrollItems.keyof(_Control);
 }

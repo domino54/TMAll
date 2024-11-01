@@ -1,0 +1,87 @@
+/**
+ * @name GarageController.Script.txt
+ * @author domino54
+ * @version 2024-10-31
+ */
+
+#Const Version      "2024-10-31"
+#Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageController.Script.txt"
+
+#Include "ManiaApps/domino54/Garage/Components/GarageBackground/GarageBackground.Script.txt" as GarageBg
+#Include "ManiaApps/domino54/Garage/Components/SkinPreview/SkinPreview.Script.txt" as SkinPreview
+#Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
+#Include "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt" as GarageMainPage
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Text G_CurrentPage;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Void Private_HidePage(Text _PageName) {
+  switch (_PageName) {
+    case GarageMainPage::C_PageName: {
+      GarageMainPage::Hide();
+    }
+  }
+}
+
+Void Private_ShowPage(Text _PageName) {
+  switch (_PageName) {
+    case GarageMainPage::C_PageName: {
+      GarageMainPage::Show();
+    }
+  }
+}
+
+Void Private_PageLoop(Text _PageName) {
+  switch (_PageName) {
+    case GarageMainPage::C_PageName: {
+      GarageMainPage::Loop();
+    }
+  }
+}
+
+Void Private_SetActivePage(Text _PageName) {
+  Private_HidePage(G_CurrentPage);
+  G_CurrentPage = _PageName;
+  Private_ShowPage(G_CurrentPage);
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Init() {
+  GarageBg::Load(GarageAPI::IsPlayground());
+}
+
+Void Load() {
+  GarageMainPage::Load();
+  SkinPreview::Load();
+}
+
+Void Show() {
+  if (GarageAPI::IsPlayground()) {
+    GarageBg::Hide();
+  } else {
+    SkinPreview::Show();
+  }
+
+  Private_SetActivePage(GarageMainPage::C_PageName);
+}
+
+Void Loop() {
+  Private_PageLoop(G_CurrentPage);
+  SkinPreview::Loop();
+}
+
+Void Unload() {
+  GarageMainPage::Unload();
+  GarageBg::Unload();
+  SkinPreview::Unload();
+}

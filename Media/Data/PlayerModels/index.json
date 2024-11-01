@@ -5,7 +5,9 @@
     "./TMCanyon/TMCanyon.json",
     "./TMValley/TMValley.json",
     "./TMLagoon/TMLagoon.json",
+    "./TMUnited/TMUnited.json",
     "./TM2Trailer/TM2Trailer.json",
+    "./TM2TrailerCanyon/TM2TrailerCanyon.json",
     "./TrafficCar/TrafficCar.json",
     "./TMAll/TMAll.json"
   ],

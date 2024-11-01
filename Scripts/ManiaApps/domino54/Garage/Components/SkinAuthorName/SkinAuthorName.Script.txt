@@ -1,0 +1,46 @@
+/**
+ * @name SkinAuthorName.Script.txt
+ * @author domino54
+ * @version 2024-10-30
+ */
+
+#Const Version      "2024-10-30"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinAuthorName/SkinAuthorName.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/SkinAuthorName/LB_SkinAuthorName.Script.txt" as LB_SkinAuthorName
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_SkinAuthorName"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetAuthorName(Text _AuthorName) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+
+  LayerCustomEvent(Layer, LB_SkinAuthorName::C_CustomEventType_SetAuthorName, [_AuthorName]);
+}
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB_SkinAuthorName::Build());
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
