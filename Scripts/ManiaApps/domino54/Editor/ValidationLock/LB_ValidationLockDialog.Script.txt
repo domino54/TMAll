@@ -1,0 +1,103 @@
+/**
+ * @name LB_ValidationLockDialog.Script.txt
+ * @author domino54
+ * @version 2024-11-04
+ */
+
+#Const Version      "2024-11-04"
+#Const ScriptName   "ManiaApps/domino54/Editor/ValidationLockDialog/LB_ValidationLockDialog.Script.txt"
+
+#Const C_DialogTitle  _("Toggle the Validation Lock")
+
+#Const C_Note _("""Validation Lock allows the map to stay $<$0F5validated$>, even if modifications are being made to it. This allows fixing problems on the map, while retaining the original author score and UID of the map.
+
+When the map is $<$0F5validated$>, Validation Lock will keep the author score, including all further improvements.
+
+Upon modifying the map, if the modification would cause the map to become $<$FA0validable$>, Validation Lock will restore the author score and make the map $<$0F5validated$> instead.
+
+The objectives will not be restored if the map is $<$F00not validable$>.
+
+This option is designed for $<$F00expert mappers only$>: it allows solving issues or decorating the map after validating, however it can be misused to create unbeatable author scores, or even unfinishable maps. Please use it mindfully.""")
+
+#Const C_CustomEventType_CloseDialog    "validation_lock:close_dialog"
+#Const C_CustomEventType_ToggleEnable   "validation_lock:toggle_enable"
+#Const C_CustomEventType_UpdateStatus   "validation_lock:update_status"
+
+Text WindowStart(Vec2 _Size, Text _Title) {
+  return """
+<frame id="Frame_Window" pos="0 {{{_Size.Y / 2}}}" z-index="1">
+  <quad z-index="-1" pos="0 4.75" halign="center" size="{{{_Size.X + 6.5}}} 8" style="Bgs1InRace" substyle="BgGlow2" />
+  <label z-index="-1" id="Label_WindowTitle" pos="0 -6" halign="center" valign="center2" style="TextTitle3" text="{{{_Title}}}" />
+  <quad z-index="-1" size="{{{_Size.X}}} 12" halign="center" style="Bgs1InRace" substyle="BgTitle" />
+
+  <quad z-index="-1" size="{{{_Size.X}}} {{{_Size.Y}}}" halign="center" style="Bgs1InRace" substyle="BgWindow2" scriptevents="1" />
+  <quad z-index="-1" pos="0 {{{-_Size.Y}}}" halign="center" size="{{{_Size.X}}} 2" style="Bgs1InRace" substyle="BgMetalBar" />
+  """;
+}
+
+Text WindowEnd() {
+  return """</frame>""";
+}
+
+Text Build() {
+  return """
+<manialink version="3" name="L_ValidationLockDialog">
+<quad size="320 180" halign="center" valign="center" style="Bgs1" substyle="BgDialogBlur" z-index="1" scriptevents="1" />
+
+<frame z-index="2">
+  {{{WindowStart(<120.0, 112.0>, C_DialogTitle)}}}
+    <frame pos="-56 -16">
+      <label pos="4 -4" halign="left" valign="top" size="104" style="TextValueSmall" autonewline="1" text="{{{C_Note}}}" />
+
+      <frame pos="56 -76.5">
+        <quad id="Quad_IsValidationLockEnabled" pos="-35 0" halign="center" valign="center" size="5 5" style="Icons64x64_1" substyle="Check" />
+        <label id="Label_ToggleValidationLock" halign="center" valign="center2" style="CardButtonSmallWide" translate="1" text="Enable Validation Lock" scriptevents="1" />
+      </frame>
+
+      <quad size="112 80" style="Bgs1" substyle="BgList" />
+    </frame>
+
+    <label id="Label_Close" pos="0 -104" halign="center" valign="center2" style="CardButtonMediumL" translate="1" text="Ok" scriptevents="1" />
+  {{{WindowEnd()}}}
+</frame>
+
+<script><!--
+
+Void SetIsEnabledIcon(Boolean _IsEnabled) {
+  declare Quad_IsValidationLockEnabled <=> (Page.GetFirstChild("Quad_IsValidationLockEnabled") as CMlQuad);
+
+  Quad_IsValidationLockEnabled.StyleSelected = _IsEnabled;
+}
+
+main() {
+  while (True) {
+    wait(PendingEvents.count > 0);
+
+    foreach (Event in PendingEvents) {
+      switch (Event.Type) {
+        case CMlScriptEvent::Type::MouseClick: {
+          switch (Event.ControlId) {
+            case "Label_Close": {
+              SendCustomEvent("{{{C_CustomEventType_CloseDialog}}}", []);
+            }
+            case "Label_ToggleValidationLock": {
+              SendCustomEvent("{{{C_CustomEventType_ToggleEnable}}}", []);
+            }
+          }
+        }
+        case CMlScriptEvent::Type::PluginCustomEvent: {
+          if (Event.CustomEventType != "{{{C_CustomEventType_UpdateStatus}}}") continue;
+
+          SetIsEnabledIcon(Event.CustomEventData[0] == "True");
+        }
+      }
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

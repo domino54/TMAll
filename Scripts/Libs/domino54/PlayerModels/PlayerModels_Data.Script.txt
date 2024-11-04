@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Data.Script.txt
  * @author domino54
- * @version 2024-10-15
+ * @version 2024-11-04
  */
 
-#Const Version      "2024-10-15"
+#Const Version      "2024-11-04"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt"
 
 #Include "MathLib" as ML
@@ -838,6 +838,24 @@ K_Overlay[Text] GetAllOverlays() {
   declare K_Overlay[Text] LibPlayerModels_OverlayById for LoadedTitle;
 
   return LibPlayerModels_OverlayById;
+}
+
+K_Model GetModelById(Text _ModelId) {
+  declare K_Model[Text] LibPlayerModels_ModelById for LoadedTitle;
+  if (!LibPlayerModels_ModelById.existskey(_ModelId)) return K_Model {};
+  return LibPlayerModels_ModelById[_ModelId];
+}
+
+K_Skin GetSkinById(Text _SkinId) {
+  declare K_Skin[Text] LibPlayerModels_SkinById for LoadedTitle;
+  if (!LibPlayerModels_SkinById.existskey(_SkinId)) return K_Skin {};
+  return LibPlayerModels_SkinById[_SkinId];
+}
+
+K_Overlay GetOverlayById(Text _OverlayId) {
+  declare K_Overlay[Text] LibPlayerModels_OverlayById for LoadedTitle;
+  if (!LibPlayerModels_OverlayById.existskey(_OverlayId)) return K_Overlay {};
+  return LibPlayerModels_OverlayById[_OverlayId];
 }
 
 K_Model[] GetModelsList(Boolean _IncludeHidden) {

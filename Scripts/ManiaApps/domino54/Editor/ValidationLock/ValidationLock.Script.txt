@@ -1,0 +1,193 @@
+/**
+ * @name ValidationLock.Script.txt
+ * @author domino54
+ * @version 2024-11-04
+ */
+
+#Const Version      "2024-11-04"
+#Const ScriptName   "ManiaApps/domino54/Editor/ValidationLock/ValidationLock.Script.txt"
+
+#Include "TextLib" as TL
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Editor/ValidationLock/LB_ValidationLockButton.Script.txt" as LB_ValidationLockButton
+#Include "ManiaApps/domino54/Editor/ValidationLock/LB_ValidationLockDialog.Script.txt" as LB_ValidationLockDialog
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ButtonManialinkLayerId   "L_ValidationLockButton"
+#Const C_DialogManialinkLayerId   "L_ValidationLockDialog"
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Boolean G_IsEnabled;
+declare Boolean G_HasCopiedObjectves;
+declare Boolean G_PrevHideEditorInterface;
+
+declare Integer G_Copied_TMObjective_AuthorTime;
+declare Integer G_Copied_TMObjective_GoldTime;
+declare Integer G_Copied_TMObjective_SilverTime;
+declare Integer G_Copied_TMObjective_BronzeTime;
+declare Integer G_Copied_TMObjective_NbLaps;
+declare Boolean G_Copied_TMObjective_IsLapRace;
+declare Text G_Copied_ObjectiveTextAuthor;
+declare Text G_Copied_ObjectiveTextGold;
+declare Text G_Copied_ObjectiveTextSilver;
+declare Text G_Copied_ObjectiveTextBronze;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Boolean Private_GetPersistentIsEnabled() {
+  declare persistent Boolean EnableValidationLock for LocalUser;
+
+  return EnableValidationLock;
+}
+
+Void Private_SetPersistentIsEnabled(Boolean _IsEnabled) {
+  declare persistent Boolean EnableValidationLock for LocalUser;
+
+  EnableValidationLock = _IsEnabled;
+}
+
+Void Private_SetStatusIsEnabled(Boolean _IsEnabled) {
+  declare ButtonLayer <=> Layers::Get(C_ButtonManialinkLayerId);
+  declare DialogLayer <=> Layers::Get(C_DialogManialinkLayerId);
+
+  if (ButtonLayer != Null) {
+    LayerCustomEvent(ButtonLayer, LB_ValidationLockButton::C_CustomEventType_UpdateStatus, [TL::ToText(_IsEnabled)]);
+  }
+  if (DialogLayer != Null) {
+    LayerCustomEvent(DialogLayer, LB_ValidationLockDialog::C_CustomEventType_UpdateStatus, [TL::ToText(_IsEnabled)]);
+  }
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Boolean IsEnabled() {
+  return G_IsEnabled;
+}
+
+Void HideDialog() {
+  if (!Layers::CheckVisible(C_DialogManialinkLayerId)) {
+    return;
+  }
+
+  Layers::Destroy(C_DialogManialinkLayerId);
+  Layers::SetVisibility(C_ButtonManialinkLayerId, True);
+
+  HideEditorInterface = G_PrevHideEditorInterface;
+
+  Private_SetStatusIsEnabled(G_IsEnabled);
+
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::HideDialog, 0, 0.0);
+}
+
+Void ShowDialog() {
+  if (Layers::CheckVisible(C_DialogManialinkLayerId)) {
+    return;
+  }
+
+  Layers::Create(C_DialogManialinkLayerId, LB_ValidationLockDialog::Build());
+  Layers::SetVisibility(C_ButtonManialinkLayerId, False);
+
+  G_PrevHideEditorInterface = HideEditorInterface;
+  HideEditorInterface = True;
+
+  Private_SetStatusIsEnabled(G_IsEnabled);
+
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::ShowDialog, 0, 0.0);
+}
+
+Void Unload() {
+  G_IsEnabled = False;
+  G_HasCopiedObjectves = False;
+
+  Layers::Destroy(C_ButtonManialinkLayerId);
+  Layers::Destroy(C_DialogManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  G_IsEnabled = Private_GetPersistentIsEnabled();
+
+  Layers::Create(C_ButtonManialinkLayerId, LB_ValidationLockButton::Build());
+
+  Private_SetStatusIsEnabled(G_IsEnabled);
+}
+
+Void Loop() {
+  foreach (Event in PendingEvents) {
+    if (Event.Type != CMapEditorPluginEvent::EType::LayerCustomEvent) continue;
+
+    switch (Event.CustomEventType) {
+      case LB_ValidationLockButton::C_CustomEventType_OpenDialog: {
+        ShowDialog();
+      }
+      case LB_ValidationLockDialog::C_CustomEventType_CloseDialog: {
+        HideDialog();
+      }
+      case LB_ValidationLockDialog::C_CustomEventType_ToggleEnable: {
+        G_IsEnabled = !G_IsEnabled;
+
+        Private_SetPersistentIsEnabled(G_IsEnabled);
+        Private_SetStatusIsEnabled(G_IsEnabled);
+      }
+    }
+  }
+}
+
+Void CopyObjectives() {
+  // Don't copy the objectives, if the map is not validated.
+  if (ValidationStatus != CMapType::ValidationStatus::Validated) {
+    return;
+  }
+
+  G_Copied_TMObjective_AuthorTime = Map.TMObjective_AuthorTime;
+  G_Copied_TMObjective_GoldTime = Map.TMObjective_GoldTime;
+  G_Copied_TMObjective_SilverTime = Map.TMObjective_SilverTime;
+  G_Copied_TMObjective_BronzeTime = Map.TMObjective_BronzeTime;
+  G_Copied_TMObjective_NbLaps = Map.TMObjective_NbLaps;
+  G_Copied_TMObjective_IsLapRace = Map.TMObjective_IsLapRace;
+
+  G_Copied_ObjectiveTextAuthor = Map.ObjectiveTextAuthor;
+  G_Copied_ObjectiveTextGold = Map.ObjectiveTextGold;
+  G_Copied_ObjectiveTextSilver = Map.ObjectiveTextSilver;
+  G_Copied_ObjectiveTextBronze = Map.ObjectiveTextBronze;
+
+  G_HasCopiedObjectves = True;
+}
+
+CMapType::ValidationStatus RestoreObjectives(CMapType::ValidationStatus _ProjectedStatus) {
+  if (!IsEnabled() || !G_HasCopiedObjectves) {
+    return _ProjectedStatus;
+  }
+
+  // Don't restore, if the map is not validable.
+  if (_ProjectedStatus == CMapType::ValidationStatus::NotValidable) {
+    return _ProjectedStatus;
+  }
+
+  // Objectives MUST be set before validating the map.
+  Map.TMObjective_AuthorTime = G_Copied_TMObjective_AuthorTime;
+  Map.TMObjective_GoldTime = G_Copied_TMObjective_GoldTime;
+  Map.TMObjective_SilverTime = G_Copied_TMObjective_SilverTime;
+  Map.TMObjective_BronzeTime = G_Copied_TMObjective_BronzeTime;
+  Map.TMObjective_NbLaps = G_Copied_TMObjective_NbLaps;
+  Map.TMObjective_IsLapRace = G_Copied_TMObjective_IsLapRace;
+
+  Map.ObjectiveTextAuthor = G_Copied_ObjectiveTextAuthor;
+  Map.ObjectiveTextGold = G_Copied_ObjectiveTextGold;
+  Map.ObjectiveTextSilver = G_Copied_ObjectiveTextSilver;
+  Map.ObjectiveTextBronze = G_Copied_ObjectiveTextBronze;
+
+  // "Validate" the map.
+  return CMapType::ValidationStatus::Validated;
+}
