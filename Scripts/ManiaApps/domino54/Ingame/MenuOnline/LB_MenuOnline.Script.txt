@@ -1,10 +1,10 @@
 /**
  * @name LB_MenuOnline.Script.txt
  * @author domino54
- * @version 2024-11-04
+ * @version 2024-11-05
  */
 
-#Const Version    "2024-11-04"
+#Const Version    "2024-11-05"
 #Const ScriptName "Libs/domino54/MenuOnline/LB_MenuOnline.Script.txt"
 
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
@@ -266,8 +266,12 @@ main() {
   declare PrevBestTime = -1;
 
   if (InputPlayer != Null && InputPlayer.Score != Null) {
-    PrevLastTime = InputPlayer.Score.PrevRace.Time;
-    PrevBestTime = InputPlayer.Score.BestRace.Time;
+    if (InputPlayer.Score.PrevRace != Null) {
+      PrevLastTime = InputPlayer.Score.PrevRace.Time;
+    }
+    if (InputPlayer.Score.BestRace != Null) {
+      PrevBestTime = InputPlayer.Score.BestRace.Time;
+    }
   }
 
   SetTime(PrevLastTime, PrevBestTime);
@@ -310,11 +314,16 @@ main() {
 
     {{{Inject_QuadsSelector::InjectInWhile("PressSelect();")}}}
 
-    if (InputPlayer != Null && InputPlayer.Score != Null && PrevLastTime != InputPlayer.Score.PrevRace.Time || PrevBestTime != InputPlayer.Score.BestRace.Time) {
-      PrevLastTime = InputPlayer.Score.PrevRace.Time;
-      PrevBestTime = InputPlayer.Score.BestRace.Time;
+    if (InputPlayer != Null && InputPlayer.Score != Null) {
+      if (
+        (InputPlayer.Score.PrevRace != Null && PrevLastTime != InputPlayer.Score.PrevRace.Time) ||
+        (InputPlayer.Score.BestRace != Null && PrevBestTime != InputPlayer.Score.BestRace.Time)
+      ) {
+        PrevLastTime = InputPlayer.Score.PrevRace.Time;
+        PrevBestTime = InputPlayer.Score.BestRace.Time;
 
-      SetTime(PrevLastTime, PrevBestTime);
+        SetTime(PrevLastTime, PrevBestTime);
+      }
     }
 
     if (Prev_IsSpectatorClient != IsSpectatorClient) {

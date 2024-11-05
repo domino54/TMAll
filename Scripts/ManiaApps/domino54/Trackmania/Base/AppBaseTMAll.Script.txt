@@ -45,6 +45,7 @@ Log::RegisterScript(MenuOnline::ScriptName, MenuOnline::Version);
 ***AB_Yield***
 ***
 UI::Yield();
+CustomSkins::Loop();
 ***
 
 // ---------------------------------- //

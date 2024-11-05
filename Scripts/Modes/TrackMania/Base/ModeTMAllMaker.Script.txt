@@ -1,10 +1,14 @@
 /**
  * Base for an online game mode inside Trackmania Multienvironment.
+ *
+ * @name ModeTMAllMaker.Script.txt
+ * @author domino54
+ * @version 2024-11-05
  */
 #Extends "Modes/TrackMania/Base/ModeTrackmania.Script.txt"
 
-#Const MB_TMAll_Version     "2024-10-26"
-#Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
+#Const MB_TMAll_Version     "2024-11-05"
+#Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAllMaker.Script.txt"
 
 #Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
 #Include "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt" as CustomSkins
@@ -19,6 +23,9 @@
 
 /// Automatically assign player model before the intro sequence.
 declare Boolean TMAll_Settings_AutoIntroSequenceModel;
+
+/// Loading mode of the player models.
+declare Integer TMAll_Settings_PlayerModelsLoadingMode;
 
 // ---------------------------------- //
 // Extends
@@ -37,6 +44,7 @@ Log::RegisterScript(TextLibExt::ScriptName, TextLibExt::Version);
 ***MB_Private_Settings***
 ***
 TMAll_Settings_AutoIntroSequenceModel = True;
+TMAll_Settings_PlayerModelsLoadingMode = PlayerModels_Server::C_LoadingMode_Compatibility;
 ***
 
 // ---------------------------------- //
@@ -60,7 +68,9 @@ while (PlayerModels_Data::Loading()) {
 ***MB_Private_StartServer***
 ***
 ItemList_Begin();
-PlayerModels_Server::Load(This);
+PlayerModels_Server::Load(This, PlayerModels_Server::K_Options {
+  LoadingMode = TMAll_Settings_PlayerModelsLoadingMode
+});
 +++TMAll_ItemList+++
 ItemList_End();
 ***
