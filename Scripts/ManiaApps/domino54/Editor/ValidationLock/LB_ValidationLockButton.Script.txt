@@ -1,0 +1,101 @@
+/**
+ * @name LB_ValidationLockButton.Script.txt
+ * @author domino54
+ * @version 2024-11-04
+ */
+
+#Const Version      "2024-11-04"
+#Const ScriptName   "ManiaApps/domino54/Editor/ValidationLockButton/LB_ValidationLockButton.Script.txt"
+
+#Const C_ButtonTooltip  _("Toggle the Validation Lock")
+
+#Const C_CustomEventType_OpenDialog     "validation_lock:open_dialog"
+#Const C_CustomEventType_UpdateStatus   "validation_lock:update_status"
+
+Text Build() {
+  return """
+<manialink version="3" name="L_ValidationLockButton">
+<frame pos="155 -84" z-index="1">
+  <label id="Label_ValidationStatus" pos="2 -2" halign="center" valign="center2" textsize="2" textcolor="FFF" text="🔒" hidden="1" />
+</frame>
+
+<frame id="Frame_LockButton" pos="155 -84" z-index="2" hidden="1">
+  <label halign="center" valign="center2" textsize="3" textcolor="FFF" text="🔒" />
+  <quad id="Quad_OpenDialogButton" halign="center" valign="center" size="10 10" style="UIConstruction_Buttons" substyle="Validate" tooltip="{{{C_ButtonTooltip}}}" opacity="0" scriptevents="1" />
+  <quad halign="center" valign="center" size="11 11" bgcolor="000" opacity="0.75" scriptevents="1" />
+</frame>
+
+<script><!--
+
+#Const C_ValidationColors [
+  "{{{CMapType::ValidationStatus::NotValidable}}}" => <1.0, 0.0, 0.0>,
+  "{{{CMapType::ValidationStatus::Validable}}}" => <1.0, {{{2/3.}}}, 0.0>,
+  "{{{CMapType::ValidationStatus::Validated}}}" => <0.0, 1.0, {{{1/3.}}}>
+]
+
+Void SetIsEnabled(Boolean _IsEnabled) {
+  declare Label_ValidationStatus <=> (Page.GetFirstChild("Label_ValidationStatus") as CMlLabel);
+
+  Label_ValidationStatus.Visible = _IsEnabled;
+}
+
+Void SetValidationStatus() {
+  declare Label_ValidationStatus <=> (Page.GetFirstChild("Label_ValidationStatus") as CMlLabel);
+
+  Label_ValidationStatus.TextColor = C_ValidationColors[""^Editor.ValidationStatus];
+}
+
+Void SetIsButtonVisible(Boolean _IsVisible) {
+  declare Frame_LockButton <=> (Page.GetFirstChild("Frame_LockButton") as CMlFrame);
+
+  Frame_LockButton.Visible = _IsVisible;
+}
+
+Boolean IsPickMode() {
+  return Editor.EditMode == CMapEditorPlugin::EditMode::Pick;
+}
+
+main() {
+  declare PrevValidationStatus = Editor.ValidationStatus;
+  declare PrevIsPickMode = IsPickMode();
+
+  SetValidationStatus();
+  SetIsButtonVisible(PrevIsPickMode);
+
+  while (True) {
+    if (PrevValidationStatus != Editor.ValidationStatus) {
+      PrevValidationStatus = Editor.ValidationStatus;
+
+      SetValidationStatus();
+    }
+
+    if (PrevIsPickMode != IsPickMode()) {
+      PrevIsPickMode = IsPickMode();
+
+      SetIsButtonVisible(PrevIsPickMode);
+    }
+
+    foreach (Event in PendingEvents) {
+      switch (Event.Type) {
+        case CMlScriptEvent::Type::MouseClick: {
+          if (Event.ControlId != "Quad_OpenDialogButton") continue;
+
+          SendCustomEvent("{{{C_CustomEventType_OpenDialog}}}", []);
+        }
+
+        case CMlScriptEvent::Type::PluginCustomEvent: {
+          if (Event.CustomEventType != "{{{C_CustomEventType_UpdateStatus}}}") continue;
+
+          SetIsEnabled(Event.CustomEventData[0] == "True");
+        }
+      }
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

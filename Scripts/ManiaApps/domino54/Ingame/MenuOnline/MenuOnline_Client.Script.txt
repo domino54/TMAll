@@ -1,0 +1,33 @@
+/**
+ * @name MenuOnline_Client.Script.txt
+ * @author domino54
+ * @version 2024-11-05
+ */
+
+#Const Version    "2024-11-05"
+#Const ScriptName "ManiaApps/domino54/Ingame/MenuOnline/MenuOnline_Client.Script.txt"
+
+#Include "ManiaApps/domino54/Ingame/MenuOnline/LB_MenuOnline.Script.txt" as LB_MenuOnline
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_MenuOnline"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load(Text _ModeName) {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB_MenuOnline::Build(_ModeName));
+  Layers::SetType(C_ManialinkLayerId, CUILayer::EUILayerType::InGameMenu);
+  //Layers::SetAnimationTypeOut(C_ManialinkLayerId), CUILayer::EUILayerAnimation::LeftFast);
+}

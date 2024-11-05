@@ -1,10 +1,10 @@
 /**
  * @name LB_MenuOnline.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-11-05
  */
 
-#Const Version    "2024-10-30"
+#Const Version    "2024-11-05"
 #Const ScriptName "Libs/domino54/MenuOnline/LB_MenuOnline.Script.txt"
 
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
@@ -13,8 +13,6 @@
 #Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt" as DesignManialinks
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_QuadsSelector.Script.txt" as Inject_QuadsSelector
 #Include "Libs/Trackmania/Ingame/UI/Layers/Inject_SoloMapInfosBase.Script.txt" as Inject_SoloMapInfosBase
-
-#Const C_ManialinkLayerId "L_UIMenuOnline"
 
 Text Private_InjectGetModeName(Text _ModeName) {
   declare ReturnValue = "Playground.ServerInfo.ModeName";
@@ -35,9 +33,9 @@ Text Build(Text _ModeName) {
   declare Integer Count_InstancesX = 1;
 
   return """
-<manialink version="3" name="{{{C_ManialinkLayerId}}}">
-  <frame id="Frame_All" z-index="1000">
-    <frame id="Frame_Menu" pos="0 0" hidden="0">
+<manialink version="3" name="L_UIMenuOnline">
+<frame id="Frame_All" z-index="1000">
+  <frame id="Frame_Menu" pos="0 0" hidden="0">
     <quad z-index="-4" pos="0 0" size="960 180" valign="center" halign="center" style="Bgs1" substyle="BgDialogBlur" opacity="1" bluramount="0"/>
     {{{Inject_SoloMapInfosBase::InjectInManialink()}}}
     {{{Inject_QuadsSelector::InjectInManialink(Count_InstancesY, Count_InstancesX)}}}
@@ -268,8 +266,12 @@ main() {
   declare PrevBestTime = -1;
 
   if (InputPlayer != Null && InputPlayer.Score != Null) {
-    PrevLastTime = InputPlayer.Score.PrevRace.Time;
-    PrevBestTime = InputPlayer.Score.BestRace.Time;
+    if (InputPlayer.Score.PrevRace != Null) {
+      PrevLastTime = InputPlayer.Score.PrevRace.Time;
+    }
+    if (InputPlayer.Score.BestRace != Null) {
+      PrevBestTime = InputPlayer.Score.BestRace.Time;
+    }
   }
 
   SetTime(PrevLastTime, PrevBestTime);
@@ -312,11 +314,16 @@ main() {
 
     {{{Inject_QuadsSelector::InjectInWhile("PressSelect();")}}}
 
-    if (InputPlayer != Null && InputPlayer.Score != Null && PrevLastTime != InputPlayer.Score.PrevRace.Time || PrevBestTime != InputPlayer.Score.BestRace.Time) {
-      PrevLastTime = InputPlayer.Score.PrevRace.Time;
-      PrevBestTime = InputPlayer.Score.BestRace.Time;
+    if (InputPlayer != Null && InputPlayer.Score != Null) {
+      if (
+        (InputPlayer.Score.PrevRace != Null && PrevLastTime != InputPlayer.Score.PrevRace.Time) ||
+        (InputPlayer.Score.BestRace != Null && PrevBestTime != InputPlayer.Score.BestRace.Time)
+      ) {
+        PrevLastTime = InputPlayer.Score.PrevRace.Time;
+        PrevBestTime = InputPlayer.Score.BestRace.Time;
 
-      SetTime(PrevLastTime, PrevBestTime);
+        SetTime(PrevLastTime, PrevBestTime);
+      }
     }
 
     if (Prev_IsSpectatorClient != IsSpectatorClient) {

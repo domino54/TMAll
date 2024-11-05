@@ -1,10 +1,10 @@
 /**
  * @name CustomSkins_Server.Script.txt
  * @author domino54
- * @version 2024-10-26
+ * @version 2024-11-05
  */
 
-#Const Version      "2024-10-26"
+#Const Version      "2024-11-05"
 #Const ScriptName   "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt"
 
 #Include "Libs/domino54/CustomSkins/LB_CustomSkins.Script.txt" as LB_CustomSkins
@@ -64,9 +64,9 @@ Void Private_ReadPlayerSkinSettings(CUser _User) {
  */
 Void Private_OnlineDataLoop() {
   foreach (Event in G_Mode.UIManager.PendingEvents) {
-    if (Event.Type != CUIConfigEvent::EType::OnLayerCustomEvent || Event.CustomEventType != LB_CustomSkins::C_PlayerDataUpdateId || Event.CustomEventData.count < 2) {
-      continue;
-    }
+    if (Event.Type != CUIConfigEvent::EType::OnLayerCustomEvent) continue;
+    if (Event.CustomEventType != LB_CustomSkins::C_PlayerDataUpdateId) continue;
+    if (Event.CustomEventData.count < 2) continue;
 
     declare Player <=> Private_GetPlayer(Event.UI);
 
@@ -98,9 +98,10 @@ Void Unload() {
 
 Void Load(CMode _Mode) {
   Unload();
-  Private_LoadLocalData();
 
   G_Mode <=> _Mode;
+
+  Private_LoadLocalData();
 }
 
 Void LoadLocalData() {

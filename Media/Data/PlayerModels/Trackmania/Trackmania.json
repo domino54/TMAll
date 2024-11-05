@@ -26,6 +26,7 @@
       "LoadAs": "ItemAndArchetype",
       "Assets": {
         "garage:name": "Stadium",
+        "garage:card": "./Card/Card_StadiumCar.webp",
         "garage:tab_icon": "./TabIcon/TabIcon_StadiumCar.webp"
       }
     },
@@ -51,6 +52,7 @@
       "LoadAs": "ItemAndArchetype",
       "Assets": {
         "garage:name": "Lagoon",
+        "garage:card": "./Card/Card_LagoonCar.webp",
         "garage:tab_icon": "./TabIcon/TabIcon_LagoonCar.webp"
       }
     },
