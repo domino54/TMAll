@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Data.Script.txt
  * @author domino54
- * @version 2024-11-04
+ * @version 2024-11-05
  */
 
-#Const Version      "2024-11-04"
+#Const Version      "2024-11-05"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt"
 
 #Include "MathLib" as ML
@@ -33,7 +33,7 @@
 #Const C_LibPlayerModels_UserSkinsNamespace       "userdata"
 #Const C_LibPlayerModels_RegexFileNameFull        "[^\\/\\\\]+$"
 #Const C_LibPlayerModels_RegexItemName            "([^\\/\\\\]+)\\.Item\\.Gbx$"
-#Const C_LibPlayerModels_RegexReplacedSlashes     "[\\/\\\\]"
+#Const C_LibPlayerModels_RegexReplacedSlashes     "[\\/\\\\]+"
 #Const C_LibPlayerModels_RegexMatchUserSkinPath   "^[^\\\\]+\\\\(.+)\\\\([^\\\\]+)\\.zip$"
 #Const C_LibPlayerModels_CharacterArchetypes      ["ArenaPlayer", "Minion"]
 #Const C_LibPlayerModels_TMUnitedArchetypes       ["DesertCar", "SnowCar", "RallyCar", "IslandCar", "BayCar", "CoastCar", "StadiumCar"]
@@ -45,6 +45,7 @@
 #Struct Structs::K_Model as K_Model
 #Struct Structs::K_Skin as K_Skin
 #Struct Structs::K_Overlay as K_Overlay
+#Struct Structs::K_ModelInfo as K_ModelInfo
 #Struct Structs::K_GameplayInfo as K_GameplayInfo
 
 #Struct K_Options {
@@ -222,7 +223,7 @@ Void Private_LoadSourceFileJson(Text _Url, Text _Body) {
 /**
  * HTTP requests loading loop.
  */
- Boolean Private_LoadingHttpRequests() {
+Boolean Private_LoadingHttpRequests() {
   while (HttpClient::HasPendingEvents(C_LibPlayerModels_Namespace)) {
     declare Event = HttpClient::GetFirstEvent(C_LibPlayerModels_Namespace);
 
@@ -1023,4 +1024,35 @@ Text GetSkinAsset(Text _SkinId, Text _AssetId, Text _Fallback) {
 
   // Fallback to model.
   return GetPlayerModelAsset(LibPlayerModels_SkinById[_SkinId].AppliesTo, _AssetId, _Fallback);
+}
+
+K_ModelInfo[] GetAllModelInfo() {
+  declare K_ModelInfo[] Result;
+  declare K_Model[Text] LibPlayerModels_ModelById for LoadedTitle;
+
+  foreach (Model in LibPlayerModels_ModelById) {
+    Result.add(K_ModelInfo {
+      Id = Model.Id,
+      BaseId = Model.Id,
+      Name = Model.Name,
+      Archetype = Model.Archetype,
+      ItemPath = Model.ItemPath
+    });
+  }
+
+  declare K_Overlay[Text] LibPlayerModels_OverlayById for LoadedTitle;
+
+  foreach (Overlay in LibPlayerModels_OverlayById) {
+    declare Model = LibPlayerModels_ModelById[Overlay.Extends];
+
+    Result.add(K_ModelInfo {
+      Id = Overlay.Id,
+      BaseId = Overlay.Extends,
+      Name = Overlay.Name,
+      Archetype = Model.Archetype,
+      ItemPath = Overlay.ItemPath
+    });
+  }
+
+  return Result;
 }
