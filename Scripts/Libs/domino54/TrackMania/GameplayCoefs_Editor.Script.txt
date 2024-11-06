@@ -1,13 +1,14 @@
 /**
  * @name GameplayCoefs_Editor.Script.txt
  * @author domino54
- * @version 2024-10-25
+ * @version 2024-11-06
  */
 
-#Const Version      "2024-10-25"
+#Const Version      "2024-11-06"
 #Const ScriptName   "Libs/domino54/TrackMania/GameplayCoefs_Editor.Script.txt"
 
 #Include "MathLib" as ML
+#Include "ManiaApps/domino54/Editor/EditorUIVisibility.Script.txt" as EditorUI
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
 
 // ---------------------------------- //
@@ -29,10 +30,8 @@
 // Global variables
 // ---------------------------------- //
 
-declare Boolean G_LibGameplayCoefs_DialogIsOpen;
 declare Boolean G_LibGameplayCoefs_AutoOpenDialog;
 declare Boolean G_LibGameplayCoefs_RequestOpenDialog;
-declare Boolean G_LibGameplayCoefs_PrevHideEditorInterface;
 
 declare Real G_LibGameplayCoefs_MapPlayerModelAccelCoef;
 declare Real G_LibGameplayCoefs_MapPlayerModelControlCoef;
@@ -255,7 +254,7 @@ main() {
         declare Multiplier = PlayerModelGameplayCoefs[Index];
         declare Value = ML::Clamp(TL::ToReal(FindResult[0]) / Multiplier, LowerBound, 1.0);
 
-        if (Value >= 1.0) {
+        if (Value > 1.0) {
           SetSliderValue(Slider, -1.0, 1.0);
           MapGameplayCoefs[Index] = -1.0;
           continue;
@@ -275,7 +274,7 @@ main() {
       declare RawValue = (Input.MousePos.X - DraggingControl.AbsolutePosition_V3.X) / DraggingControl.Size.X;
       declare Value = ML::Clamp(RawValue, MinGameplayCoefs[DraggingIndex], 1.0);
 
-      if (Value >= 1.0) {
+      if (Value > 1.0) {
         SetSliderValue(Slider, -1.0, 1.0);
         MapGameplayCoefs[DraggingIndex] = -1.0;
       } else {
@@ -343,35 +342,27 @@ Void Private_ApplyMapValuesFromLayer() {
 // ---------------------------------- //
 
 Void HideDialog() {
-  if (!G_LibGameplayCoefs_DialogIsOpen) {
+  if (!Layers::CheckVisible(C_LibGameplayCoefs_EditorManialinkLayerId)) {
     return;
   }
 
-  Layers::SetVisibility(C_LibGameplayCoefs_ButtonManialinkLayerId, True);
   Layers::Destroy(C_LibGameplayCoefs_EditorManialinkLayerId);
-
-  G_LibGameplayCoefs_DialogIsOpen = False;
-
-  HideEditorInterface = G_LibGameplayCoefs_PrevHideEditorInterface;
+  EditorUI::SetVisibility(True);
 
   Audio.PlaySoundEvent(CAudioManager::ELibSound::HideDialog, 0, 0.0);
 }
 
 Void ShowDialog() {
-  if (G_LibGameplayCoefs_DialogIsOpen) {
+  if (Layers::CheckVisible(C_LibGameplayCoefs_EditorManialinkLayerId)) {
     return;
   }
 
-  Layers::SetVisibility(C_LibGameplayCoefs_ButtonManialinkLayerId, False);
   Layers::Create(C_LibGameplayCoefs_EditorManialinkLayerId, Private_CreateDialogManialinkLayer());
+  EditorUI::SetVisibility(False);
 
   Private_SendMapValuesToLayer();
 
-  G_LibGameplayCoefs_DialogIsOpen = True;
   G_LibGameplayCoefs_RequestOpenDialog = False;
-  G_LibGameplayCoefs_PrevHideEditorInterface = HideEditorInterface;
-
-  HideEditorInterface = True;
 
   Audio.PlaySoundEvent(CAudioManager::ELibSound::ShowDialog, 0, 0.0);
 }
@@ -419,8 +410,6 @@ Void NormalizeCoefsIfUninitialized(Real _AccelCoef, Real _ControlCoef, Real _Gra
 }
 
 Void Unload() {
-  HideEditorInterface = G_LibGameplayCoefs_PrevHideEditorInterface;
-
   G_LibGameplayCoefs_MapPlayerModelAccelCoef = 1.0;
   G_LibGameplayCoefs_MapPlayerModelControlCoef = 1.0;
   G_LibGameplayCoefs_MapPlayerModelGravityCoef = 1.0;
@@ -435,6 +424,7 @@ Void Load(Boolean _AutoOpen) {
   G_LibGameplayCoefs_AutoOpenDialog = _AutoOpen;
 
   Layers::Create(C_LibGameplayCoefs_ButtonManialinkLayerId, Private_CreateButtonManialinkLayer());
+  EditorUI::AddLayer(C_LibGameplayCoefs_ButtonManialinkLayerId);
 }
 
 Void Load() {
