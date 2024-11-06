@@ -1,0 +1,36 @@
+/**
+ * @name EditorUIVisibility.Script.txt
+ * @author domino54
+ * @version 2024-11-06
+ */
+
+#Const Version      "2024-11-06"
+#Const ScriptName   "ManiaApps/domino54/TrackMania/EditorUIVisibility.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Text[] G_EditorUILayerIds;
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void AddLayer(Text _LayerId) {
+  if (G_EditorUILayerIds.exists(_LayerId)) {
+    return;
+  }
+
+  G_EditorUILayerIds.add(_LayerId);
+}
+
+Void SetVisibility(Boolean _IsVisible) {
+  HideEditorInterface = !_IsVisible;
+
+  foreach (LayerId in G_EditorUILayerIds) {
+    Layers::SetVisibility(LayerId, !HideEditorInterface);
+  }
+}

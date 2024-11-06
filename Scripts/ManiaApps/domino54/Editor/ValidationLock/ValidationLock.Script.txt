@@ -1,16 +1,17 @@
 /**
  * @name ValidationLock.Script.txt
  * @author domino54
- * @version 2024-11-04
+ * @version 2024-11-06
  */
 
-#Const Version      "2024-11-04"
+#Const Version      "2024-11-06"
 #Const ScriptName   "ManiaApps/domino54/Editor/ValidationLock/ValidationLock.Script.txt"
 
 #Include "TextLib" as TL
-#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Editor/EditorUIVisibility.Script.txt" as EditorUI
 #Include "ManiaApps/domino54/Editor/ValidationLock/LB_ValidationLockButton.Script.txt" as LB_ValidationLockButton
 #Include "ManiaApps/domino54/Editor/ValidationLock/LB_ValidationLockDialog.Script.txt" as LB_ValidationLockDialog
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
 
 // ---------------------------------- //
 // Constants
@@ -25,7 +26,6 @@
 
 declare Boolean G_IsEnabled;
 declare Boolean G_HasCopiedObjectves;
-declare Boolean G_PrevHideEditorInterface;
 
 declare Integer G_Copied_TMObjective_AuthorTime;
 declare Integer G_Copied_TMObjective_GoldTime;
@@ -80,9 +80,7 @@ Void HideDialog() {
   }
 
   Layers::Destroy(C_DialogManialinkLayerId);
-  Layers::SetVisibility(C_ButtonManialinkLayerId, True);
-
-  HideEditorInterface = G_PrevHideEditorInterface;
+  EditorUI::SetVisibility(True);
 
   Private_SetStatusIsEnabled(G_IsEnabled);
 
@@ -95,10 +93,7 @@ Void ShowDialog() {
   }
 
   Layers::Create(C_DialogManialinkLayerId, LB_ValidationLockDialog::Build());
-  Layers::SetVisibility(C_ButtonManialinkLayerId, False);
-
-  G_PrevHideEditorInterface = HideEditorInterface;
-  HideEditorInterface = True;
+  EditorUI::SetVisibility(False);
 
   Private_SetStatusIsEnabled(G_IsEnabled);
 
@@ -119,6 +114,7 @@ Void Load() {
   G_IsEnabled = Private_GetPersistentIsEnabled();
 
   Layers::Create(C_ButtonManialinkLayerId, LB_ValidationLockButton::Build());
+  EditorUI::AddLayer(C_ButtonManialinkLayerId);
 
   Private_SetStatusIsEnabled(G_IsEnabled);
 }
