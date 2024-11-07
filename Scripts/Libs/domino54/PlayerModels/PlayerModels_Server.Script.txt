@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2024-10-26
+ * @version 2024-11-07
  */
 
-#Const Version      "2024-10-26"
+#Const Version      "2024-11-07"
 #Const ScriptName   "Libs/domino54/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
@@ -319,11 +319,10 @@ Void Private_AssignModel(CPlayer _Player, Ident _ItemId) {
   }
 }
 
-Void Private_AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
+Ident Private_GetModelIdent(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
   declare ModelId = PMData::ResolveModelId(_ModelId);
-  declare ItemId = Private_GetModelLookupId(ModelId, _SkinId, _PreferCustom);
 
-  Private_AssignModel(_Player, ItemId);
+  return Private_GetModelLookupId(ModelId, _SkinId, _PreferCustom);
 }
 
 // ---------------------------------- //
@@ -451,40 +450,75 @@ Boolean GetPlayerPreferCustom(Text _Login, Text _ModelId) {
 /**
  * Assign a model to a player.
  */
+Ident GetModelIdent(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
+  return Private_GetModelIdent(_Player, _ModelId, _SkinId, _PreferCustom);
+}
+
+/**
+ * Assign a model to a player (automatic skin).
+ */
+Ident GetModelIdent(CPlayer _Player, Text _ModelId, Boolean _PreferCustom) {
+  declare SkinId = GetPlayerSkinId(_Player.User.Login, _ModelId);
+
+  return GetModelIdent(_Player, _ModelId, SkinId, _PreferCustom);
+}
+
+/**
+ * Assign a model to a player (automatic prefer custom).
+ */
+Ident GetModelIdent(CPlayer _Player, Text _ModelId, Text _SkinId) {
+  declare PreferCustom = GetPlayerPreferCustom(_Player.User.Login, _ModelId);
+
+  return GetModelIdent(_Player, _ModelId, _SkinId, PreferCustom);
+}
+
+/**
+ * Assign a model to a player (automatic skin, prefer custom).
+ */
+Ident GetModelIdent(CPlayer _Player, Text _ModelId) {
+  declare PreferCustom = GetPlayerPreferCustom(_Player.User.Login, _ModelId);
+
+  return GetModelIdent(_Player, _ModelId, PreferCustom);
+}
+
+/**
+ * Assign a model to a player (automatic model from current map, skin, prefer custom).
+ */
+Ident GetModelIdent(CPlayer _Player) {
+  return GetModelIdent(_Player, G_LibPlayerModels_CurrentMapPlayerModelId);
+}
+
+/**
+ * Assign a model to a player.
+ */
 Void AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
-  Private_AssignModel(_Player, _ModelId, _SkinId, _PreferCustom);
+  Private_AssignModel(_Player, GetModelIdent(_Player, _ModelId, _SkinId, _PreferCustom));
 }
 
 /**
  * Assign a model to a player (automatic skin).
  */
 Void AssignModel(CPlayer _Player, Text _ModelId, Boolean _PreferCustom) {
-  declare SkinId = GetPlayerSkinId(_Player.User.Login, _ModelId);
-
-  AssignModel(_Player, _ModelId, SkinId, _PreferCustom);
+  Private_AssignModel(_Player, GetModelIdent(_Player, _ModelId, _PreferCustom));
 }
 
 /**
  * Assign a model to a player (automatic prefer custom).
  */
 Void AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId) {
-  declare PreferCustom = GetPlayerPreferCustom(_Player.User.Login, _ModelId);
-
-  AssignModel(_Player, _ModelId, _SkinId, PreferCustom);
+  Private_AssignModel(_Player, GetModelIdent(_Player, _ModelId, _SkinId));
 }
 
 /**
  * Assign a model to a player (automatic skin, prefer custom).
  */
 Void AssignModel(CPlayer _Player, Text _ModelId) {
-  declare PreferCustom = GetPlayerPreferCustom(_Player.User.Login, _ModelId);
-
-  AssignModel(_Player, _ModelId, PreferCustom);
+  Private_AssignModel(_Player, GetModelIdent(_Player, _ModelId));
 }
 
 /**
  * Assign a model to a player (automatic model from current map, skin, prefer custom).
  */
 Void AssignModel(CPlayer _Player) {
-  AssignModel(_Player, G_LibPlayerModels_CurrentMapPlayerModelId);
+  Private_AssignModel(_Player, GetModelIdent(_Player));
 }

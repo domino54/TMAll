@@ -3,12 +3,12 @@
  *
  * @name MapTypeTMAll.Script.txt
  * @author domino54
- * @version 2024-11-04
+ * @version 2024-11-07
  */
 
 #Extends "MapTypes/Base/MapTypeTrackmania.Script.txt"
 
-#Const TMAll_Version      "2024-11-04"
+#Const TMAll_Version      "2024-11-07"
 #Const TMAll_ScriptName   "MapTypes/Base/MapTypeTMAll.Script.txt"
 
 #Include "TextLib" as TL
@@ -146,6 +146,19 @@ PlayerModels_Server::Load(Mode, PlayerModels_Server::K_Options {
   ModelIdAllowlist = [PlayerModels_Server::GetMapPlayerModelId()],
   SkinIdAllowlist = PlayerModels_Server::GetLocalPlayerSkinIds()
 });
+***
+
+// ---------------------------------- //
+// Init playground
+// ---------------------------------- //
+***Playground_Init***
+***
+declare CurrentSkinIdent = PlayerModels_Server::GetModelIdent(Player);
+
+// Apply the current skin to the PB ghost.
+if (CurrentSkinIdent != NullId) {
+  MTB_Private_PBGhostModelId = CurrentSkinIdent;
+}
 ***
 
 // ---------------------------------- //

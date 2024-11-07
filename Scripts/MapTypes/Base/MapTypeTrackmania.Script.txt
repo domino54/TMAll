@@ -3,14 +3,14 @@
  *
  * @name MapTypeTrackmania.Script.txt
  * @author domino54
- * @version 2024-10-25
+ * @version 2024-11-07
  */
 
 #RequireContext CTmMapType
 
 #Extends "MapTypes/Base/MapTypeBase.Script.txt"
 
-#Const TM_Version     "2024-10-25"
+#Const TM_Version     "2024-11-07"
 #Const TM_ScriptName  "MapTypes/Base/MapTypeTrackmania.Script.txt"
 
 #Include "Libs/Trackmania/Ingame/UI/UI.Script.txt" as GameUI
@@ -20,6 +20,7 @@
 // ---------------------------------- //
 
 declare CGhost MTB_Private_PersonalBestGhost;
+declare Ident MTB_Private_PBGhostModelId;
 declare CTaskResult_Ghost MTB_Private_PBGhostTaskResult;
 
 declare Boolean MTB_Setting_UseDefaultTest;
@@ -90,6 +91,14 @@ if (MTB_Setting_UseDefaultTest) {
 ***Playground_Init***
 ***
 declare Player <=> Mode.AllPlayers[0];
+***
+
+// ---------------------------------- //
+// Load items
+// ---------------------------------- //
+***Playground_ItemList***
+***
+MTB_Private_PBGhostModelId = Mode.ItemList_AddWithSkin("DefaultPlayerModel", "Profile");
 ***
 
 // ---------------------------------- //
@@ -211,7 +220,7 @@ Void TM_StartRace(CTmPlayer _Player, Integer _StartTime) {
   Mode.RaceGhost_RemoveAll();
 
   if (MTB_Private_PersonalBestGhost != Null) {
-    Mode.RaceGhost_Add(MTB_Private_PersonalBestGhost, True);
+    Mode.RaceGhost_Add(MTB_Private_PersonalBestGhost, True, MTB_Private_PBGhostModelId);
   }
 
   +++TMPlayground_RaceGhosts+++
