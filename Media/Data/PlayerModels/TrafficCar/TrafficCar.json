@@ -5,6 +5,16 @@
   "Name": "TrafficCar Basic Color Skins",
   "Skins": [
     {
+      "Id": "trafficcar:amber",
+      "AppliesTo": "trackmania:trafficcar",
+      "Name": "Amber",
+      "SkinPath": "Skins/Models/TrafficCar/Amber.zip",
+      "Author": "Puriii",
+      "Assets": {
+        "garage:card": "./Card/Card_Amber.webp"
+      }
+    },
+    {
       "Id": "trafficcar:charcoal",
       "AppliesTo": "trackmania:trafficcar",
       "Name": "Charcoal",
