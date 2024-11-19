@@ -1,10 +1,10 @@
 /**
  * @name LB_GarageBackground.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-11-19
  */
 
-#Const Version      "2024-10-30"
+#Const Version      "2024-11-19"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/GarageBackground/LB_GarageBackground.Script.txt"
 
 #Const C_BaseUrl "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Garage/"
@@ -39,7 +39,7 @@ Text Build(Boolean _SingleImage) {
 
 declare Boolean HideBackground for Page;
 
-wait(HideBackground);
+wait(PageIsVisible && HideBackground);
 
 declare Quad_GarageBg <=> (Page.GetFirstChild("Quad_GarageBg") as CMlQuad);
 

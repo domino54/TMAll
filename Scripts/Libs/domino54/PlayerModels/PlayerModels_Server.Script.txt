@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2024-11-07
+ * @version 2024-11-19
  */
 
-#Const Version      "2024-11-07"
+#Const Version      "2024-11-19"
 #Const ScriptName   "Libs/domino54/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
@@ -28,6 +28,9 @@
 
 /// Model name, which references whatever model is used on the loaded map.
 #Const C_LibPlayerModels_DefaultPlayerModel "DefaultPlayerModel"
+
+// Special skin names from TMT, which do not work inside ManiaPlanet and will be ignored.
+#Const C_LibPlayerModels_SpecialSkinNames ["", "Default", "Profile"]
 
 // ---------------------------------- //
 // Structs
@@ -131,15 +134,32 @@ Boolean Private_IsSkinAllowlisted(Text _SkinId) {
   return Private_IsSkinAllowlisted(_SkinId, "");
 }
 
+Ident Private_ItemListAdd(CMode _Context, Text _ItemPath) {
+  // No need to load the item at all if it's just default player model.
+  if (_ItemPath == C_LibPlayerModels_DefaultPlayerModel) {
+    return NullId;
+  }
+
+  return _Context.ItemList_Add(_ItemPath);
+}
+
+Ident Private_ItemListAdd(CMode _Context, Text _ItemPath, Text _SkinPath) {
+  // Do not load special skin names, as they do not work.
+  if (C_LibPlayerModels_SpecialSkinNames.exists(_SkinPath)) {
+    Private_ItemListAdd(_Context, _ItemPath);
+  }
+
+  return _Context.ItemList_AddWithSkin(_ItemPath, _SkinPath);
+}
+
 Ident Private_ItemListAdd(CMode _Context, Text[] _ItemProps) {
   declare ResultId = NullId;
 
   switch (_ItemProps.count) {
-    case 1: ResultId = _Context.ItemList_Add(_ItemProps[0]);
-    case 2: ResultId = _Context.ItemList_AddWithSkin(_ItemProps[0], _ItemProps[1]);
+    case 1: ResultId = Private_ItemListAdd(_Context, _ItemProps[0]);
+    case 2: ResultId = Private_ItemListAdd(_Context, _ItemProps[0], _ItemProps[1]);
+    default: assert(False, "Player model could not be loaded.");
   }
-
-  assert(ResultId != NullId, "Player model could not be loaded.");
 
   return ResultId;
 }

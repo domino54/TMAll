@@ -1,10 +1,10 @@
 /**
  * @name LB_SkinList.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-11-19
  */
 
-#Const Version      "2024-10-30"
+#Const Version      "2024-11-19"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinList/LB_SkinList.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
@@ -321,6 +321,17 @@ main() {
   declare Real ScrollMouseOriginX;
   declare Real ScrollOffsetOriginX;
 
+  declare CMlControl MouseUpControl;
+  declare Vec2 MouseUpOrigin;
+  declare MouseUpFocus = False;
+
+  declare PageIsDragging = False;
+  declare Vec2 PageDraggingOrigin;
+  declare Real PageDraggingOffset;
+  declare Vec2 PageDraggingPrevStep;
+  declare Vec2 PageDraggingPrevStep2;
+  declare Integer PageDraggingNextStep;
+
   declare PrevPageIsVisible = !PageIsVisible;
 
   while (True) {
@@ -401,11 +412,21 @@ main() {
     if (PrevAnimPosY != Quad_AnimDummy.RelativePosition_V3.Y) {
       PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
 
+      if (PrevAnimPosY > VirtualScrollMaxY) {
+        PrevAnimPosY = VirtualScrollMaxY;
+
+        AnimMgr.Flush(Quad_AnimDummy);
+      }
+
       Frame_ScrollContainer.ScrollOffset.Y = PrevAnimPosY;
     }
 
     foreach (Event in PendingEvents) {
       if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+        MouseUpControl = Event.Control;
+        MouseUpFocus = True;
+        MouseUpOrigin = Input.MousePos;
+
         if (Event.Control.HasClass("Focus")) {
           Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
         }
@@ -415,9 +436,49 @@ main() {
           ScrollMouseOriginX = Input.MousePos.X;
           ScrollOffsetOriginX = Frame_ScrollContainer.ScrollOffset.Y;
         }
+      }
 
-        else if (Event.ControlId == "Quad_SkinButton") {
-          declare Button <=> Event.Control.Parent.Parent;
+      else if (Event.Type == CMlScriptEvent::Type::MouseOut) {
+        if (Event.Control == MouseUpControl) {
+          MouseUpFocus = False;
+        }
+
+        if (Event.ControlId != "Quad_SkinButton") continue;
+
+        SetSkinButtonHover(Event.Control.Parent.Parent, False);
+      }
+
+      else if (Event.Type == CMlScriptEvent::Type::MouseOver) {
+        if (Event.Control == MouseUpControl) {
+          MouseUpFocus = True;
+        }
+
+        if (Event.Control.HasClass("Focus")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+        }
+
+        if (Event.ControlId != "Quad_SkinButton") continue;
+
+        SetSkinButtonHover(Event.Control.Parent.Parent, True);
+      }
+    }
+
+    if (MouseUpControl != Null) {
+      if (Input.MouseLeftButton && (ML::Abs(Input.MousePos.X - MouseUpOrigin.X) > 6.0 ||ML::Abs(Input.MousePos.Y - MouseUpOrigin.Y) > 6.0)) {
+        MouseUpControl = Null;
+        MouseUpFocus = False;
+
+        PageIsDragging = True;
+        PageDraggingOrigin = Input.MousePos;
+        PageDraggingOffset = Frame_ScrollContainer.ScrollOffset.Y;
+        PageDraggingPrevStep = PageDraggingOrigin;
+        PageDraggingPrevStep2 = PageDraggingPrevStep;
+        PageDraggingNextStep = Now + 100;
+      }
+
+      if (!Input.MouseLeftButton) {
+        if (MouseUpFocus && MouseUpControl.ControlId == "Quad_SkinButton") {
+          declare Button <=> MouseUpControl.Parent.Parent;
           declare Index = VirtualScroll_GetIndex(Button);
           declare SkinData = SkinsData[Index];
 
@@ -441,22 +502,38 @@ main() {
             SendCustomEvent("{{{C_CustomEventType_SetAppliedSkinId}}}", [AppliedSkinId]);
           }
         }
+
+        MouseUpControl = Null;
+        MouseUpFocus = False;
       }
+    }
 
-      else if (Event.Type == CMlScriptEvent::Type::MouseOut) {
-        if (Event.ControlId != "Quad_SkinButton") continue;
+    if (PageIsDragging) {
+      declare Diff = Input.MousePos.X - PageDraggingOrigin.X;
 
-        SetSkinButtonHover(Event.Control.Parent.Parent, False);
-      }
+      Frame_ScrollContainer.ScrollOffset.Y = PageDraggingOffset - Diff;
 
-      else if (Event.Type == CMlScriptEvent::Type::MouseOver) {
-        if (Event.Control.HasClass("Focus")) {
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+      if (!Input.MouseLeftButton) {
+        PageIsDragging = False;
+
+        declare Momentum = <
+          (PageDraggingPrevStep2.X - PageDraggingPrevStep.X) * 5.0,
+          (PageDraggingPrevStep2.Y - PageDraggingPrevStep.Y) * 5.0
+        >;
+
+        if (Momentum.X != 0.0) {
+          declare Clamped = Frame_ScrollContainer.ScrollOffset.Y + Momentum.X;
+
+          AnimMgr.Flush(Quad_AnimDummy);
+          Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
+          AnimMgr.Add(Quad_AnimDummy, "<quad pos='0 "^Clamped^"' />", 1500, CAnimManager::EAnimManagerEasing::QuadOut);
         }
+      }
 
-        if (Event.ControlId != "Quad_SkinButton") continue;
-
-        SetSkinButtonHover(Event.Control.Parent.Parent, True);
+      else if (Now >= PageDraggingNextStep) {
+        PageDraggingNextStep = Now + 100;
+        PageDraggingPrevStep2 = PageDraggingPrevStep;
+        PageDraggingPrevStep = Input.MousePos;
       }
     }
 

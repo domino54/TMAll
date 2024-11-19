@@ -1,12 +1,12 @@
 /**
  * @name ModeGarage.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-11-19
  */
 
 #RequireContext CTmMode
 
-#Const MB_Version     "2024-10-30"
+#Const MB_Version     "2024-11-19"
 #Const MB_ScriptName  "Modes/TrackMania/ModeGarage.Script.txt"
 
 #Include "Libs/domino54/Garage/ServerComm.Script.txt" as Garage
@@ -150,7 +150,6 @@ if (!Player.IsSpawned) {
   PlayerModels_Server::AssignModel(Player, PreviewModelId, PreviewSkinId, True);
 
   SpawnPlayer(Player, 0, Now);
-  Garage::HideBackground(LocalUser);
 }
 ***
 
