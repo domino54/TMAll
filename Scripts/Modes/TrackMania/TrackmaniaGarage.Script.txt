@@ -1,0 +1,39 @@
+/**
+ * Mode for the Garage function inside TrackMania
+ *
+ * @name TrackmaniaGarage.Script.txt
+ * @author domino54
+ * @version 2024-12-01
+ */
+
+#Extends "Modes/Base/ModeGarage.Script.txt"
+
+#RequireContext CTmMode
+
+#Const Version      "2024-12-01"
+#Const ScriptName   "Modes/TrackMania/TrackmaniaGarage.Script.txt"
+
+// ---------------------------------- //
+// Log versions
+// ---------------------------------- //
+***MB_LogVersions***
+***
+Log::RegisterScript(ScriptName, Version);
+Log::RegisterScript(Env::ScriptName, Env::Version);
+***
+
+// ---------------------------------- //
+// Unspawn player
+// ---------------------------------- //
+***UnspawnPlayer***
+***
+UnspawnPlayer(Player);
+***
+
+// ---------------------------------- //
+// Spawn player
+// ---------------------------------- //
+***SpawnPlayer***
+***
+SpawnPlayer(Player, 0, Now);
+***

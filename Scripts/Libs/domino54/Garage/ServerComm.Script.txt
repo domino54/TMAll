@@ -1,10 +1,10 @@
 /**
  * @name ServerComm.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-11-19
  */
 
-#Const Version      "2024-10-30"
+#Const Version      "2024-11-19"
 #Const ScriptName   "Libs/domino54/Garage/ServerComm.Script.txt"
 
 // ---------------------------------- //
@@ -39,30 +39,4 @@ Text GetPreviewSkinId(CUser _User) {
   declare Text LibGarage_CurrentPreviewSkinId for _User;
 
   return LibGarage_CurrentPreviewSkinId;
-}
-
-Void HideBackground(CUser _User, Integer _Delay) {
-  declare Integer LibGarage_HideBackgroundAfter for _User;
-
-  LibGarage_HideBackgroundAfter = Now + _Delay;
-}
-
-Void HideBackground(CUser _User) {
-  HideBackground(_User, Now);
-}
-
-Boolean IsHideBackground(CUser _User, Integer _Time) {
-  declare Integer LibGarage_HideBackgroundAfter for _User;
-
-  if (LibGarage_HideBackgroundAfter <= 0) {
-    return False;
-  }
-
-  declare Result = _Time >= LibGarage_HideBackgroundAfter;
-
-  if (Result) {
-    LibGarage_HideBackgroundAfter = -1;
-  }
-
-  return Result;
 }

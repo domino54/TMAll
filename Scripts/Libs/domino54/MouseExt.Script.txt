@@ -1,0 +1,142 @@
+/**
+ * @name MouseExt.Script.txt
+ * @author domino54
+ * @version 2024-11-21
+ */
+
+#Const Version      "2024-11-21"
+#Const ScriptName   "Libs/domino54/MouseExt.Script.txt"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+/**
+ * Options passed to the events function.
+ * All text fields are parts of the manialink script executed when a corresponding "event" is fired.
+ * Think of it like a glorified switch statement.
+ */
+#Struct K_Options {
+  /**
+   * Fired when left mouse button is released on the clicked control.
+   * Variables: CMlControl EventControl, Vec2 EventOrigin.
+   */
+  Text MouseUp;
+  /**
+   * Fired when a control starts being dragged.
+   * Variables: CMlControl EventControl, Vec2 EventOrigin.
+   */
+  Text DragStart;
+  /**
+   * Fired when a control is dragged and the position has changed.
+   * Variables: CMlControl EventControl, Vec2 EventOrigin, Vec2 EventVelocity.
+   */
+  Text DragMove;
+  /**
+   * Fired when a control stops being dragged.
+   * Variables: CMlControl EventControl, Vec2 EventOrigin, Vec2 EventVelocity.
+   */
+  Text DragEnd;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text InjectDeclares() {
+  return """
+declare CMlControl G_MouseClickControl;
+declare Vec2 G_MouseClickOrigin;
+declare Boolean G_MouseClickHasFocus;
+
+declare CMlControl G_MouseDragControl;
+declare Vec2 G_MouseDragOrigin;
+declare Vec2 G_MouseDragPrev;
+  """;
+}
+
+Text InjectEvents(K_Options _Options) {
+  declare DragMin = 6.0; // TODO: Configurable
+  declare HasDrag = _Options.DragStart != "" || _Options.DragMove != "" || _Options.DragEnd != "";
+
+  declare Result = """
+foreach (Event in PendingEvents) {
+  if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+    G_MouseClickControl = Event.Control;
+    G_MouseClickOrigin = Input.MousePos;
+    G_MouseClickHasFocus = True;
+    G_MouseDragControl = Null;
+  }
+  else if (Event.Type == CMlScriptEvent::Type::MouseOut) {
+    if (Event.Control == G_MouseClickControl) {
+      G_MouseClickHasFocus = False;
+    }
+  }
+  else if (Event.Type == CMlScriptEvent::Type::MouseOver) {
+    if (Event.Control == G_MouseClickControl) {
+      G_MouseClickHasFocus = True;
+    }
+  }
+}
+
+if (G_MouseClickControl != Null) {
+  """;
+
+  if (HasDrag) {
+    Result ^= """
+  if (Input.MouseLeftButton && G_MouseDragControl == Null && !G_MouseClickControl.DataAttributeExists("nodrag") && (ML::Abs(Input.MousePos.X - G_MouseClickOrigin.X) > {{{DragMin}}} || ML::Abs(Input.MousePos.Y - G_MouseClickOrigin.Y) > {{{DragMin}}})) {
+    G_MouseDragControl = G_MouseClickControl;
+    G_MouseDragOrigin = Input.MousePos;
+    G_MouseDragPrev = Input.MousePos;
+
+    G_MouseClickControl = Null;
+    G_MouseClickHasFocus = False;
+
+    declare EventControl = G_MouseClickControl;
+    declare EventOrigin = G_MouseClickOrigin;
+
+    {{{_Options.DragStart}}}
+  }
+    """;
+  }
+
+  Result ^= """
+  if (!Input.MouseLeftButton) {
+    if (G_MouseClickHasFocus) {
+      declare EventControl = G_MouseClickControl;
+      declare EventOrigin = G_MouseClickOrigin;
+
+      {{{_Options.MouseUp}}}
+    }
+
+    G_MouseClickControl = Null;
+    G_MouseClickHasFocus = False;
+  }
+}""";
+
+  if (HasDrag) {
+    Result ^= """
+if (G_MouseDragControl != Null) {
+  declare EventControl = G_MouseDragControl;
+  declare EventOrigin = G_MouseDragOrigin;
+  declare Vec2 EventVelocity;
+
+  if (G_MouseDragPrev != Input.MousePos) {
+    EventVelocity = (Input.MousePos - G_MouseDragPrev) * (1000.0 / Period);
+
+    G_MouseDragPrev = Input.MousePos;
+
+    {{{_Options.DragMove}}}
+  }
+
+  if (!Input.MouseLeftButton) {
+    G_MouseDragControl = Null;
+
+    {{{_Options.DragEnd}}}
+  }
+}
+    """;
+  }
+
+  return Result;
+}

@@ -1,15 +1,15 @@
 /**
  * @name GarageController.Script.txt
  * @author domino54
- * @version 2024-10-31
+ * @version 2024-11-19
  */
 
-#Const Version      "2024-10-31"
+#Const Version      "2024-11-19"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageController.Script.txt"
 
 #Include "ManiaApps/domino54/Garage/Components/GarageBackground/GarageBackground.Script.txt" as GarageBg
 #Include "ManiaApps/domino54/Garage/Components/SkinPreview/SkinPreview.Script.txt" as SkinPreview
-#Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
+#Include "ManiaApps/domino54/Garage/Core/GaragePlaygroundAPI.Script.txt" as GaragePlaygroundAPI
 #Include "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt" as GarageMainPage
 
 // ---------------------------------- //
@@ -57,7 +57,7 @@ Void Private_SetActivePage(Text _PageName) {
 // ---------------------------------- //
 
 Void Init() {
-  GarageBg::Load(GarageAPI::IsPlayground());
+  GarageBg::Load(GaragePlaygroundAPI::IsPlayground());
 }
 
 Void Load() {
@@ -66,7 +66,7 @@ Void Load() {
 }
 
 Void Show() {
-  if (GarageAPI::IsPlayground()) {
+  if (GaragePlaygroundAPI::IsPlayground()) {
     GarageBg::Hide();
   } else {
     SkinPreview::Show();

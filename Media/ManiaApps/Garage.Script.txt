@@ -4,16 +4,17 @@
 /**
  * @name Garage.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-11-19
  */
 
 #Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
 
-#Const Version    "2024-10-30"
+#Const Version    "2024-11-19"
 #Const ScriptName "ManiaApps/Garage.Script.txt"
 
 #Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
 #Include "ManiaApps/domino54/Garage/Core/GarageController.Script.txt" as GarageController
+#Include "ManiaApps/domino54/Garage/Core/GaragePlaygroundAPI.Script.txt" as GaragePlaygroundAPI
 
 #Setting S_ScriptEnvironment "development"
 
@@ -22,9 +23,11 @@
 // ---------------------------------- //
 ***AB_InitApp***
 ***
-if (GarageAPI::IsPlayground()) {
+if (GaragePlaygroundAPI::IsPlayground()) {
+  GaragePlaygroundAPI::Load();
+
   // Mutes the car engine.
-  Audio.LimitSceneSoundVolumedB = -40.0;
+  Audio.LimitSceneSoundVolumedB = -100.0;
 
   // Curiously does not pause the game in solo mode, yet enables menu controls.
   // Only used in-game, because it breaks the scroll inside manialinks???
@@ -41,13 +44,8 @@ while (GarageAPI::IsLoading()) {
 GarageAPI::SetModelId(GarageAPI::GetInitialModelId());
 GarageController::Load();
 
-while (GarageAPI::IsPlayground() && !GarageAPI::IsServerReady()) {
+while (GaragePlaygroundAPI::IsPlayground() && !GaragePlaygroundAPI::HasSpawnedOnce()) {
   AB_Yield();
-}
-
-// Ugly way to get the UI to draw later.
-if (GarageAPI::IsPlayground()) {
-  AB_Sleep(50);
 }
 
 GarageController::Show();

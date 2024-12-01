@@ -3,16 +3,15 @@
  *
  * @name MapTypeTMAll.Script.txt
  * @author domino54
- * @version 2024-11-07
+ * @version 2024-12-01
  */
 
 #Extends "MapTypes/Base/MapTypeTrackmania.Script.txt"
 
-#Const TMAll_Version      "2024-11-07"
+#Const TMAll_Version      "2024-12-01"
 #Const TMAll_ScriptName   "MapTypes/Base/MapTypeTMAll.Script.txt"
 
 #Include "TextLib" as TL
-#Include "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt" as CustomSkins
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt" as PlayerModels_Server
@@ -38,7 +37,6 @@ declare Boolean TMAll_Private_HasProbedMapPlayerModelName;
 ***MTB_LogVersions***
 ***
 Log::RegisterScript(TMAll_ScriptName, TMAll_Version);
-Log::RegisterScript(CustomSkins::ScriptName, CustomSkins::Version);
 Log::RegisterScript(GameplayCoefs_Editor::ScriptName, GameplayCoefs_Editor::Version);
 Log::RegisterScript(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
 Log::RegisterScript(HttpClient::ScriptName, HttpClient::Version);
@@ -53,7 +51,6 @@ Log::RegisterScript(ValidationLock::ScriptName, ValidationLock::Version);
 ***MTB_LoadLibraries***
 ***
 HttpClient::Load();
-CustomSkins::Load(Mode);
 GameplayCoefs_Editor::Load(False);
 GameplayCoefs_Server::Load();
 PlayerModels_Data::Load();
@@ -133,8 +130,6 @@ TMAll_ProbeMapPlayerModelName();
 TMAll_NormalizeCoefsIfUninitialized();
 
 GameplayCoefs_Server::ReadValuesFromMap(Map);
-
-CustomSkins::LoadLocalData();
 ***
 
 // ---------------------------------- //
@@ -144,7 +139,7 @@ CustomSkins::LoadLocalData();
 ***
 PlayerModels_Server::Load(Mode, PlayerModels_Server::K_Options {
   ModelIdAllowlist = [PlayerModels_Server::GetMapPlayerModelId()],
-  SkinIdAllowlist = PlayerModels_Server::GetLocalPlayerSkinIds()
+  LocalUserSkinsOnly = True
 });
 ***
 
@@ -175,7 +170,7 @@ PlayerModels_Server::AssignModel(Player);
 // ---------------------------------- //
 ***Playground_End***
 ***
-PlayerModels_Server::Unload(Mode);
+PlayerModels_Server::Unload();
 ***
 
 // ---------------------------------- //
@@ -192,7 +187,6 @@ PlayerModels_Server::Unload(Mode);
 ***MTB_UnloadLibraries***
 ***
 HttpClient::Unload();
-CustomSkins::Unload();
 GameplayCoefs_Editor::Unload();
 GameplayCoefs_Server::Unload();
 PlayerModels_Data::Unload();

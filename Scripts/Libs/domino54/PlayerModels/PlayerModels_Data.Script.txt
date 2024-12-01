@@ -78,7 +78,7 @@
 // Global variables
 // ---------------------------------- //
 
-declare CTaskResult_FileList[Ident] G_LibPlayerModels_PendingTasks;
+declare CTaskResult_FileList[Ident] G_PendingTasks;
 
 // ---------------------------------- //
 // Private functions
@@ -257,11 +257,11 @@ CTaskResult_FileList Private_CreateUserDataTask(Text _Path) {
  * Awaiting for processed tasks loop.
  */
 Boolean Private_LoadingTaskResults() {
-  if (G_LibPlayerModels_PendingTasks.count <= 0) return False;
+  if (G_PendingTasks.count <= 0) return False;
 
   declare Ident[] TasksToRemove;
 
-  foreach (TaskId => Task in G_LibPlayerModels_PendingTasks) {
+  foreach (TaskId => Task in G_PendingTasks) {
     if (Task.IsProcessing) continue;
 
     foreach (File in Task.Files) {
@@ -276,12 +276,12 @@ Boolean Private_LoadingTaskResults() {
   while (TasksToRemove.existskey(0)) {
     declare TaskId = TasksToRemove[0];
     declare Removed1 = TasksToRemove.removekey(0);
-    declare Removed2 = G_LibPlayerModels_PendingTasks.removekey(TaskId);
+    declare Removed2 = G_PendingTasks.removekey(TaskId);
 
     DataFileMgr.TaskResult_Release(TaskId);
   }
 
-  return G_LibPlayerModels_PendingTasks.count > 0;
+  return G_PendingTasks.count > 0;
 }
 
 /**
@@ -693,12 +693,12 @@ Void Private_StartLoading(K_Options _Options) {
     return;
   }
 
-  declare CTaskResult_FileList[Ident] G_LibPlayerModels_PendingTasks for LoadedTitle;
+  declare CTaskResult_FileList[Ident] G_PendingTasks for LoadedTitle;
 
   foreach (Directory in C_LibPlayerModels_UserSkinsDirectories) {
     declare Task <=> Private_CreateUserDataTask(Directory);
 
-    G_LibPlayerModels_PendingTasks[Task.Id] = Task;
+    G_PendingTasks[Task.Id] = Task;
   }
 }
 
@@ -707,11 +707,11 @@ Void Private_StartLoading(K_Options _Options) {
 // ---------------------------------- //
 
 Void Unload() {
-  foreach (TaskId => __ in G_LibPlayerModels_PendingTasks) {
+  foreach (TaskId => __ in G_PendingTasks) {
     DataFileMgr.TaskResult_Release(TaskId);
   }
 
-  G_LibPlayerModels_PendingTasks.clear();
+  G_PendingTasks.clear();
 }
 
 /**

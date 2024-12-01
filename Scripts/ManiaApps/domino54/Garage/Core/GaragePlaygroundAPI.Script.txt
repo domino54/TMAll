@@ -1,0 +1,85 @@
+/**
+ * @name GaragePlaygroundAPI.Script.txt
+ * @author domino54
+ * @version 2024-11-19
+ */
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_IsSpawned"
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Text Private_CreateManialinkIsSpawned() {
+  return """
+<manialink version="3" name="{{{C_ManialinkLayerId}}}">
+<script><!--
+
+wait(PageIsVisible && !ParentApp.Playground.IsLoadingScreen);
+
+declare CMlScript _Context = This;
+
+switchtype (_Context) {
+  case CTmMlScriptIngame: {
+    declare Context <=> (_Context as CTmMlScriptIngame);
+
+    wait(Context.GUIPlayer != Null && Context.GUIPlayer.IsSpawned);
+  }
+
+  case CSmMlScriptIngame: {
+    declare Context <=> (_Context as CSmMlScriptIngame);
+
+    wait(Context.GUIPlayer != Null && Context.GUIPlayer.SpawnStatus == CSmPlayer::ESpawnStatus::Spawned);
+  }
+
+  default: {
+    assert(False, "This layer should be created only in a playground app");
+  }
+}
+
+declare Boolean HasSpawnedOnce for Page;
+
+HasSpawnedOnce = True;
+
+--></script>
+</manialink>
+  """;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Boolean IsPlayground() {
+  return This is CManiaAppPlaygroundCommon;
+}
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  if (IsPlayground()) {
+    Layers::Create(C_ManialinkLayerId, Private_CreateManialinkIsSpawned());
+  }
+}
+
+Boolean HasSpawnedOnce() {
+  declare Layer = Layers::Get(C_ManialinkLayerId);
+
+  if (Layer == Null) {
+    return False;
+  }
+
+  declare Boolean HasSpawnedOnce for Layer.LocalPage;
+
+  return HasSpawnedOnce;
+}

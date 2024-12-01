@@ -3,13 +3,12 @@
  */
 #Extends "Modes/TrackMania/ModeBase.Script.txt"
 
-#Const MB_TMAll_Version     "2024-10-26"
+#Const MB_TMAll_Version     "2024-12-01"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAll.Script.txt"
 
 #Include "Libs/Nadeo/Env.Script.txt" as Env
 #Include "Libs/Nadeo/Log.Script.txt" as Log
 #Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
-#Include "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt" as CustomSkins
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt" as PlayerModels_Server
@@ -26,7 +25,6 @@
 MB_LogVersion(MB_TMAll_ScriptName, MB_TMAll_Version);
 MB_LogVersion(Env::ScriptName, Env::Version);
 MB_LogVersion(Log::ScriptName, Log::Version);
-MB_LogVersion(CustomSkins::ScriptName, CustomSkins::Version);
 MB_LogVersion(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
 MB_LogVersion(HttpClient::ScriptName, HttpClient::Version);
 MB_LogVersion(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
@@ -43,7 +41,6 @@ Env::Load();
 Env::Set(S_ScriptEnvironment);
 Log::Load();
 HttpClient::Load();
-CustomSkins::Load(This);
 GameplayCoefs_Server::Load();
 PlayerModels_Data::Load();
 
@@ -61,7 +58,7 @@ ItemList_Begin();
 
 PlayerModels_Server::Load(This, PlayerModels_Server::K_Options {
   // Ensure that we only load the skins that are absolutely necessary.
-  SkinIdAllowlist = PlayerModels_Server::GetLocalPlayerSkinIds()
+  LocalUserSkinsOnly = True
 });
 
 +++ItemList+++
@@ -92,8 +89,7 @@ HttpClient::Yield();
 ***EndServer***
 ***
 HttpClient::Unload();
-PlayerModels_Server::Unload(This);
-CustomSkins::Unload();
+PlayerModels_Server::Unload();
 GameplayCoefs_Server::Unload();
 PlayerModels_Data::Unload();
 Log::Unload();

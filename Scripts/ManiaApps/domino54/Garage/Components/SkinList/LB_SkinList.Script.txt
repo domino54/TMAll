@@ -1,14 +1,15 @@
 /**
  * @name LB_SkinList.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-11-21
  */
 
-#Const Version      "2024-10-30"
+#Const Version      "2024-11-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinList/LB_SkinList.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
 
 #Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/"
 
@@ -95,7 +96,7 @@ Text Build() {
       <!-- scroll handle must be inside the scrolling container frame to avoid the handle preventing the scrolling -->
       <frame id="Frame_ScrollExempt">
         <frame pos="{{{PaddingX}}} {{{PaddingY}}}" z-index="1">
-          <quad id="Quad_ScrollBarTarget" class="Focus" pos="0 0" halign="left" valign="center" size="0 6" bgcolor="0000" scriptevents="1" />
+          <quad id="Quad_ScrollBarTarget" class="Focus" pos="0 0" halign="left" valign="center" size="0 6" bgcolor="0000" data-nodrag="1" scriptevents="1" />
         </frame>
       </frame>
 
@@ -122,6 +123,8 @@ Text Build() {
   Text Name;
   Text IconUrl;
 }
+
+{{{MouseExt::InjectDeclares()}}}
 
 {{{VirtualScroll::InjectInManialink()}}}
 
@@ -322,6 +325,7 @@ main() {
   declare Real ScrollOffsetOriginX;
 
   declare PrevPageIsVisible = !PageIsVisible;
+  declare Real PageDraggingOffset;
 
   while (True) {
     // Can't yield here or the events will be missed.
@@ -398,26 +402,10 @@ main() {
       continue;
     }
 
-    if (PrevAnimPosY != Quad_AnimDummy.RelativePosition_V3.Y) {
-      PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
-
-      Frame_ScrollContainer.ScrollOffset.Y = PrevAnimPosY;
-    }
-
-    foreach (Event in PendingEvents) {
-      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
-        if (Event.Control.HasClass("Focus")) {
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
-        }
-
-        if (Event.ControlId == "Quad_ScrollBarTarget") {
-          ScrollIsDragging = True;
-          ScrollMouseOriginX = Input.MousePos.X;
-          ScrollOffsetOriginX = Frame_ScrollContainer.ScrollOffset.Y;
-        }
-
-        else if (Event.ControlId == "Quad_SkinButton") {
-          declare Button <=> Event.Control.Parent.Parent;
+    {{{MouseExt::InjectEvents(MouseExt::K_Options {
+      MouseUp = """
+        if (EventControl.ControlId == "Quad_SkinButton") {
+          declare Button <=> EventControl.Parent.Parent;
           declare Index = VirtualScroll_GetIndex(Button);
           declare SkinData = SkinsData[Index];
 
@@ -440,6 +428,48 @@ main() {
 
             SendCustomEvent("{{{C_CustomEventType_SetAppliedSkinId}}}", [AppliedSkinId]);
           }
+        }
+      """,
+
+      DragStart = """
+        PageDraggingOffset = Frame_ScrollContainer.ScrollOffset.Y;
+
+        // Cancel sliding
+        AnimMgr.Flush(Quad_AnimDummy);
+        PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
+      """,
+
+      DragMove = """
+        declare Diff = Input.MousePos.X - EventOrigin.X;
+
+        Frame_ScrollContainer.ScrollOffset.Y = PageDraggingOffset - Diff;
+      """,
+
+      DragEnd = """
+        if (EventVelocity.X != 0.0) {
+          declare Clamped = Frame_ScrollContainer.ScrollOffset.Y - (EventVelocity.X / 2);
+
+          AnimMgr.Flush(Quad_AnimDummy);
+          Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
+          AnimMgr.Add(Quad_AnimDummy, "<quad pos='0 "^Clamped^"' />", 1500, CAnimManager::EAnimManagerEasing::QuadOut);
+        }
+      """
+    })}}}
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+        // Cancel sliding
+        AnimMgr.Flush(Quad_AnimDummy);
+        PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
+
+        if (Event.Control.HasClass("Focus")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+        }
+
+        if (Event.ControlId == "Quad_ScrollBarTarget") {
+          ScrollIsDragging = True;
+          ScrollMouseOriginX = Input.MousePos.X;
+          ScrollOffsetOriginX = Frame_ScrollContainer.ScrollOffset.Y;
         }
       }
 
@@ -536,6 +566,18 @@ main() {
 
         Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
       }
+    }
+
+    if (PrevAnimPosY != Quad_AnimDummy.RelativePosition_V3.Y) {
+      PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
+
+      if (PrevAnimPosY > VirtualScrollMaxY) {
+        PrevAnimPosY = VirtualScrollMaxY;
+
+        AnimMgr.Flush(Quad_AnimDummy);
+      }
+
+      Frame_ScrollContainer.ScrollOffset.Y = PrevAnimPosY;
     }
 
     if (ScrollIsDragging && !Input.MouseLeftButton) {

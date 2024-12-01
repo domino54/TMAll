@@ -1,125 +1,85 @@
 /**
  * @name CustomSkins_Server.Script.txt
  * @author domino54
- * @version 2024-11-05
+ * @version 2024-12-01
  */
 
-#Const Version      "2024-11-05"
+#Const Version      "2024-12-01"
 #Const ScriptName   "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt"
 
-#Include "Libs/domino54/CustomSkins/LB_CustomSkins.Script.txt" as LB_CustomSkins
-
 // ---------------------------------- //
-// Constants
+// Global variables
 // ---------------------------------- //
 
 declare CMode G_Mode;
-declare Text[Text][Text] G_LibCustomSkins_PlayerModelIdToSkinId;
-declare Text[][Text] G_LibCustomSkins_PlayerUseCustomOverArchetype;
 
 // ---------------------------------- //
 // Private functions
 // ---------------------------------- //
 
-CPlayer Private_GetPlayer(CUIConfig _UI) {
-  switchtype (G_Mode) {
-    case CTmMode: {
-      return (G_Mode as CTmMode).GetPlayer(_UI);
-    }
-    case CSmMode: {
-      return (G_Mode as CTmMode).GetPlayer(_UI);
-    }
-  }
-
-  return Null;
-}
-
-Void Private_ReadPlayerSkinSettings(CUser _User) {
-  if (_User == Null) return;
-
-  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for _User;
-  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for _User;
-
-  G_LibCustomSkins_PlayerModelIdToSkinId[_User.Login] = Persistent_LibCustomSkins_ModelIdToSkinId;
-  G_LibCustomSkins_PlayerUseCustomOverArchetype[_User.Login] = Persistent_LibCustomSkins_UseCustomOverArchetype;
-}
-
-/**
- * Fetches data in solo context.
- */
- Void Private_LoadLocalData() {
-  foreach (User in Users) {
-    declare persistent Integer Persistent_LibCustomSkins_LastUpdate for User;
-    declare Integer LibCustomSkins_PrevUpdate for User;
-
-    if (LibCustomSkins_PrevUpdate == Persistent_LibCustomSkins_LastUpdate) continue;
-    LibCustomSkins_PrevUpdate = Persistent_LibCustomSkins_LastUpdate;
-
-    Private_ReadPlayerSkinSettings(User);
-  }
-}
-
-/**
- * Fetches data in online context.
- */
-Void Private_OnlineDataLoop() {
-  foreach (Event in G_Mode.UIManager.PendingEvents) {
-    if (Event.Type != CUIConfigEvent::EType::OnLayerCustomEvent) continue;
-    if (Event.CustomEventType != LB_CustomSkins::C_PlayerDataUpdateId) continue;
-    if (Event.CustomEventData.count < 2) continue;
-
-    declare Player <=> Private_GetPlayer(Event.UI);
-
-    if (Player == Null) {
-      continue;
-    }
-
-    declare Text[Text] ModelIdToSkinId;
-    declare Text[] UseCustomOverArchetype;
-
-    declare Copied0 = ModelIdToSkinId.fromjson(Event.CustomEventData[0]);
-    declare Copied1 = UseCustomOverArchetype.fromjson(Event.CustomEventData[1]);
-
-    G_LibCustomSkins_PlayerModelIdToSkinId[Player.User.Login] = ModelIdToSkinId;
-    G_LibCustomSkins_PlayerUseCustomOverArchetype[Player.User.Login] = UseCustomOverArchetype;
-  }
+CUIConfig Private_GetUI(CUser _User) {
+  if (_User == Null) return Null;
+  return G_Mode.UIManager.GetUI(_User);
 }
 
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
 
-Void Unload() {
-  foreach (User in Users) {
-    declare Integer LibCustomSkins_PrevUpdate for User;
-    LibCustomSkins_PrevUpdate = -1;
-  }
-}
-
 Void Load(CMode _Mode) {
-  Unload();
-
   G_Mode <=> _Mode;
-
-  Private_LoadLocalData();
 }
 
-Void LoadLocalData() {
-  Private_LoadLocalData();
-}
+Text GetPlayerSkinId(CUser _User, Text _ModelId) {
+  declare UI <=> Private_GetUI(_User);
 
-Void OnlineYield() {
-  Private_OnlineDataLoop();
-}
+  if (UI != Null) {
+    declare netread Text[Text] Net_LibCustomSkins_ModelIdToSkinId for UI;
 
-Text GetPlayerSkinId(Text _Login, Text _ModelId) {
-  if (!G_LibCustomSkins_PlayerModelIdToSkinId.existskey(_Login) || !G_LibCustomSkins_PlayerModelIdToSkinId[_Login].existskey(_ModelId)) {
+    if (Net_LibCustomSkins_ModelIdToSkinId.existskey(_ModelId)) {
+      return Net_LibCustomSkins_ModelIdToSkinId[_ModelId];
+    }
+  }
+
+  // Don't use persistent values on servers.
+  if (G_Mode.DataFileMgr == Null) {
     return "";
   }
 
-  return G_LibCustomSkins_PlayerModelIdToSkinId[_Login][_ModelId];
+  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for _User;
+
+  if (Persistent_LibCustomSkins_ModelIdToSkinId.existskey(_ModelId)) {
+    return Persistent_LibCustomSkins_ModelIdToSkinId[_ModelId];
+  }
+
+  return "";
 }
 
-Boolean GetPlayerUseCustomOverArchetype(Text _Login, Text _ModelId) {
-  return G_LibCustomSkins_PlayerUseCustomOverArchetype.existskey(_Login) && G_LibCustomSkins_PlayerUseCustomOverArchetype[_Login].exists(_ModelId);
+Text GetPlayerSkinId(CPlayer _Player, Text _ModelId) {
+  return GetPlayerSkinId(_Player.User, _ModelId);
+}
+
+Boolean GetPlayerUseCustomOverArchetype(CUser _User, Text _ModelId) {
+  declare UI <=> Private_GetUI(_User);
+
+  if (UI != Null) {
+    declare netread Text[] Net_LibCustomSkins_UseCustomOverArchetype for UI;
+
+    if (Net_LibCustomSkins_UseCustomOverArchetype.exists(_ModelId)) {
+      return True;
+    }
+  }
+
+  // Don't use persistent values on servers.
+  if (G_Mode.DataFileMgr == Null) {
+    return False;
+  }
+
+  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for _User;
+
+  return Persistent_LibCustomSkins_UseCustomOverArchetype.exists(_ModelId);
+}
+
+Boolean GetPlayerUseCustomOverArchetype(CPlayer _Player, Text _ModelId) {
+  return GetPlayerUseCustomOverArchetype(_Player.User, _ModelId);
 }

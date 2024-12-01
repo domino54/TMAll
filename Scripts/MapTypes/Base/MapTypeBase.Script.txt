@@ -1,12 +1,12 @@
 /**
- * Base for a map type in ManiaPlanet.
+ * Base for a map type in ManiaPlanet. Game core invariant.
  *
  * @name MapTypeBase.Script.txt
  * @author domino54
- * @version 2024-10-24
+ * @version 2024-12-01
  */
 
-#Const MTB_Version      "2024-10-24"
+#Const MTB_Version      "2024-12-01"
 #Const MTB_ScriptName   "MapTypes/Base/MapTypeBase.Script.txt"
 
 #Include "Libs/Nadeo/Env.Script.txt" as Env
@@ -88,6 +88,10 @@ foreach (Event in PendingEvents) {
 
     case CMapEditorPluginEvent::Type::EditObjectives: {
       +++MTB_EditObjectives+++
+    }
+
+    case CMapEditorPluginEvent::Type::EditAnchor: {
+      +++MTB_EditAnchor+++
     }
   }
 }

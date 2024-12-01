@@ -1,43 +1,73 @@
 /**
  * @name CustomSkins_Client.Script.txt
  * @author domino54
- * @version 2024-11-05
+ * @version 2024-12-01
  */
 
-#Const Version      "2024-11-05"
+#Const Version      "2024-12-01"
 #Const ScriptName   "Libs/domino54/CustomSkins/CustomSkins_Client.Script.txt"
 
-#Include "Libs/domino54/CustomSkins/LB_CustomSkins.Script.txt" as LB_CustomSkins
-#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Integer G_LastUpdate;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+CUIConfig Private_GetUI() {
+  declare Context = (This as CManiaApp);
+  if (Context is CManiaAppPlaygroundCommon) return (Context as CManiaAppPlaygroundCommon).UI;
+  return Null;
+}
+
+Void Private_SendInfoToServer() {
+  declare UI <=> Private_GetUI();
+
+  if (UI == Null) {
+    return;
+  }
+
+  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for LocalUser;
+  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for LocalUser;
+
+  declare netwrite Text[Text] Net_LibCustomSkins_ModelIdToSkinId for UI;
+  declare netwrite Text[] Net_LibCustomSkins_UseCustomOverArchetype for UI;
+
+  Net_LibCustomSkins_ModelIdToSkinId = Persistent_LibCustomSkins_ModelIdToSkinId;
+  Net_LibCustomSkins_UseCustomOverArchetype = Persistent_LibCustomSkins_UseCustomOverArchetype;
+}
 
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
 
 Void Unload() {
-  Layers::Destroy(LB_CustomSkins::C_ManialinkLayerId);
+  G_LastUpdate = -1;
 }
 
 Void Load() {
   Unload();
 
-  Layers::Create(LB_CustomSkins::C_ManialinkLayerId, LB_CustomSkins::Build());
+  Private_SendInfoToServer();
 }
 
 Void Loop() {
-  if (!(This is CManiaAppPlayground)) {
+  if (!(This is CManiaAppPlaygroundCommon)) {
     return;
   }
 
-  foreach (Event in PendingEvents) {
-    if (Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
-    if (Event.CustomEventType != LB_CustomSkins::C_PlayerDataUpdateId) continue;
-    if (Event.CustomEventData.count < 2) continue;
+  declare persistent Integer Persistent_LibCustomSkins_LastUpdate for LocalUser;
 
-    declare Context <=> ((This as CNod) as CManiaAppPlayground);
-
-    Context.SendCustomEvent(Event.CustomEventType, [Event.CustomEventData[0], Event.CustomEventData[1]]);
+  if (G_LastUpdate == Persistent_LibCustomSkins_LastUpdate) {
+    return;
   }
+
+  G_LastUpdate = Persistent_LibCustomSkins_LastUpdate;
+
+  Private_SendInfoToServer();
 }
 
 Void SetPlayerSkinId(Text _ModelId, Text _SkinId) {
@@ -57,6 +87,8 @@ Void SetPlayerSkinId(Text _ModelId, Text _SkinId) {
     Persistent_LibCustomSkins_ModelIdToSkinId[_ModelId] = _SkinId;
     Persistent_LibCustomSkins_LastUpdate = Now;
   }
+
+  Private_SendInfoToServer();
 }
 
 Void UnsetPlayerSkinId(Text _ModelId) {
@@ -76,6 +108,8 @@ Void SetPreferCustom(Text _ModelId, Boolean _PreferCustom) {
     declare Removed = Persistent_LibCustomSkins_UseCustomOverArchetype.remove(_ModelId);
     Persistent_LibCustomSkins_LastUpdate = Now;
   }
+
+  Private_SendInfoToServer();
 }
 
 Text GetPlayerSkinId(Text _ModelId) {

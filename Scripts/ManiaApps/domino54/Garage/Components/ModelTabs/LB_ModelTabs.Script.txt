@@ -1,14 +1,15 @@
 /**
  * @name LB_ModelTabs.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-11-21
  */
 
-#Const Version      "2024-10-30"
+#Const Version      "2024-11-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/ModelTabs/LB_ModelTabs.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
 
 #Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons"
 
@@ -67,12 +68,12 @@ Text Build() {
 
     <frame id="Frame_MoreLeft" pos="46 5" hidden="1">
       <quad id="Quad_MoreLeft" class="ArrowMore" rot="180" />
-      <quad id="Quad_MoreLeftButton" class="ArrowButton Focus" scriptevents="1" />
+      <quad id="Quad_MoreLeftButton" class="ArrowButton Focus" data-nodrag="1" scriptevents="1" />
     </frame>
 
     <frame id="Frame_MoreRight" pos="186 5" hidden="1">
       <quad id="Quad_MoreRight" class="ArrowMore" />
-      <quad id="Quad_MoreRightButton" class="ArrowButton Focus" scriptevents="1" />
+      <quad id="Quad_MoreRightButton" class="ArrowButton Focus" data-nodrag="1" scriptevents="1" />
     </frame>
 
     <frame id="Frame_ScrollContainer" pos="50 -2" rot="-90" halign="left" valign="top" size="30 132" scroll="1" scrollgrid="0 {{{SizeX / 4}}}" scrollmax="0 100000">
@@ -101,6 +102,8 @@ Text Build() {
   Text Label;
   Text IconUrl;
 }
+
+{{{MouseExt::InjectDeclares()}}}
 
 {{{VirtualScroll::InjectInManialink()}}}
 
@@ -249,6 +252,7 @@ main() {
   declare PrevScrollOffsetY = 0.0;
   declare PrevAnimPosY = 0.0;
   declare PrevPageIsVisible = !PageIsVisible;
+  declare PageDraggingOffset = 0.0;
 
   while (True) {
     // Can't yield here or the events are missed.
@@ -319,16 +323,12 @@ main() {
       continue;
     }
 
-    foreach (Event in PendingEvents) {
-      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
-        if (Event.Control.HasClass("Focus")) {
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
-        }
-
+    {{{MouseExt::InjectEvents(MouseExt::K_Options {
+      MouseUp = """
         declare ActiveTabIndex = AllTabIds.keyof(ActiveTabId);
 
-        if (Event.ControlId == "Quad_MenuTabTrigger") {
-          declare Index = VirtualScroll_GetIndex(Event.Control.Parent);
+        if (EventControl.ControlId == "Quad_MenuTabTrigger") {
+          declare Index = VirtualScroll_GetIndex(EventControl.Parent);
           declare MenuTab = MenuTabsData[Index];
 
           if (ActiveTabId != MenuTab.Id) {
@@ -339,12 +339,48 @@ main() {
           }
         }
 
-        else if (Event.ControlId == "Quad_MoreLeftButton" && StartIndex > 0) {
+        else if (EventControl.ControlId == "Quad_MoreLeftButton" && StartIndex > 0) {
           ScrollIntoOffset(Frame_ScrollContainer.ScrollOffset.Y - Frame_ScrollContainer.Size.Y);
         }
 
-        else if (Event.ControlId == "Quad_MoreRightButton" && StartIndex < MenuTabsData.count - {{{C_NbButtonsScreen}}}) {
+        else if (EventControl.ControlId == "Quad_MoreRightButton" && StartIndex < MenuTabsData.count - {{{C_NbButtonsScreen}}}) {
           ScrollIntoOffset(Frame_ScrollContainer.ScrollOffset.Y + Frame_ScrollContainer.Size.Y);
+        }
+      """,
+
+      DragStart = """
+        PageDraggingOffset = Frame_ScrollContainer.ScrollOffset.Y;
+
+        // Cancel sliding
+        AnimMgr.Flush(Quad_AnimDummy);
+        PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
+      """,
+
+      DragMove = """
+        declare Diff = Input.MousePos.X - EventOrigin.X;
+
+        Frame_ScrollContainer.ScrollOffset.Y = PageDraggingOffset - Diff;
+      """,
+
+      DragEnd = """
+        if (EventVelocity.X != 0.0) {
+          declare Clamped = Frame_ScrollContainer.ScrollOffset.Y - (EventVelocity.X / 2);
+
+          AnimMgr.Flush(Quad_AnimDummy);
+          Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
+          AnimMgr.Add(Quad_AnimDummy, "<quad pos='0 "^Clamped^"' />", 1500, CAnimManager::EAnimManagerEasing::QuadOut);
+        }
+      """
+    })}}}
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+        // Cancel sliding
+        AnimMgr.Flush(Quad_AnimDummy);
+        PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
+
+        if (Event.Control.HasClass("Focus")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
         }
       }
 
