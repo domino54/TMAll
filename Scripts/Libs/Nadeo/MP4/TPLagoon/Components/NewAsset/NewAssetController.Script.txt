@@ -312,11 +312,16 @@ Void GoToNewMap(Boolean _IsSimple)
 
 	if (ProjectEnviro == "TMAll") {
 		Pages::GotoNext("Enviro");
+		return;
 	}
 	else if (_IsSimple) {
 		LaunchSimpleEditor();
+		return;
 	}
-	else if (ProjectEnviro == "Storm") {
+
+	ModBrowserController::FetchMods(ProjectEnviro);
+
+	if (ProjectEnviro == "Storm") {
 		Pages::GotoNext("Fields");
 	}
 	else {
@@ -335,19 +340,18 @@ Void Show(Text _PageToGoBackTo) {
 	ChangeAllMenus();
 
 	declare Text MapEditorMode = UserMgr.MainUser.Config.Editors_MapEditorMode^""; //En text parce que l'EMapEditorMode n'est pas encore trouvé
-	if(MapEditorMode == "::EMapEditorMode::Simple")
-	{
-		GoToNewMap(True);
-	}
-	else if(MapEditorMode == "::EMapEditorMode::Advanced")
-	{
-		GoToNewMap(False);
-	}
-	else if(MapEditorMode == "::EMapEditorMode::Ask")
-	{
-		Pages::GotoNext("NewMap");
-	}
 
+	switch (MapEditorMode) {
+		case "::EMapEditorMode::Simple": {
+			GoToNewMap(True);
+		}
+		case "::EMapEditorMode::Advanced": {
+			GoToNewMap(False);
+		}
+		case "::EMapEditorMode::Ask": {
+			Pages::GotoNext("NewMap");
+		}
+	}
 }
 
 Void LaunchEditor()
@@ -398,12 +402,12 @@ Void LaunchEditor()
 }
 
 Void GoToByEnviro(Integer _Enviro) {
-	declare Text Enviro = Get_EnviroText(_Enviro);
-	// Environment is selected first, by the time the user select a mood,
-	// information if there are mods available will be ready.
-	ModBrowserController::FetchMods(Enviro);
-
 	if (G_Advanced) {
+		declare Text Enviro = Get_EnviroText(_Enviro);
+		// Environment is selected first, by the time the user select a mood,
+		// information if there are mods available will be ready.
+		ModBrowserController::FetchMods(Enviro);
+
 		Pages::GotoNext("Vehicle");
 	}
 	else {

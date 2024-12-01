@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2024-11-19
+ * @version 2024-12-01
  */
 
-#Const Version      "2024-11-19"
+#Const Version      "2024-12-01"
 #Const ScriptName   "Libs/domino54/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
@@ -21,16 +21,16 @@
 #Const C_LoadingMode_AllowArchetypes  2   ///< Same as Compatibility, but allows archetypes to load.
 
 /// These environments restrict the assignable archetypes and require unlock via items.
-#Const C_LibPlayerModels_EnvironmentRequiresUnlock ["Stadium"]
+#Const C_EnvironmentRequiresUnlock ["Stadium"]
 
 /// These archetypes are available without the need of an unlock.
-#Const C_LibPlayerModels_VehicleIgnoresUnlock ["StadiumCar"]
+#Const C_VehicleIgnoresUnlock ["StadiumCar"]
 
 /// Model name, which references whatever model is used on the loaded map.
-#Const C_LibPlayerModels_DefaultPlayerModel "DefaultPlayerModel"
+#Const C_DefaultPlayerModel "DefaultPlayerModel"
 
 // Special skin names from TMT, which do not work inside ManiaPlanet and will be ignored.
-#Const C_LibPlayerModels_SpecialSkinNames ["", "Default", "Profile"]
+#Const C_SpecialSkinNames ["", "Default", "Profile"]
 
 // ---------------------------------- //
 // Structs
@@ -55,28 +55,32 @@
   /** Load CarCommon skins to the first player model only. Use for skin selection interface. */
   Boolean CarCommonFirstModel;
 
+  /** Load only skins, which the local user has selected (or been assigned). */
+  Boolean LocalUserSkinsOnly;
+
   /** Player model ID allowlist for specific models to be loaded exclusively. */
   Text[] ModelIdAllowlist;
-
-  /**
-   * Model skin ID allowlist for specific skins to be loaded exclusively.
-   * [SkinId => [ModelId]]
-   */
-  Text[][Text] SkinIdAllowlist;
 }
 
 // ---------------------------------- //
 // Global variables
 // ---------------------------------- //
 
-declare K_Options G_LibPlayerModels_Options;
+declare CMode G_Mode;
+declare K_Options G_Options;
 
-declare Text G_LibPlayerModels_CurrentMapEnvironmentName;
-declare Text G_LibPlayerModels_CurrentMapPlayerModelName;
-declare Text G_LibPlayerModels_CurrentMapPlayerModelId;
+declare Text G_CurrentMapEnvironmentName;
+declare Text G_CurrentMapPlayerModelName;
+declare Text G_CurrentMapPlayerModelId;
+
+/**
+ * Model skin ID allowlist for specific skins to be loaded exclusively.
+ * [SkinId => [ModelId]]
+ */
+declare Text[][Text] G_SkinIdAllowlist;
 
 /// Lookup table for text-based model ID to loaded item Ident.
-declare Ident[Text] G_LibPlayerModels_LoadedItemIdByLookupId;
+declare Ident[Text] G_LoadedItemIdByLookupId;
 
 // ---------------------------------- //
 // Private functions
@@ -95,76 +99,140 @@ Text Private_GetLookupId(Text _ModelId, Boolean _IsArchetype) {
 }
 
 Text Private_GetLookupId(Text _ModelId) {
-  return Private_GetLookupId(_ModelId, False);
+  return _ModelId;
 }
 
 Text Private_GetArchetypePath(Text _ItemPath) {
-  if (G_LibPlayerModels_Options.LoadingMode == C_LoadingMode_Compatibility) {
-    return C_LibPlayerModels_DefaultPlayerModel;
+  if (G_Options.LoadingMode == C_LoadingMode_Compatibility) {
+    return C_DefaultPlayerModel;
   }
 
   return _ItemPath;
 }
 
 Text Private_GetItemPath(Text _ItemPath) {
-  if (G_LibPlayerModels_Options.LoadingMode != C_LoadingMode_LoadEverything) {
-    return C_LibPlayerModels_DefaultPlayerModel;
+  if (G_Options.LoadingMode != C_LoadingMode_LoadEverything) {
+    return C_DefaultPlayerModel;
   }
 
   return _ItemPath;
 }
 
+/**
+ * Pick a random skin for the player and remember it until the title is unloaded.
+ */
+Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId) {
+  declare Text[Text][Text] LibPlayerModels_RandomizedSkins for LoadedTitle;
+
+  // Login not initialized in the store yet.
+  if (!LibPlayerModels_RandomizedSkins.existskey(_Login)) {
+    LibPlayerModels_RandomizedSkins[_Login] = [];
+  }
+
+  // There's already a random skin assigned to the model id.
+  if (LibPlayerModels_RandomizedSkins[_Login].existskey(_ModelId)) {
+    return LibPlayerModels_RandomizedSkins[_Login][_ModelId];
+  }
+
+  // Pick a random skin and keep it on the server side.
+  declare SkinId = PMData::GetRandomSkinIdByModelId(_ModelId, False);
+
+  if (SkinId != "") {
+    LibPlayerModels_RandomizedSkins[_Login][_ModelId] = SkinId;
+  }
+
+  return SkinId;
+}
+
+/**
+ * Get the player skin preference or a randomized skin.
+ */
+Text Private_GetPlayerSkinId(CUser _User, Text _ModelId) {
+  declare BaseModelId = PMData::GetBaseModelId(_ModelId);
+  declare PlayerPreferenceId = CustomSkins::GetPlayerSkinId(_User, BaseModelId);
+
+  // Return the preference if set.
+  if (PlayerPreferenceId != "") {
+    return PlayerPreferenceId;
+  }
+
+  return Private_GetPlayerRandomizedSkinId(_User.Login, BaseModelId);
+}
+
+/**
+ * @returns List of all skin IDs the local player has got assigned.
+ */
+Text[][Text] Private_GetLocalPlayerSkinIds() {
+  declare Text[][Text] Result;
+
+  // Users array exists in both game modes and maptypes.
+  foreach (User in Users) {
+    foreach (BaseModelId => __ in PMData::GetAllModels()) {
+      declare PlayerPreferenceId = Private_GetPlayerSkinId(User, BaseModelId);
+      if (PlayerPreferenceId == "") continue;
+
+      if (Result.existskey(PlayerPreferenceId)) {
+        Result[PlayerPreferenceId].add(BaseModelId);
+      } else {
+        Result[PlayerPreferenceId] = [BaseModelId];
+      }
+    }
+  }
+
+  return Result;
+}
+
 Boolean Private_IsModelAllowlisted(Text _ModelId) {
-  return G_LibPlayerModels_Options.ModelIdAllowlist.count <= 0 || G_LibPlayerModels_Options.ModelIdAllowlist.exists(_ModelId);
+  return G_Options.ModelIdAllowlist.count <= 0 || G_Options.ModelIdAllowlist.exists(_ModelId);
 }
 
 Boolean Private_IsSkinAllowlisted(Text _SkinId, Text _ModelId) {
-  if (G_LibPlayerModels_Options.SkinIdAllowlist.count <= 0) {
+  if (G_SkinIdAllowlist.count <= 0) {
     return True;
   }
 
   if (_ModelId == "") {
-    return G_LibPlayerModels_Options.SkinIdAllowlist.existskey(_SkinId);
+    return G_SkinIdAllowlist.existskey(_SkinId);
   }
 
-  return G_LibPlayerModels_Options.SkinIdAllowlist[_SkinId].exists(_ModelId);
+  return G_SkinIdAllowlist[_SkinId].exists(_ModelId);
 }
 
 Boolean Private_IsSkinAllowlisted(Text _SkinId) {
   return Private_IsSkinAllowlisted(_SkinId, "");
 }
 
-Ident Private_ItemListAdd(CMode _Context, Text _ItemPath) {
+Ident Private_ItemListAdd(Text _ItemPath) {
   // No need to load the item at all if it's just default player model.
-  if (_ItemPath == C_LibPlayerModels_DefaultPlayerModel) {
+  if (_ItemPath == C_DefaultPlayerModel) {
     return NullId;
   }
 
-  return _Context.ItemList_Add(_ItemPath);
+  return G_Mode.ItemList_Add(_ItemPath);
 }
 
-Ident Private_ItemListAdd(CMode _Context, Text _ItemPath, Text _SkinPath) {
+Ident Private_ItemListAdd(Text _ItemPath, Text _SkinPath) {
   // Do not load special skin names, as they do not work.
-  if (C_LibPlayerModels_SpecialSkinNames.exists(_SkinPath)) {
-    Private_ItemListAdd(_Context, _ItemPath);
+  if (C_SpecialSkinNames.exists(_SkinPath)) {
+    return Private_ItemListAdd(_ItemPath);
   }
 
-  return _Context.ItemList_AddWithSkin(_ItemPath, _SkinPath);
+  return G_Mode.ItemList_AddWithSkin(_ItemPath, _SkinPath);
 }
 
-Ident Private_ItemListAdd(CMode _Context, Text[] _ItemProps) {
+Ident Private_ItemListAdd(Text[] _ItemProps) {
   declare ResultId = NullId;
 
   switch (_ItemProps.count) {
-    case 1: ResultId = Private_ItemListAdd(_Context, _ItemProps[0]);
-    case 2: ResultId = Private_ItemListAdd(_Context, _ItemProps[0], _ItemProps[1]);
+    case 1: ResultId = Private_ItemListAdd(_ItemProps[0]);
+    case 2: ResultId = Private_ItemListAdd(_ItemProps[0], _ItemProps[1]);
     default: assert(False, "Player model could not be loaded.");
   }
 
   return ResultId;
 }
 
-Integer Private_LoadItems(CMode _Context, Text[][Text] _ItemsToLoad) {
+Integer Private_LoadItems(Text[][Text] _ItemsToLoad) {
   declare Ident[Text] CachedItemIds;
 
   foreach (ModelId => ItemProps in _ItemsToLoad) {
@@ -172,19 +240,19 @@ Integer Private_LoadItems(CMode _Context, Text[][Text] _ItemsToLoad) {
 
     // If we get the same [Model+Skin], don't load the same item twice, reuse an existing Ident.
     if (CachedItemIds.existskey(ReusableIndex)) {
-      G_LibPlayerModels_LoadedItemIdByLookupId[ModelId] = CachedItemIds[ReusableIndex];
+      G_LoadedItemIdByLookupId[ModelId] = CachedItemIds[ReusableIndex];
       continue;
     }
 
-    declare ResultId = Private_ItemListAdd(_Context, ItemProps);
+    declare ResultId = Private_ItemListAdd(ItemProps);
     CachedItemIds[ReusableIndex] = ResultId;
-    G_LibPlayerModels_LoadedItemIdByLookupId[ModelId] = ResultId;
+    G_LoadedItemIdByLookupId[ModelId] = ResultId;
   }
 
   return CachedItemIds.count;
 }
 
-Void Private_LoadModelItems(CMode _Context) {
+Void Private_LoadModelItems() {
   // Dictionary of tuples. This is used later to call ItemList_Add.
   // [UniqueId => [ItemPath, SkinPath]]
   declare Text[][Text] ItemsToLoad = [];
@@ -213,6 +281,11 @@ Void Private_LoadModelItems(CMode _Context) {
 
       ItemsToLoad[AsArchetypeId] = [Private_GetArchetypePath(Model.Archetype)];
     }
+  }
+
+  // Limit the loaded skins to the local user preferences.
+  if (G_Options.LocalUserSkinsOnly) {
+    G_SkinIdAllowlist = Private_GetLocalPlayerSkinIds();
   }
 
   // Holds skin paths for loading overlays.
@@ -257,7 +330,7 @@ Void Private_LoadModelItems(CMode _Context) {
 
   // Prepare overlays.
   foreach (ModelOverlayId => ModelOverlay in PMData::GetAllOverlays()) {
-    if (G_LibPlayerModels_Options.SkipOverlays) break;
+    if (G_Options.SkipOverlays) break;
     if (!Private_IsModelAllowlisted(ModelOverlayId)) continue;
 
     declare BaseModelLookupId = Private_GetLookupId(ModelOverlayId);
@@ -286,13 +359,13 @@ Void Private_LoadModelItems(CMode _Context) {
   }
 
   // Load items into the game mode.
-  declare NbItems = Private_LoadItems(_Context, ItemsToLoad);
+  declare NbItems = Private_LoadItems(ItemsToLoad);
 
   Log::Log("""[PlayerModels_Server] Loaded {{{NbItems}}} items""");
 }
 
 Boolean Private_CurrentMapRequiresUnlock() {
-  return C_LibPlayerModels_EnvironmentRequiresUnlock.exists(G_LibPlayerModels_CurrentMapEnvironmentName);
+  return C_EnvironmentRequiresUnlock.exists(G_CurrentMapEnvironmentName);
 }
 
 Ident Private_GetModelLookupId(Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
@@ -300,8 +373,8 @@ Ident Private_GetModelLookupId(Text _ModelId, Text _SkinId, Boolean _PreferCusto
   if (!_PreferCustom) {
     declare Archetype = Private_GetLookupId(_ModelId, True);
 
-    if (G_LibPlayerModels_LoadedItemIdByLookupId.existskey(Archetype)) {
-      return G_LibPlayerModels_LoadedItemIdByLookupId[Archetype];
+    if (G_LoadedItemIdByLookupId.existskey(Archetype)) {
+      return G_LoadedItemIdByLookupId[Archetype];
     }
   }
 
@@ -309,16 +382,16 @@ Ident Private_GetModelLookupId(Text _ModelId, Text _SkinId, Boolean _PreferCusto
   if (_SkinId != "") {
     declare WithSkin = Private_GetLookupId(_ModelId, _SkinId);
 
-    if (G_LibPlayerModels_LoadedItemIdByLookupId.existskey(WithSkin)) {
-      return G_LibPlayerModels_LoadedItemIdByLookupId[WithSkin];
+    if (G_LoadedItemIdByLookupId.existskey(WithSkin)) {
+      return G_LoadedItemIdByLookupId[WithSkin];
     }
   }
 
   // Load the item with a basic skin.
   declare Item = Private_GetLookupId(_ModelId);
 
-  if (G_LibPlayerModels_LoadedItemIdByLookupId.existskey(Item)) {
-    return G_LibPlayerModels_LoadedItemIdByLookupId[Item];
+  if (G_LoadedItemIdByLookupId.existskey(Item)) {
+    return G_LoadedItemIdByLookupId[Item];
   }
 
   // Nothing was found, fallback to no custom model.
@@ -339,8 +412,8 @@ Void Private_AssignModel(CPlayer _Player, Ident _ItemId) {
   }
 }
 
-Ident Private_GetModelIdent(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
-  declare ModelId = PMData::ResolveModelId(_ModelId);
+Ident Private_GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Text _SkinId, Boolean _PreferCustom) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
 
   return Private_GetModelLookupId(ModelId, _SkinId, _PreferCustom);
 }
@@ -349,191 +422,137 @@ Ident Private_GetModelIdent(CPlayer _Player, Text _ModelId, Text _SkinId, Boolea
 // Public functions
 // ---------------------------------- //
 
-Void Unload(CMode _Context) {
-  G_LibPlayerModels_Options = K_Options {};
-  G_LibPlayerModels_LoadedItemIdByLookupId.clear();
+Void Unload() {
+  G_Mode = Null;
+  G_Options = K_Options {};
+  G_SkinIdAllowlist.clear();
+  G_LoadedItemIdByLookupId.clear();
 }
 
-Void Load(CMode _Context, K_Options _Options) {
-  Unload(_Context);
+Void Load(CMode _Mode, K_Options _Options) {
+  Unload();
 
-  G_LibPlayerModels_Options = _Options;
+  G_Mode <=> _Mode;
+  G_Options = _Options;
 
-  Private_LoadModelItems(_Context);
+  CustomSkins::Load(G_Mode);
+
+  Private_LoadModelItems();
 }
 
-Void Load(CMode _Context) {
-  Load(_Context, K_Options {});
+Void Load(CMode _Mode) {
+  Load(_Mode, K_Options {});
 }
 
 Void SetMapProperties(Text _Environment, Text _MapPlayerModelName) {
-  G_LibPlayerModels_CurrentMapEnvironmentName = _Environment;
-  G_LibPlayerModels_CurrentMapPlayerModelName = _MapPlayerModelName;
-  G_LibPlayerModels_CurrentMapPlayerModelId = PMData::ResolveModelId(_MapPlayerModelName);
+  G_CurrentMapEnvironmentName = _Environment;
+  G_CurrentMapPlayerModelName = _MapPlayerModelName;
+  G_CurrentMapPlayerModelId = PMData::ResolveModelId(_MapPlayerModelName);
 }
 
 Text GetMapPlayerModelId() {
-  return G_LibPlayerModels_CurrentMapPlayerModelId;
-}
-
-/**
- * Pick a random skin for the player and remember it until the title is unloaded.
- */
-Text GetPlayerRandomizedSkinId(Text _Login, Text _ModelId) {
-  declare Text[Text][Text] LibPlayerModels_RandomizedSkins for LoadedTitle;
-
-  // Login not initialized in the store yet.
-  if (!LibPlayerModels_RandomizedSkins.existskey(_Login)) {
-    LibPlayerModels_RandomizedSkins[_Login] = [];
-  }
-
-  // There's already a random skin assigned to the model id.
-  if (LibPlayerModels_RandomizedSkins[_Login].existskey(_ModelId)) {
-    return LibPlayerModels_RandomizedSkins[_Login][_ModelId];
-  }
-
-  // Pick a random skin and keep it on the server side.
-  declare SkinId = PMData::GetRandomSkinIdByModelId(_ModelId, False);
-
-  if (SkinId != "") {
-    LibPlayerModels_RandomizedSkins[_Login][_ModelId] = SkinId;
-  }
-
-  return SkinId;
+  return G_CurrentMapPlayerModelId;
 }
 
 /**
  * Get the player skin preference or a randomized skin.
  */
-Text GetPlayerSkinId(Text _Login, Text _ModelId) {
-  declare BaseModelId = PMData::GetBaseModelId(_ModelId);
-  declare PlayerPreferenceId = CustomSkins::GetPlayerSkinId(_Login, BaseModelId);
+Text GetPlayerSkinId(CUser _User, Text _ResolvableModelId) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
 
-  // Return the preference if it is set.
-  if (PlayerPreferenceId != "") {
-    return PlayerPreferenceId;
-  }
-
-  return GetPlayerRandomizedSkinId(_Login, BaseModelId);
-}
-
-/**
- * @returns List of all skin IDs the local player has got assigned.
- */
-Text[][Text] GetLocalPlayerSkinIds() {
-  declare Text[][Text] Result;
-
-  // Users array exists in both game modes and maptypes.
-  foreach (User in Users) {
-    foreach (BaseModelId => __ in PMData::GetAllModels()) {
-      declare PlayerPreferenceId = GetPlayerSkinId(User.Login, BaseModelId);
-      if (PlayerPreferenceId == "") continue;
-
-      if (Result.existskey(PlayerPreferenceId)) {
-        Result[PlayerPreferenceId].add(BaseModelId);
-      } else {
-        Result[PlayerPreferenceId] = [BaseModelId];
-      }
-    }
-  }
-
-  return Result;
+  return Private_GetPlayerSkinId(_User, ModelId);
 }
 
 /**
  * Check if a model requires special unlock.
  */
-Boolean GetModelRequiresUnlock(Text _ModelId) {
-  declare Archetype = PMData::GetModelArchetype(_ModelId);
+Boolean GetModelRequiresUnlock(Text _ResolvableModelId) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+  declare Archetype = PMData::GetModelArchetype(ModelId);
 
-  return !C_LibPlayerModels_VehicleIgnoresUnlock.exists(Archetype);
-}
-
-/**
- * Check if the player requires additional special unlock to assign the model.
- */
-Boolean GetPlayerRequiresUnlock(Text _Login) {
-  return True;
+  return !C_VehicleIgnoresUnlock.exists(Archetype);
 }
 
 /**
  * Check if the player model should override an archetype.
  */
-Boolean GetPlayerPreferCustom(Text _Login, Text _ModelId) {
-  if (CustomSkins::GetPlayerUseCustomOverArchetype(_Login, _ModelId)) {
+Boolean GetPlayerPreferCustom(CUser _User, Text _ResolvableModelId) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+
+  if (CustomSkins::GetPlayerUseCustomOverArchetype(_User, ModelId)) {
     return True;
   }
 
-  return Private_CurrentMapRequiresUnlock() && GetPlayerRequiresUnlock(_Login) && GetModelRequiresUnlock(_ModelId);
+  return Private_CurrentMapRequiresUnlock() && GetModelRequiresUnlock(ModelId);
 }
 
 /**
  * Assign a model to a player.
  */
-Ident GetModelIdent(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
-  return Private_GetModelIdent(_Player, _ModelId, _SkinId, _PreferCustom);
+Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Text _SkinId, Boolean _PreferCustom) {
+  return Private_GetModelIdent(_Player, _ResolvableModelId, _SkinId, _PreferCustom);
 }
 
 /**
  * Assign a model to a player (automatic skin).
  */
-Ident GetModelIdent(CPlayer _Player, Text _ModelId, Boolean _PreferCustom) {
-  declare SkinId = GetPlayerSkinId(_Player.User.Login, _ModelId);
+Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Boolean _PreferCustom) {
+  declare SkinId = GetPlayerSkinId(_Player.User, _ResolvableModelId);
 
-  return GetModelIdent(_Player, _ModelId, SkinId, _PreferCustom);
+  return GetModelIdent(_Player, _ResolvableModelId, SkinId, _PreferCustom);
 }
 
 /**
  * Assign a model to a player (automatic prefer custom).
  */
-Ident GetModelIdent(CPlayer _Player, Text _ModelId, Text _SkinId) {
-  declare PreferCustom = GetPlayerPreferCustom(_Player.User.Login, _ModelId);
+Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Text _SkinId) {
+  declare PreferCustom = GetPlayerPreferCustom(_Player.User, _ResolvableModelId);
 
-  return GetModelIdent(_Player, _ModelId, _SkinId, PreferCustom);
+  return GetModelIdent(_Player, _ResolvableModelId, _SkinId, PreferCustom);
 }
 
 /**
  * Assign a model to a player (automatic skin, prefer custom).
  */
-Ident GetModelIdent(CPlayer _Player, Text _ModelId) {
-  declare PreferCustom = GetPlayerPreferCustom(_Player.User.Login, _ModelId);
+Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId) {
+  declare PreferCustom = GetPlayerPreferCustom(_Player.User, _ResolvableModelId);
 
-  return GetModelIdent(_Player, _ModelId, PreferCustom);
+  return GetModelIdent(_Player, _ResolvableModelId, PreferCustom);
 }
 
 /**
  * Assign a model to a player (automatic model from current map, skin, prefer custom).
  */
 Ident GetModelIdent(CPlayer _Player) {
-  return GetModelIdent(_Player, G_LibPlayerModels_CurrentMapPlayerModelId);
+  return GetModelIdent(_Player, G_CurrentMapPlayerModelId);
 }
 
 /**
  * Assign a model to a player.
  */
-Void AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
-  Private_AssignModel(_Player, GetModelIdent(_Player, _ModelId, _SkinId, _PreferCustom));
+Void AssignModel(CPlayer _Player, Text _ResolvableModelId, Text _SkinId, Boolean _PreferCustom) {
+  Private_AssignModel(_Player, GetModelIdent(_Player, _ResolvableModelId, _SkinId, _PreferCustom));
 }
 
 /**
  * Assign a model to a player (automatic skin).
  */
-Void AssignModel(CPlayer _Player, Text _ModelId, Boolean _PreferCustom) {
-  Private_AssignModel(_Player, GetModelIdent(_Player, _ModelId, _PreferCustom));
+Void AssignModel(CPlayer _Player, Text _ResolvableModelId, Boolean _PreferCustom) {
+  Private_AssignModel(_Player, GetModelIdent(_Player, _ResolvableModelId, _PreferCustom));
 }
 
 /**
  * Assign a model to a player (automatic prefer custom).
  */
-Void AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId) {
-  Private_AssignModel(_Player, GetModelIdent(_Player, _ModelId, _SkinId));
+Void AssignModel(CPlayer _Player, Text _ResolvableModelId, Text _SkinId) {
+  Private_AssignModel(_Player, GetModelIdent(_Player, _ResolvableModelId, _SkinId));
 }
 
 /**
  * Assign a model to a player (automatic skin, prefer custom).
  */
-Void AssignModel(CPlayer _Player, Text _ModelId) {
-  Private_AssignModel(_Player, GetModelIdent(_Player, _ModelId));
+Void AssignModel(CPlayer _Player, Text _ResolvableModelId) {
+  Private_AssignModel(_Player, GetModelIdent(_Player, _ResolvableModelId));
 }
 
 /**

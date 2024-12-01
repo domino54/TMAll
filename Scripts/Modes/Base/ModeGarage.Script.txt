@@ -1,13 +1,13 @@
 /**
+ * Base game mode for the Garage function. Game core invariant.
+ *
  * @name ModeGarage.Script.txt
  * @author domino54
- * @version 2024-11-19
+ * @version 2024-12-01
  */
 
-#RequireContext CTmMode
-
-#Const MB_Version     "2024-11-19"
-#Const MB_ScriptName  "Modes/TrackMania/ModeGarage.Script.txt"
+#Const MB_Version     "2024-12-01"
+#Const MB_ScriptName  "Modes/TrackMania/Base/ModeGarage.Script.txt"
 
 #Include "Libs/domino54/Garage/ServerComm.Script.txt" as Garage
 #Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
@@ -88,7 +88,7 @@ declare Text PrevPreviewModelId;
 declare Text PrevPreviewSkinId;
 declare Integer LastDespawnTime;
 
-// Spectating oneself prevents controlling of the car.
+// Spectating oneself prevents controlling the player.
 UIManager.UIAll.ForceSpectator = True;
 UIManager.UIAll.SpectatorForcedTarget = Player.Id;
 ***
@@ -139,17 +139,17 @@ if ((PrevPreviewModelId != PreviewModelId || PrevPreviewSkinId != PreviewSkinId)
   PrevPreviewSkinId = PreviewSkinId;
   LastDespawnTime = Now;
 
-  UnspawnPlayer(Player);
+  +++UnspawnPlayer+++
 }
 
 // Spawn player with the target model.
-if (!Player.IsSpawned) {
+if (!MB_IsSpawned(Player)) {
   declare PreviewModelId = Garage::GetPreviewModelId(LocalUser);
   declare PreviewSkinId = Garage::GetPreviewSkinId(LocalUser);
 
   PlayerModels_Server::AssignModel(Player, PreviewModelId, PreviewSkinId, True);
 
-  SpawnPlayer(Player, 0, Now);
+  +++SpawnPlayer+++
 }
 ***
 
@@ -158,7 +158,7 @@ if (!Player.IsSpawned) {
 // ---------------------------------- //
 ***MB_UnloadLibraries***
 ***
-PlayerModels_Server::Unload(This);
+PlayerModels_Server::Unload();
 PlayerModels_Data::Unload();
 HttpClient::Unload();
 Log::Unload();
@@ -168,6 +168,14 @@ Env::Unload();
 // ---------------------------------- //
 // Functions
 // ---------------------------------- //
+
+Boolean MB_IsSpawned(CPlayer _Player) {
+  switchtype (_Player) {
+    case CTmPlayer: return (_Player as CTmPlayer).IsSpawned;
+    case CSmPlayer: return (_Player as CSmPlayer).SpawnStatus == CSmPlayer::ESpawnStatus::Spawned;
+  }
+  return False;
+}
 
 Void MB_SetDefaultUIVisibility(Boolean _Visible) {
   UIManager.UIAll.OverlayHideNotices = !_Visible;
@@ -238,8 +246,8 @@ main() {
 
   wait(Players.count >= 1);
 
-  declare Player <=> Players[0];
-  declare LocalUser <=> Users[0];
+  declare Player = Players[0];
+  declare LocalUser = Users[0];
 
   while (MB_Private_ServerIsRunning()) {
     +++MB_LoadLibraries+++

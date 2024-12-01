@@ -162,7 +162,7 @@ if (Player.RaceStartTime <= 0 && Game::IsWaiting(Player)) {
 
 // Events
 foreach (Event in Mode.PendingEvents) {
-  Mode.PassOn(Event);
+  declare Passed = Mode.PassOn(Event);
 
   if (Event.Type != CTmModeEvent::EType::WayPoint || !Event.IsEndRace) {
     continue;

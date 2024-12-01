@@ -131,7 +131,7 @@ Void LaunchGarage()
 		return;
 	}
 
-	declare Text Mode = "Modes/TrackMania/ModeGarage";
+	declare Text Mode = "Modes/TrackMania/TrackmaniaGarage";
 
 	wait(TitleFlow.IsReady);
 

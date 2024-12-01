@@ -3,14 +3,14 @@
  *
  * @name MapTypeTrackmania.Script.txt
  * @author domino54
- * @version 2024-11-07
+ * @version 2024-12-01
  */
 
 #RequireContext CTmMapType
 
 #Extends "MapTypes/Base/MapTypeBase.Script.txt"
 
-#Const TM_Version     "2024-11-07"
+#Const TM_Version     "2024-12-01"
 #Const TM_ScriptName  "MapTypes/Base/MapTypeTrackmania.Script.txt"
 
 #Include "Libs/Trackmania/Ingame/UI/UI.Script.txt" as GameUI
@@ -81,7 +81,9 @@ if (MTB_Private_PBGhostTaskResult != Null && !MTB_Private_PBGhostTaskResult.IsPr
 if (MTB_Setting_UseDefaultTest) {
   ValidationEndNoConfirm = True;
 
-  TM_SetDefaultUIToHide(True);
+  if (MTB_Setting_UseDefaultGameUI) {
+    TM_SetDefaultUIToHide(True);
+  }
 }
 ***
 
@@ -126,7 +128,7 @@ if (MTB_Setting_UseDefaultTest) {
     if (Event.Type == CTmModeEvent::EType::WayPoint && Event.IsEndRace) {
       Mode.Discard(Event);
     } else {
-      Mode.PassOn(Event);
+      declare Passed = Mode.PassOn(Event);
     }
   }
 
@@ -220,7 +222,7 @@ Void TM_StartRace(CTmPlayer _Player, Integer _StartTime) {
   Mode.RaceGhost_RemoveAll();
 
   if (MTB_Private_PersonalBestGhost != Null) {
-    Mode.RaceGhost_Add(MTB_Private_PersonalBestGhost, True, MTB_Private_PBGhostModelId);
+    declare GhostInstId = Mode.RaceGhost_Add(MTB_Private_PersonalBestGhost, True, MTB_Private_PBGhostModelId);
   }
 
   +++TMPlayground_RaceGhosts+++
