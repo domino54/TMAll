@@ -1,16 +1,19 @@
 /**
  * @name GarageController.Script.txt
  * @author domino54
- * @version 2024-11-19
+ * @version 2024-12-22
  */
 
-#Const Version      "2024-11-19"
+#Const Version      "2024-12-22"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageController.Script.txt"
 
 #Include "ManiaApps/domino54/Garage/Components/GarageBackground/GarageBackground.Script.txt" as GarageBg
 #Include "ManiaApps/domino54/Garage/Components/SkinPreview/SkinPreview.Script.txt" as SkinPreview
+#Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
 #Include "ManiaApps/domino54/Garage/Core/GaragePlaygroundAPI.Script.txt" as GaragePlaygroundAPI
+#Include "ManiaApps/domino54/Garage/Pages/GarageIntroPage.Script.txt" as GarageIntroPage
 #Include "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt" as GarageMainPage
+#Include "ManiaApps/domino54/Garage/Pages/GarageTutorialPage.Script.txt" as GarageTutorialPage
 
 // ---------------------------------- //
 // Global variables
@@ -24,25 +27,25 @@ declare Text G_CurrentPage;
 
 Void Private_HidePage(Text _PageName) {
   switch (_PageName) {
-    case GarageMainPage::C_PageName: {
-      GarageMainPage::Hide();
-    }
+    case GarageIntroPage::C_PageName: GarageIntroPage::Hide();
+    case GarageMainPage::C_PageName: GarageMainPage::Hide();
+    case GarageTutorialPage::C_PageName: GarageTutorialPage::Hide();
   }
 }
 
 Void Private_ShowPage(Text _PageName) {
   switch (_PageName) {
-    case GarageMainPage::C_PageName: {
-      GarageMainPage::Show();
-    }
+    case GarageIntroPage::C_PageName: GarageIntroPage::Show();
+    case GarageMainPage::C_PageName: GarageMainPage::Show();
+    case GarageTutorialPage::C_PageName: GarageTutorialPage::Show();
   }
 }
 
 Void Private_PageLoop(Text _PageName) {
   switch (_PageName) {
-    case GarageMainPage::C_PageName: {
-      GarageMainPage::Loop();
-    }
+    case GarageIntroPage::C_PageName: GarageIntroPage::Loop();
+    case GarageMainPage::C_PageName: GarageMainPage::Loop();
+    case GarageTutorialPage::C_PageName: GarageTutorialPage::Loop();
   }
 }
 
@@ -61,7 +64,9 @@ Void Init() {
 }
 
 Void Load() {
+  GarageIntroPage::Load();
   GarageMainPage::Load();
+  GarageTutorialPage::Load();
   SkinPreview::Load();
 }
 
@@ -72,7 +77,13 @@ Void Show() {
     SkinPreview::Show();
   }
 
-  Private_SetActivePage(GarageMainPage::C_PageName);
+  declare InitialPageName = GarageIntroPage::C_PageName;
+
+  if (GarageAPI::HasSeenTutorial(GarageTutorialPage::C_TutorialVersion)) {
+    InitialPageName = GarageMainPage::C_PageName;
+  }
+
+  Private_SetActivePage(InitialPageName);
 }
 
 Void Loop() {
@@ -81,7 +92,9 @@ Void Loop() {
 }
 
 Void Unload() {
+  GarageIntroPage::Unload();
   GarageMainPage::Unload();
+  GarageTutorialPage::Unload();
   GarageBg::Unload();
   SkinPreview::Unload();
 }

@@ -1,0 +1,36 @@
+/**
+ * @name GarageTutorialPage.Script.txt
+ * @author domino54
+ * @version 2024-12-22
+ */
+
+#Const Version      "2024-12-22"
+#Const ScriptName   "ManiaApps/domino54/Garage/Pages/GarageTutorialPage.Script.txt"
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_PageName         "GarageTutorialPage"
+#Const C_TutorialVersion  1
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+}
+
+Void Load() {
+  Unload();
+}
+
+Void Show() {
+}
+
+Void Hide() {
+}
+
+Void Loop() {
+  // TODO: Handle the tutorial page switch buttons
+}

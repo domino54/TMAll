@@ -1,0 +1,66 @@
+/**
+ * @name LB_GarageSplashScreen.Script.txt
+ * @author domino54
+ * @version 2024-12-22
+ */
+
+#Const Version      "2024-12-22"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/GarageSplashScreen/LB_GarageSplashScreen.Script.txt"
+
+Text Build() {
+  return """
+<manialink version="3" name="L_GarageSplashScreen">
+<frame>
+  <label pos="80" halign="center" valign="center" text="Garage" textsize="10" textcolor="000" />
+</frame>
+
+<frame id="Frame_Images" scale="1.07">
+  <quad class="px" pos="0 0" halign="center" valign="center" size="320 180" data-px-depth="15.0" image="file://Media/PxLayer6.webp" />
+  <quad class="px" pos="0 0" halign="center" valign="center" size="320 180" data-px-depth="10.0" image="file://Media/PxLayer5.webp" />
+  <quad class="px" pos="0 0" halign="center" valign="center" size="320 180" data-px-depth="6.0" image="file://Media/PxLayer4.webp" />
+  <quad class="px" pos="0 0" halign="center" valign="center" size="320 180" data-px-depth="4.0" image="file://Media/PxLayer3.webp" />
+  <quad class="px" pos="0 0" halign="center" valign="center" size="320 180" data-px-depth="2.5" image="file://Media/PxLayer2.webp" />
+  <quad class="px" pos="0 0" halign="center" valign="center" size="320 180" data-px-depth="2.0" image="file://Media/PxLayer2a.webp" />
+  <quad class="px" pos="0 0" halign="center" valign="center" size="320 180" data-px-depth="0.5" image="file://Media/PxLayer1.webp" />
+  <quad class="px" pos="0 0" halign="center" valign="center" size="320 180" data-px-depth="0.0" image="file://Media/PxLayer0.webp" />
+</frame>
+
+<script><!--
+
+#Include "TextLib" as TL
+
+// TODO: Split the parallax/animation into a separate, reusable library
+main() {
+  // "px" marks the element as animated
+  Page.GetClassChildren("px", Page.MainFrame, True);
+
+  declare CMlQuad[] Quad_Images;
+
+  foreach (Control in Page.GetClassChildren_Result) {
+    Quad_Images.add((Control as CMlQuad));
+  }
+
+  while (True) {
+    if (Input.MousePos.X == -1000.0) {
+      yield;
+
+      continue;
+    }
+
+    // TODO: Prepare a list of parallax elements beforehand and conditionally run the code only on visible elements
+    foreach (I => Quad in Quad_Images) {
+      declare Depth = TL::ToReal(Quad.DataAttributeGet("px-depth"));
+
+      Quad.RelativePosition_V3.Y = (Input.MousePos.Y / 160.0) * Depth;
+      Quad.RelativePosition_V3.X = (Input.MousePos.X / 160.0) * Depth;
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+
+  """;
+}

@@ -1,0 +1,51 @@
+/**
+ * @name SkinFallbackInfo.Script.txt
+ * @author domino54
+ * @version 2024-12-22
+ */
+
+#Const Version      "2024-12-22"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/SkinFallbackInfo.Script.txt"
+
+#Include "TextLib" as TL
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/LB_SkinFallbackInfo.Script.txt" as LB_SkinFallbackInfo
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_SkinFallbackInfo"
+
+#Const C_CustomEventType_TogglePreferCustom   "skin_fallback_info:toggle_prefer_custom"
+#Const C_CustomEventType_SetPreferCustom      "skin_fallback_info:set_prefer_custom"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void SetPreferCustom(Boolean _PreferCustom) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+  declare PreferCustom = TL::ToText(_PreferCustom);
+
+  LayerCustomEvent(Layer, C_CustomEventType_SetPreferCustom, [PreferCustom]);
+}
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB_SkinFallbackInfo::Build());
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
