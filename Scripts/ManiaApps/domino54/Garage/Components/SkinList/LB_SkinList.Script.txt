@@ -1,10 +1,10 @@
 /**
  * @name LB_SkinList.Script.txt
  * @author domino54
- * @version 2024-11-21
+ * @version 2024-12-22
  */
 
-#Const Version      "2024-11-21"
+#Const Version      "2024-12-22"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinList/LB_SkinList.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
@@ -427,6 +427,8 @@ main() {
             SetAppliedSkinIndex(Index);
 
             SendCustomEvent("{{{C_CustomEventType_SetAppliedSkinId}}}", [AppliedSkinId]);
+
+            Audio.PlaySoundEvent(CAudioManager::ELibSound::Start, 0, 0.0);
           }
         }
       """,
@@ -518,13 +520,14 @@ main() {
 
           SendCustomEvent("{{{C_CustomEventType_SetAppliedSkinId}}}", [AppliedSkinId]);
 
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Start, 0, 0.0);
           break;
         }
 
         case CInputEvent::EButton::Left, CInputEvent::EButton::LeftStick_Left: {
           if (PreviewSkinIndex <= 0) {
             Frame_ScrollContainer.ScrollBumpTop();
+            Audio.PlaySoundEvent(CAudioManager::ELibSound::ScoreIncrease, 0, 0.0);
           } else {
             ChangeSkinIndex = PreviewSkinIndex - 1;
           }
@@ -533,6 +536,7 @@ main() {
         case CInputEvent::EButton::Right, CInputEvent::EButton::LeftStick_Right: {
           if (PreviewSkinIndex >= AllSkinIds.count - 1) {
             Frame_ScrollContainer.ScrollBumpBottom();
+            Audio.PlaySoundEvent(CAudioManager::ELibSound::ScoreIncrease, 0, 0.0);
           } else {
             ChangeSkinIndex = PreviewSkinIndex + 1;
           }
@@ -541,6 +545,7 @@ main() {
         case CInputEvent::EButton::Up, CInputEvent::EButton::LeftStick_Up: {
           if (PreviewSkinIndex <= 0) {
             Frame_ScrollContainer.ScrollBumpTop();
+            Audio.PlaySoundEvent(CAudioManager::ELibSound::ScoreIncrease, 0, 0.0);
           } else {
             ChangeSkinIndex = 0;
           }
@@ -549,6 +554,7 @@ main() {
         case CInputEvent::EButton::Down, CInputEvent::EButton::LeftStick_Down: {
           if (PreviewSkinIndex >= AllSkinIds.count - 1) {
             Frame_ScrollContainer.ScrollBumpBottom();
+            Audio.PlaySoundEvent(CAudioManager::ELibSound::ScoreIncrease, 0, 0.0);
           } else {
             ChangeSkinIndex = AllSkinIds.count - 1;
           }

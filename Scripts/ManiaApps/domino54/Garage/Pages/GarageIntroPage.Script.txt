@@ -1,0 +1,42 @@
+/**
+ * @name GarageIntroPage.Script.txt
+ * @author domino54
+ * @version 2024-12-22
+ */
+
+#Const Version      "2024-12-22"
+#Const ScriptName   "ManiaApps/domino54/Garage/Pages/GarageIntroPage.Script.txt"
+
+#Include "ManiaApps/domino54/Garage/Components/GarageSplashScreen/GarageSplashScreen.Script.txt" as GarageSplashScreen
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_PageName "GarageIntroPage"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  GarageSplashScreen::Unload();
+}
+
+Void Load() {
+  Unload();
+
+  GarageSplashScreen::Load();
+}
+
+Void Show() {
+  GarageSplashScreen::Show();
+}
+
+Void Hide() {
+  GarageSplashScreen::Hide();
+}
+
+Void Loop() {
+  // TODO: Handle the exit and next buttons
+}

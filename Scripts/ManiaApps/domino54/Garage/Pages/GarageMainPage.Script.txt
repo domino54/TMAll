@@ -1,16 +1,17 @@
 /**
  * @name GarageMainPage.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2024-12-22
  */
 
-#Const Version      "2024-10-30"
+#Const Version      "2024-12-22"
 #Const ScriptName   "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt"
 
 #Include "TextLib" as TL
 #Include "ColorLib" as CL
 #Include "ManiaApps/domino54/Garage/Components/ModelTabs/ModelTabs.Script.txt" as ModelTabs
 #Include "ManiaApps/domino54/Garage/Components/SkinAuthorName/SkinAuthorName.Script.txt" as SkinAuthorName
+#Include "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/SkinFallbackInfo.Script.txt" as SkinFallbackInfo
 #Include "ManiaApps/domino54/Garage/Components/SkinList/SkinList.Script.txt" as SkinList
 #Include "ManiaApps/domino54/Garage/Components/TitleLogoControls/TitleLogoControls.Script.txt" as TitleLogoControls
 #Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
@@ -19,7 +20,8 @@
 // Constants
 // ---------------------------------- //
 
-#Const C_PageName "GarageMainPage"
+#Const C_PageName     "GarageMainPage"
+#Const C_GarageColor  "736AE6"  // TODO configurable
 
 // ---------------------------------- //
 // Structs
@@ -31,6 +33,18 @@
 // ---------------------------------- //
 // Private functions
 // ---------------------------------- //
+
+Text Private_GetTitleText() {
+  if (GarageAPI::IsVehicles()) {
+    return _("Garage");
+  }
+
+  if (GarageAPI::IsCharacters()) {
+    return _("Wardrobe");
+  }
+
+  return _("Models");
+}
 
 K_MenuTab[] Private_CreateModelTabs() {
   declare K_MenuTab[] Result;
@@ -67,6 +81,13 @@ Void Private_UpdateCurrentSkins(Text _ModelId) {
   SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(GarageAPI::GetSkinId()));
 }
 
+Void Private_TogglePreferCustom(Text _ModelId) {
+  declare PreferCustom = !GarageAPI::GetPreferCustom(_ModelId);
+
+  GarageAPI::SetPreferCustom(_ModelId, PreferCustom);
+  SkinFallbackInfo::SetPreferCustom(PreferCustom);
+}
+
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
@@ -74,6 +95,7 @@ Void Private_UpdateCurrentSkins(Text _ModelId) {
 Void Unload() {
   ModelTabs::Unload();
   SkinAuthorName::Unload();
+  SkinFallbackInfo::Unload();
   SkinList::Unload();
   TitleLogoControls::Unload();
 }
@@ -83,9 +105,10 @@ Void Load() {
 
   TitleLogoControls::Load();
   ModelTabs::Load();
-  ModelTabs::SetHeaderText(_("Garage"));
-  ModelTabs::SetColor(CL::HexToRgb("736AE6")); // TODO configurable
+  ModelTabs::SetHeaderText(Private_GetTitleText());
+  ModelTabs::SetColor(CL::HexToRgb(C_GarageColor));
   SkinAuthorName::Load();
+  SkinFallbackInfo::Load();
   SkinList::Load();
 
   ModelTabs::SetTabsData(Private_CreateModelTabs());
@@ -98,6 +121,7 @@ Void Show() {
   TitleLogoControls::Show();
   ModelTabs::Show();
   SkinAuthorName::Show();
+  SkinFallbackInfo::Show();
   SkinList::Show();
 }
 
@@ -105,6 +129,7 @@ Void Hide() {
   TitleLogoControls::Show();
   ModelTabs::Hide();
   SkinAuthorName::Show();
+  SkinFallbackInfo::Show();
   SkinList::Show();
 }
 
@@ -125,6 +150,9 @@ Void Loop() {
       }
       case SkinList::C_CustomEventType_SetAppliedSkinId: {
         GarageAPI::SetSelectedSkinId(GarageAPI::GetModelId(), Event.CustomEventData[0]);
+      }
+      case SkinFallbackInfo::C_CustomEventType_TogglePreferCustom: {
+        Private_TogglePreferCustom(GarageAPI::GetModelId());
       }
     }
 
