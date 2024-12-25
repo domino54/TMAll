@@ -1,10 +1,10 @@
 /**
  * @name SkinFallbackInfo.Script.txt
  * @author domino54
- * @version 2024-12-22
+ * @version 2024-12-25
  */
 
-#Const Version      "2024-12-22"
+#Const Version      "2024-12-25"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/SkinFallbackInfo.Script.txt"
 
 #Include "TextLib" as TL
@@ -19,16 +19,22 @@
 
 #Const C_CustomEventType_TogglePreferCustom   "skin_fallback_info:toggle_prefer_custom"
 #Const C_CustomEventType_SetPreferCustom      "skin_fallback_info:set_prefer_custom"
+#Const C_CustomEventType_SetIsVisible         "skin_fallback_info:set_is_visible"
 
 // ---------------------------------- //
 // Public functions
 // ---------------------------------- //
 
+Void SetButtonVisibility(Boolean _IsVisible) {
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+
+  LayerCustomEvent(Layer, C_CustomEventType_SetIsVisible, [TL::ToText(_IsVisible)]);
+}
+
 Void SetPreferCustom(Boolean _PreferCustom) {
   declare Layer <=> Layers::Get(C_ManialinkLayerId);
-  declare PreferCustom = TL::ToText(_PreferCustom);
 
-  LayerCustomEvent(Layer, C_CustomEventType_SetPreferCustom, [PreferCustom]);
+  LayerCustomEvent(Layer, C_CustomEventType_SetPreferCustom, [TL::ToText(_PreferCustom)]);
 }
 
 Void Unload() {

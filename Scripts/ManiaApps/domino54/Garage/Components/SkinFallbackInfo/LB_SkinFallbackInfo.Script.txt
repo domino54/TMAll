@@ -1,102 +1,69 @@
 /**
  * @name LB_SkinFallbackInfo.Script.txt
  * @author domino54
- * @version 2024-12-22
+ * @version 2024-12-25
  */
 
-#Const Version      "2024-12-22"
+#Const Version      "2024-12-25"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/LB_SkinFallbackInfo.Script.txt"
 
-#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
 #Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
-
-#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "ManiaApps/domino54/Common/DesignButtons.Script.txt" as DesignButtons
 
 #Const C_LabelTitle         _("Fallback Skin")
 #Const C_LabelDescription   _("This skin will only be used in special circumstances, where the profile skin cannot normally work.\nYou can also opt in to use this skin everywhere instead, which will override your profile selection.")
 #Const C_LabelButton        _("Override Profile Skin")
+#Const C_FramePosition      <-150.0, 51.0>
+#Const C_FrameWidth         68.0
+#Const C_FrameTextMargin    3.0
+#Const C_ButtonHeight       8.0
+#Const C_ButtonSpacingGap   2.0
+#Const C_ForegroundColor    "222222"
+#Const C_BackgroundColor    "FFFFFF"
+#Const C_BackgroundOpacity  0.5
 
 #Const C_CustomEventType_TogglePreferCustom   "skin_fallback_info:toggle_prefer_custom"
 #Const C_CustomEventType_SetPreferCustom      "skin_fallback_info:set_prefer_custom"
-
-// TODO: Make this into a reusable component
-Text CreateButton(Text _Id, Vec2 _Size, Real _Outline, Boolean _Fill, Text _Text, Real _TextSize) {
-  declare SubFont = Font::GetFontName("SubTitle");
-  declare TextColor = "FFFFFF";
-  declare HoverSize = _Size;
-  declare HoverPos = <0.0, 0.0>;
-  declare X = _Size.X;
-  declare Y = _Size.Y;
-
-  if (_Fill) {
-    TextColor = "444444";
-  }
-  else {
-    HoverSize = <X + 2, Y + 2>;
-    HoverPos = <-1.0, 1.0>;
-  }
-
-  declare Controls = """
-    <quad id="Quad_ButtonHover" class="Hover" pos="{{{HoverPos.X}}} {{{HoverPos.Y}}}" size="{{{HoverSize.X}}} {{{HoverSize.Y}}}" bgcolor="FFFFFF44" opacity="0" />
-    <label id="Label_ButtonText" pos="{{{Y + (X - Y - 2) / 2}}} {{{Y / -2 - 0.2}}}" halign="center" valign="center2" size="{{{X - Y - 2}}}" textsize="2.5" textcolor="FFF" textfont="{{{SubFont}}}" textprefix="$t" text="{{{_Text}}}" />
-    <quad id="Quad_{{{_Id}}}" pos="0 0" size="{{{X}}} {{{Y}}}" scriptevents="1" />
-  """;
-
-  // Add outline if specified
-  if (_Outline > 0) {
-    Controls ^= """
-      <quad size="{{{Y}}} {{{Y}}}" image="{{{C_ImgBase}}}EmptyCircle.dds" />
-      <quad pos="0 0" halign="left" valign="top" size="{{{X}}} {{{_Outline}}}" bgcolor="FFF" />
-      <quad pos="0 0" halign="left" valign="top" size="{{{_Outline}}} {{{Y}}}" bgcolor="FFF" />
-      <quad pos="0 {{{-Y}}}" halign="left" valign="bottom" size="{{{X}}} {{{_Outline}}}" bgcolor="FFF" />
-      <quad pos="{{{X}}} 0" halign="right" valign="top" size="{{{_Outline}}} {{{Y}}}" bgcolor="FFF" />
-    """;
-  }
-
-  // Add fill if specified
-  if (_Fill) {
-    Controls ^= """
-      <quad class="Contour" size="{{{Y}}} {{{Y}}}" image="{{{C_ImgBase}}}EmptyContour.dds" opacity="0" />
-      <quad class="Contour" pos="{{{Y}}} 0" size="{{{X - Y}}} {{{Y}}}" bgcolor="FFF" opacity="0" />
-    """;
-  }
-
-  return """
-<frame id="Frame_{{{_Id}}}">
-  {{{Controls}}}
-</frame>
-  """;
-}
+#Const C_CustomEventType_SetIsVisible         "skin_fallback_info:set_is_visible"
 
 Text Build() {
   declare SubFont = Font::GetFontName("SubTitle");
-  declare ButtonSize = <68.0, 8.0>;
+  declare TitleY = C_FrameTextMargin + 1.5;
+  declare LabelWidth = C_FrameWidth - (C_FrameTextMargin * 2);
+  declare ButtonSize = <C_FrameWidth, C_ButtonHeight>;
+  declare HideOffset = -100.0;
 
   return """
 <manialink version="3" name="L_SkinFallbackInfo">
+<frame id="Frame_MoveContainer" pos="{{{C_FramePosition.X}}} {{{C_FramePosition.Y}}}">
+  <frame id="Frame_HintWindow" pos="{{{HideOffset}}}">
+    <label pos="{{{C_FrameTextMargin}}} {{{-TitleY}}}" valign="center2" textsize="2" textcolor="{{{C_ForegroundColor}}}" text="" />
+    <label pos="{{{C_FrameTextMargin + 5}}} {{{-TitleY}}}" halign="left" valign="center2" textfont="{{{SubFont}}}" textsize="1.5" textcolor="{{{C_ForegroundColor}}}" textprefix="$t" text="{{{C_LabelTitle}}}" />
 
-<frame pos="-150 51" scale="1">
-  <frame>
-    <label pos="3.5 -4" halign="center" valign="center2" textsize="2" textcolor="333333" text="" />
-    <label pos="7 -4" halign="left" valign="center2" textfont="{{{SubFont}}}" textsize="1.5" textcolor="262626" textprefix="$t" text="{{{C_LabelTitle}}}" />
+    <label id="Label_Description" pos="{{{C_FrameTextMargin}}} {{{-TitleY - C_FrameTextMargin}}}" halign="left" valign="top" size="{{{LabelWidth}}}" textfont="{{{SubFont}}}" textsize="1" textcolor="{{{C_ForegroundColor}}}" text="{{{C_LabelDescription}}}" autonewline="1" />
 
-    <label id="Label_Description" pos="2 -7.25" halign="left" valign="top" size="{{{ButtonSize.X - 4}}}" textfont="{{{SubFont}}}" textsize="1" textcolor="262626" text="{{{C_LabelDescription}}}" autonewline="1" />
-
-    <quad id="Quad_Background0" size="{{{ButtonSize.X}}} 20" bgcolor="FFF" opacity="0.4" />
-    <quad id="Quad_Background1" size="{{{ButtonSize.X}}} 20" style="Bgs1" substyle="BgDialogBlur" opacity="0" />
+    <quad id="Quad_Background0" size="{{{C_FrameWidth}}} 18" bgcolor="{{{C_BackgroundColor}}}" opacity="{{{C_BackgroundOpacity}}}" />
+    <quad id="Quad_Background1" size="{{{C_FrameWidth}}} 18" style="Bgs1" substyle="BgDialogBlur" opacity="0" />
   </frame>
 
-  <frame id="Frame_ButtonOverrideContainer">
+  <frame id="Frame_ButtonOverrideContainer" pos="{{{HideOffset}}}">
     <label id="Label_IconEnabled" pos="{{{ButtonSize.Y / 2}}} {{{ButtonSize.Y / -2}}}" halign="center" valign="center2" textsize="1.75" textcolor="FFF" text="" />
     <label id="Label_IconDisabled" pos="{{{ButtonSize.Y / 2}}} {{{ButtonSize.Y / -2}}}" halign="center" valign="center2" textsize="1.75" textcolor="FFF" text="" />
 
-    {{{CreateButton("ButtonOverride", ButtonSize, 0.15, True, C_LabelButton, 2.5)}}}
+    {{{DesignButtons::CreateButton("ButtonOverride", ButtonSize, C_LabelButton)}}}
+  </frame>
+
+  <frame id="Frame_BottomDecorLine" pos="{{{HideOffset}}}">
+    <quad pos="0 0" size="{{{C_FrameWidth}}} 0.25" bgcolor="FFF" />
+    <quad pos="{{{C_FrameWidth}}} 0" halign="right" size="15 0.75" bgcolor="FFF" />
   </frame>
 </frame>
 
 <script><!--
 
 {{{MouseExt::InjectDeclares()}}}
+{{{DesignButtons::InjectFunctions()}}}
 
 Void SetButtonHover(CMlFrame _Frame, Boolean _IsHovered) {
   Page.GetClassChildren("Hover", _Frame, True);
@@ -113,41 +80,44 @@ Void SetButtonHover(CMlFrame _Frame, Boolean _IsHovered) {
   }
 }
 
-/*
-declare Label_IconEnabled <=> (Page.GetFirstChild("Label_IconEnabled") as CMlLabel);
-declare Label_IconDisabled <=> (Page.GetFirstChild("Label_IconDisabled") as CMlLabel);
+Void SetVisibility(Boolean _IsVisible) {
+  declare Frame_ClipContainer <=> (Page.GetFirstChild("Frame_ClipContainer") as CMlFrame);
+  declare Frame_MoveContainer <=> (Page.GetFirstChild("Frame_MoveContainer") as CMlFrame);
 
-Label_IconEnabled.Visible = _IsFilled;
-Label_IconDisabled.Visible = !_IsFilled;
-*/
+  declare PosX = {{{HideOffset}}};
+  declare BaseDuration = 500;
+  declare Step = BaseDuration / 10;
+  declare Easing = CAnimManager::EAnimManagerEasing::CubicIn;
 
-// TODO: Extract this into a reusable component
-Void Button_SetFilled(CMlFrame _Frame, Boolean _IsFilled) {
-  declare Label_ButtonOverride <=> (Page.GetFirstChild("Label_ButtonOverride") as CMlLabel);
-  declare Quad_ButtonHover <=> (Page.GetFirstChild("Quad_ButtonHover") as CMlQuad);
-
-  Page.GetClassChildren("Contour", _Frame, True);
-
-  declare Opacity = 0.0;
-  declare TextColor = "FFFFFF";
-
-  if (_IsFilled) {
-    Opacity = 1.0;
-    TextColor = "444444";
-    Quad_ButtonHover.RelativePosition_V3 = <-1.0, 1.0>;
-    Quad_ButtonHover.Size = <{{{ButtonSize.X + 2}}}, {{{ButtonSize.Y + 2}}}>;
-  } else {
-    Quad_ButtonHover.RelativePosition_V3 = <0.0, 0.0>;
-    Quad_ButtonHover.Size = <{{{ButtonSize.X}}}, {{{ButtonSize.Y}}}>;
+  if (_IsVisible) {
+    PosX = 0.0;
+    Easing = CAnimManager::EAnimManagerEasing::CubicOut;
   }
 
-  AnimMgr.Flush(Label_ButtonOverride);
-  AnimMgr.Add(Label_ButtonOverride, "<label textcolor='"^TextColor^"' />", 125, CAnimManager::EAnimManagerEasing::CircOut);
+  foreach (I => Control in Frame_MoveContainer.Controls) {
+    declare PosY = Control.RelativePosition_V3.Y;
+    declare Scale = I * Step;
+    declare StartTime = Now;
+    declare Duration = BaseDuration;
 
-  foreach (Control in Page.GetClassChildren_Result) {
+    if (_IsVisible) {
+      StartTime += Scale;
+      Duration -= Scale;
+    } else {
+      Duration += Scale;
+    }
+
     AnimMgr.Flush(Control);
-    AnimMgr.Add(Control, "<quad opacity='"^Opacity^"' />", 125, CAnimManager::EAnimManagerEasing::CircOut);
+    AnimMgr.Add(Control, "<frame pos='"^PosX^" "^PosY^"' />", StartTime, Duration, Easing);
   }
+}
+
+Void SetIconEnabled(Boolean _IsEnabled) {
+  declare Label_IconEnabled <=> (Page.GetFirstChild("Label_IconEnabled") as CMlLabel);
+  declare Label_IconDisabled <=> (Page.GetFirstChild("Label_IconDisabled") as CMlLabel);
+
+  Label_IconEnabled.Visible = _IsEnabled;
+  Label_IconDisabled.Visible = !_IsEnabled;
 }
 
 main() {
@@ -156,25 +126,59 @@ main() {
   declare Quad_Background1 <=> (Page.GetFirstChild("Quad_Background1") as CMlQuad);
   declare Frame_ButtonOverrideContainer <=> (Page.GetFirstChild("Frame_ButtonOverrideContainer") as CMlFrame);
   declare Frame_ButtonOverride <=> (Page.GetFirstChild("Frame_ButtonOverride") as CMlFrame);
+  declare Frame_BottomDecorLine <=> (Page.GetFirstChild("Frame_BottomDecorLine") as CMlFrame);
 
   declare Height = Label_Description.ComputeHeight(Label_Description.Value);
 
-  Quad_Background0.Size.Y = Height + 7.25 + 2.0;
+  Quad_Background0.Size.Y = -Label_Description.RelativePosition_V3.Y + Height + {{{C_FrameTextMargin}}};
   Quad_Background1.Size.Y = Quad_Background0.Size.Y;
-  Frame_ButtonOverrideContainer.RelativePosition_V3.Y = Quad_Background0.RelativePosition_V3.Y - Quad_Background0.Size.Y - 2.0;
+
+  Frame_ButtonOverrideContainer.RelativePosition_V3.Y = Quad_Background0.RelativePosition_V3.Y - Quad_Background0.Size.Y - {{{C_ButtonSpacingGap}}};
+  Frame_BottomDecorLine.RelativePosition_V3.Y = Frame_ButtonOverrideContainer.RelativePosition_V3.Y - {{{ButtonSize.Y}}} - {{{C_ButtonSpacingGap}}};
+
+  declare IsVisible = False;
+
+  declare PrevVisibility = False;
+
+  SetVisibility(IsVisible);
 
   while (True) {
     foreach (Event in PendingEvents) {
-      if (Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
-      if (Event.CustomEventType != "{{{C_CustomEventType_SetPreferCustom}}}") continue;
-      if (Event.CustomEventData.count < 1) continue;
+      if (Event.Type == CMlScriptEvent::Type::PluginCustomEvent) {
+        switch (Event.CustomEventType) {
+          case "{{{C_CustomEventType_SetIsVisible}}}": {
+            if (Event.CustomEventData.count < 1) continue;
 
-      declare PreferCustom = Event.CustomEventData[0] == "True";
+            IsVisible = Event.CustomEventData[0] == "True";
+          }
 
-      Button_SetFilled(Frame_ButtonOverride, Event.CustomEventData[0] == "True");
+          case "{{{C_CustomEventType_SetPreferCustom}}}": {
+            if (!IsVisible || Event.CustomEventData.count < 1) continue;
+
+            declare PrefersCustom = Event.CustomEventData[0] == "True";
+
+            Button_SetFilled(Frame_ButtonOverride, PrefersCustom);
+            SetIconEnabled(PrefersCustom);
+          }
+        }
+      }
+
+      else if (Event.Type == CMlScriptEvent::Type::MouseOut) {
+        if (Event.ControlId != "Quad_ButtonOverride") continue;
+
+        SetButtonHover(Event.Control.Parent, False);
+      }
     }
 
-    if (!PageIsVisible) {
+    declare IsActuallyVisible = PageIsVisible && IsVisible;
+
+    if (PrevVisibility != IsActuallyVisible) {
+      SetVisibility(IsActuallyVisible);
+
+      PrevVisibility = IsActuallyVisible;
+    }
+
+    if (!IsActuallyVisible) {
       yield;
       continue;
     }
@@ -192,12 +196,6 @@ main() {
         if (Event.Control.HasClass("Focus")) {
           Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
         }
-      }
-
-      else if (Event.Type == CMlScriptEvent::Type::MouseOut) {
-        if (Event.ControlId != "Quad_ButtonOverride") continue;
-
-        SetButtonHover(Event.Control.Parent, False);
       }
 
       else if (Event.Type == CMlScriptEvent::Type::MouseOver) {

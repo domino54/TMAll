@@ -1,10 +1,10 @@
 /**
  * @name GarageAPI.Script.txt
  * @author domino54
- * @version 2024-12-22
+ * @version 2024-12-25
  */
 
-#Const Version      "2024-12-22"
+#Const Version      "2024-12-25"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt"
 
 #Include "TextLib" as TL
@@ -148,6 +148,10 @@ Text[] GetSelectableSkinIds(Text _ModelId) {
   }
 
   return Result;
+}
+
+Boolean GetUsesArchetype(Text _ModelId) {
+  return PMData::GetModelById(_ModelId).LoadAs == PMData::C_LibPlayerModels_LoadAs_ItemAndArchetype;
 }
 
 Text GetSkinId() {

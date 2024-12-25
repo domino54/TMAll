@@ -1,10 +1,10 @@
 /**
  * @name GarageMainPage.Script.txt
  * @author domino54
- * @version 2024-12-22
+ * @version 2024-12-25
  */
 
-#Const Version      "2024-12-22"
+#Const Version      "2024-12-25"
 #Const ScriptName   "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt"
 
 #Include "TextLib" as TL
@@ -79,6 +79,8 @@ Void Private_UpdateCurrentSkins(Text _ModelId) {
   SkinList::SetPreviewSkinId(GarageAPI::GetSkinId());
   SkinList::SetAppliedSkinId(GarageAPI::GetSelectedSkinId(_ModelId));
   SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(GarageAPI::GetSkinId()));
+  SkinFallbackInfo::SetButtonVisibility(GarageAPI::GetUsesArchetype(_ModelId));
+  SkinFallbackInfo::SetPreferCustom(GarageAPI::GetPreferCustom(_ModelId));
 }
 
 Void Private_TogglePreferCustom(Text _ModelId) {

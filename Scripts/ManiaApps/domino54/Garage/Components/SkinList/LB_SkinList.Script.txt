@@ -1,10 +1,10 @@
 /**
  * @name LB_SkinList.Script.txt
  * @author domino54
- * @version 2024-12-22
+ * @version 2024-12-25
  */
 
-#Const Version      "2024-12-22"
+#Const Version      "2024-12-25"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinList/LB_SkinList.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
@@ -72,7 +72,7 @@ Text Build() {
     </frame>
   </frame>
 
-  <quad id="Quad_SkinApplied" pos="0 0" halign="left" valign="top" size="{{{SizeY / 5}}} {{{SizeY / 5}}}" scale="1" image="{{{C_ImgBase}}}Garage/GarageSelected.webp" hidden="1" />
+  <quad id="Quad_SkinApplied" pos="0 0" halign="left" valign="top" size="{{{SizeY / 5}}} {{{SizeY / 5}}}" scale="1" image="{{{C_ImgBase}}}Garage/GarageSelected.webp" autoscale="0" hidden="1" />
   <quad id="Quad_SkinPreviewed" pos="{{{SizeX / 2}}} {{{SizeY / -2}}}" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" scale="1" image="{{{C_ImgBase}}}Garage/GarageCardSelected.webp" hidden="1" />
   <quad class="Hover" pos="{{{SizeX / 2}}} {{{SizeY / -2}}}" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" scale="1.01" image="{{{C_ImgBase}}}Garage/GarageCardOver.webp" opacity="0" />
 
