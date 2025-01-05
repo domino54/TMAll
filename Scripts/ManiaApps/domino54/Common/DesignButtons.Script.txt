@@ -1,0 +1,161 @@
+/**
+ * @name DesignButtons.Script.txt
+ * @author domino54
+ * @version 2024-12-25
+ */
+
+#Const Version      "2024-12-25"
+#Const ScriptName   "ManiaApps/domino54/Common/DesignButtons.Script.txt"
+
+#Include "MathLib" as ML
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
+
+#Const C_ButtonFillColor      "FFFFFF"
+#Const C_ButtonTextColor      "444444"
+#Const C_DefaultAnimDuration  250
+#Const C_DefaultOutlineWidth  0.333333
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text Private_CreateButton(Text _Id, Vec2 _Size, Real _Outline, Boolean _Filled, Text _Text, Real _TextSize) {
+  declare SubFont = Font::GetFontName("SubTitle");
+  declare TextColor = C_ButtonFillColor;
+  declare TextSize = _TextSize;
+  declare HoverSize = _Size;
+  declare HoverPos = <0.0, 0.0>;
+  declare X = _Size.X;
+  declare Y = _Size.Y;
+
+  if (TextSize <= 0) {
+    TextSize = ML::NearestInteger(Y * 0.75 - 1) / 2.0;
+  }
+
+  if (_Filled) {
+    TextColor = C_ButtonTextColor;
+  }
+  else {
+    HoverSize = _Size + <2.0, 2.0>;
+    HoverPos = <-1.0, 1.0>;
+  }
+
+  declare Controls = """
+    <quad id="Quad_ButtonHover" class="Hover" pos="{{{HoverPos.X}}} {{{HoverPos.Y}}}" size="{{{HoverSize.X}}} {{{HoverSize.Y}}}" bgcolor="{{{C_ButtonFillColor}}}44" opacity="0" />
+    <label id="Label_ButtonText" pos="{{{Y + (X - Y - 2) / 2}}} {{{Y / -2 - 0.2}}}" halign="center" valign="center2" size="{{{X - Y - 2}}}" textsize="2.5" textcolor="{{{TextColor}}}" textfont="{{{SubFont}}}" textprefix="$t" text="{{{_Text}}}" />
+    <quad id="Quad_{{{_Id}}}" class="Focus" pos="0 0" size="{{{X}}} {{{Y}}}" scriptevents="1" />
+  """;
+
+  // Add outline if specified
+  if (_Outline > 0) {
+    Controls ^= """
+      <quad size="{{{Y}}} {{{Y}}}" image="{{{C_ImgBase}}}EmptyCircle.dds" />
+      <quad pos="0 0" rot="90" halign="left" valign="bottom" size="{{{_Outline}}} {{{X}}}" bgcolor="FFF" />
+      <quad pos="0 0" halign="left" valign="top" size="{{{_Outline}}} {{{Y}}}" bgcolor="FFF" autoscale="0" />
+      <quad pos="0 {{{-Y}}}" rot="-90" halign="left" valign="top" size="{{{_Outline}}} {{{X}}}" bgcolor="FFF" />
+      <quad pos="{{{X}}} 0" rot="180" halign="left" valign="bottom" size="{{{_Outline}}} {{{Y}}}" bgcolor="FFF" autoscale="0" />
+    """;
+  }
+
+  // Add fill if specified
+  if (_Filled) {
+    Controls ^= """
+      <quad class="Contour" size="{{{Y}}} {{{Y}}}" image="{{{C_ImgBase}}}EmptyContour.dds" opacity="0" />
+      <quad class="Contour" pos="{{{Y}}} 0" size="{{{X - Y}}} {{{Y}}}" bgcolor="{{{C_ButtonFillColor}}}" opacity="0" />
+    """;
+  }
+
+  return """
+<frame id="Frame_{{{_Id}}}">
+  {{{Controls}}}
+</frame>
+  """;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text CreateButton(Text _Id, Vec2 _Size, Real _Outline, Text _Text, Real _TextSize) {
+  return Private_CreateButton(_Id, _Size, _Outline, True, _Text, _TextSize);
+}
+
+Text CreateButton(Text _Id, Vec2 _Size, Real _Outline, Text _Text) {
+  return CreateButton(_Id, _Size, _Outline, _Text, 0.0);
+}
+
+Text CreateButton(Text _Id, Vec2 _Size, Text _Text, Real _TextSize) {
+  return CreateButton(_Id, _Size, C_DefaultOutlineWidth, _Text, _TextSize);
+}
+
+Text CreateButton(Text _Id, Vec2 _Size, Text _Text) {
+  return CreateButton(_Id, _Size, _Text, 0.0);
+}
+
+Text CreateOutlineButton(Text _Id, Vec2 _Size, Real _Outline, Text _Text, Real _TextSize) {
+  return Private_CreateButton(_Id, _Size, _Outline, False, _Text, _TextSize);
+}
+
+Text CreateOutlineButton(Text _Id, Vec2 _Size, Real _Outline, Text _Text) {
+  return CreateOutlineButton(_Id, _Size, _Outline, _Text, 0.0);
+}
+
+Text CreateOutlineButton(Text _Id, Vec2 _Size, Text _Text, Real _TextSize) {
+  return CreateOutlineButton(_Id, _Size, C_DefaultOutlineWidth, _Text, _TextSize);
+}
+
+Text CreateOutlineButton(Text _Id, Vec2 _Size, Text _Text) {
+  return CreateOutlineButton(_Id, _Size, _Text, 0.0);
+}
+
+Text CreateFilledButton(Text _Id, Vec2 _Size, Text _Text, Real _TextSize) {
+  return Private_CreateButton(_Id, _Size, 0.0, True, _Text, _TextSize);
+}
+
+Text CreateFilledButton(Text _Id, Vec2 _Size, Text _Text) {
+  return CreateFilledButton(_Id, _Size, _Text, 0.0);
+}
+
+Text InjectFunctions() {
+  return """
+Void Button_SetFilled(CMlFrame _Frame, Boolean _IsFilled, Integer _Duration) {
+  declare Label_ButtonText <=> (_Frame.GetFirstChild("Label_ButtonText") as CMlLabel);
+  declare Quad_ButtonHover <=> (_Frame.GetFirstChild("Quad_ButtonHover") as CMlQuad);
+  declare Quad_Focus <=> (_Frame.Controls[2] as CMlQuad);
+
+  Page.GetClassChildren("Contour", _Frame, True);
+
+  declare Opacity = 0.0;
+  declare TextColor = "{{{C_ButtonFillColor}}}";
+
+  if (_IsFilled) {
+    Opacity = 1.0;
+    TextColor = "{{{C_ButtonTextColor}}}";
+    Quad_ButtonHover.RelativePosition_V3 = <-1.0, 1.0>;
+    Quad_ButtonHover.Size = Quad_Focus.Size + <2.0, 2.0>;
+  }
+  else {
+    Quad_ButtonHover.RelativePosition_V3 = <0.0, 0.0>;
+    Quad_ButtonHover.Size = Quad_Focus.Size;
+  }
+
+  AnimMgr.Flush(Label_ButtonText);
+  AnimMgr.Add(Label_ButtonText, "<label textcolor='"^TextColor^"' />", _Duration, CAnimManager::EAnimManagerEasing::CircOut);
+
+  foreach (Control in Page.GetClassChildren_Result) {
+    AnimMgr.Flush(Control);
+    AnimMgr.Add(Control, "<quad opacity='"^Opacity^"' />", _Duration, CAnimManager::EAnimManagerEasing::CircOut);
+  }
+}
+
+Void Button_SetFilled(CMlFrame _Frame, Boolean _IsFilled) {
+  Button_SetFilled(_Frame, _IsFilled, {{{C_DefaultAnimDuration}}});
+}
+  """;
+}

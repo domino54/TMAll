@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Structs.Script.txt
  * @author domino54
- * @version 2024-11-05
+ * @version 2025-01-04
  */
 
-#Const Version      "2024-11-05"
+#Const Version      "2025-01-04"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Structs.Script.txt"
 
 // ---------------------------------- //
@@ -32,8 +32,15 @@
   Text Author;
   Integer Rarity;
   Integer SortIndex;
+  Text[] Groups;
   Text[Text] Assets;
   Boolean IsCustom;
+}
+
+#Struct K_SkinGroup {
+  Text Id;
+  Text Name;
+  Text[Text] Assets;
 }
 
 #Struct K_GameplayInfo {
@@ -57,6 +64,11 @@
   Text Name;
   Text Archetype;
   Text ItemPath;
+}
+
+#Struct K_SkinResult {
+  Text SkinId;
+  Text SkinGroupId;
 }
 
 // ---------------------------------- //
@@ -90,6 +102,12 @@ Text Manialink() {
   Boolean IsCustom;
 }
 
+#Struct K_SkinGroup {
+  Text Id;
+  Text Name;
+  Text[Text] Assets;
+}
+
 #Struct K_GameplayInfo {
   Real AccelCoef;
   Real ControlCoef;
@@ -111,6 +129,11 @@ Text Manialink() {
   Text Name;
   Text Archetype;
   Text ItemPath;
+}
+
+#Struct K_SkinResult {
+  Text SkinId;
+  Text SkinGroupId;
 }
   """;
 }

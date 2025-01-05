@@ -1,10 +1,10 @@
 /**
  * @name LB_SkinList.Script.txt
  * @author domino54
- * @version 2024-12-22
+ * @version 2025-01-04
  */
 
-#Const Version      "2024-12-22"
+#Const Version      "2025-01-04"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinList/LB_SkinList.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
@@ -72,7 +72,7 @@ Text Build() {
     </frame>
   </frame>
 
-  <quad id="Quad_SkinApplied" pos="0 0" halign="left" valign="top" size="{{{SizeY / 5}}} {{{SizeY / 5}}}" scale="1" image="{{{C_ImgBase}}}Garage/GarageSelected.webp" hidden="1" />
+  <quad id="Quad_SkinApplied" pos="0 0" halign="left" valign="top" size="{{{SizeY / 5}}} {{{SizeY / 5}}}" scale="1" image="{{{C_ImgBase}}}Garage/GarageSelected.webp" autoscale="0" hidden="1" />
   <quad id="Quad_SkinPreviewed" pos="{{{SizeX / 2}}} {{{SizeY / -2}}}" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" scale="1" image="{{{C_ImgBase}}}Garage/GarageCardSelected.webp" hidden="1" />
   <quad class="Hover" pos="{{{SizeX / 2}}} {{{SizeY / -2}}}" halign="center" valign="center" size="{{{SizeX}}} {{{SizeY}}}" scale="1.01" image="{{{C_ImgBase}}}Garage/GarageCardOver.webp" opacity="0" />
 
@@ -96,11 +96,12 @@ Text Build() {
       <!-- scroll handle must be inside the scrolling container frame to avoid the handle preventing the scrolling -->
       <frame id="Frame_ScrollExempt">
         <frame pos="{{{PaddingX}}} {{{PaddingY}}}" z-index="1">
-          <quad id="Quad_ScrollBarTarget" class="Focus" pos="0 0" halign="left" valign="center" size="0 6" bgcolor="0000" data-nodrag="1" scriptevents="1" />
+          <quad id="Quad_ScrollBarTarget" class="Focus" pos="0 0" halign="left" valign="center" size="0 6" data-nodrag="1" scriptevents="1" />
         </frame>
-      </frame>
 
-      <quad id="Quad_ScrollTarget" halign="left" valign="bottom" size="0 40" scriptevents="1" />
+        <!-- A quad can be at most 1000 units in size, so this just moves with scroll -->
+        <quad id="Quad_ScrollTarget" halign="left" valign="bottom" pos="{{{-GridY}}}" size="{{{C_ScreenFrameWidth + GridY * 2}}} 40" scriptevents="1" />
+      </frame>
     </frame>
   </frame>
 
@@ -260,10 +261,8 @@ Void ScrollIntoIndex(Integer _Index, Boolean _Instant) {
 
   Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
 
-  declare Real VirtualScrollMaxY for Frame_ScrollContainer;
-
   declare Offset = {{{ButtonWidth}}} * (0.5 + _Index - {{{C_NbButtonsScreen / 2.0}}});
-  declare Clamped = ML::Clamp(Offset, Frame_ScrollContainer.ScrollMin.Y, VirtualScrollMaxY);
+  declare Clamped = ML::Clamp(Offset, Frame_ScrollContainer.ScrollMin.Y, Frame_ScrollContainer.ScrollMax.Y);
 
   AnimMgr.Flush(Quad_AnimDummy);
 
@@ -287,7 +286,6 @@ main() {
   declare Frame_AnimSlideIn <=> (Page.GetFirstChild("Frame_AnimSlideIn") as CMlFrame);
   declare Frame_ScrollContainer <=> (Page.GetFirstChild("Frame_ScrollContainer") as CMlFrame);
   declare Frame_ScrollExempt <=> (Page.GetFirstChild("Frame_ScrollExempt") as CMlFrame);
-  declare Quad_ScrollTarget <=> (Page.GetFirstChild("Quad_ScrollTarget") as CMlQuad);
 
   declare Quad_AnimDummy <=> (Page.GetFirstChild("Quad_AnimDummy") as CMlQuad);
   declare Frame_ScrollBar <=> (Page.GetFirstChild("Frame_ScrollBar") as CMlFrame);
@@ -301,13 +299,6 @@ main() {
   foreach (_Control in Frame_SkinButtonInstances.Controls) {
     Frame_SkinButtons.add((_Control as CMlFrame));
   }
-
-  /**
-   * This is a fake maximum scroll value, used instead of the native one.
-   * This is because ScrollMax does not update in the same frame, and changing the car
-   * would in some cases cause the frames to update twice. This is used as the limiter instead.
-   */
-  declare Real VirtualScrollMaxY for Frame_ScrollContainer;
 
   declare K_SkinOption[] SkinsData for Page;
 
@@ -326,6 +317,12 @@ main() {
 
   declare PrevPageIsVisible = !PageIsVisible;
   declare Real PageDraggingOffset;
+
+  declare MaxWidth = 0.0;
+  declare SameFrameExtraYield = False;
+  declare NextFrameUpdateSkins = False;
+  declare NextFrameScrollIntoPreview = False;
+  declare NextFrameUpdateApplied = False;
 
   while (True) {
     // Can't yield here or the events will be missed.
@@ -348,51 +345,31 @@ main() {
 
       switch (Event.CustomEventType) {
         case "{{{C_CustomEventType_UpdateSkins}}}": {
-          PrevScrollOffsetY = -1.0;
-          PrevStartIndex = -1000;
+          MaxWidth = ML::Max(0.0, {{{ButtonWidth}}} * SkinsData.count - {{{C_ButtonGap}}});
 
-          VirtualScroll_ResetControls();
+          declare PrevScrollMaxY = Frame_ScrollContainer.ScrollMax.Y;
+          declare NewScrollMaxY = ML::Max(0.0, MaxWidth - {{{C_ButtonsTotalWidth}}});
 
-          AllSkinIds.clear();
+          Frame_ScrollContainer.ScrollMax.Y = NewScrollMaxY;
 
-          foreach (_SkinData in SkinsData) {
-            AllSkinIds.add(_SkinData.Id);
+          if (PageIsVisible && PrevScrollMaxY < NewScrollMaxY) {
+            // Scroll max does not update in the same frame.
+            // This means if the new scroll max is bigger, all updates should defer to one frame later.
+            // Without this, page cannot auto scroll to the end of the updated, bigger list.
+            SameFrameExtraYield = True;
           }
 
-          if (!AllSkinIds.exists(PreviewSkinId)) {
-            PreviewSkinId = "";
-          }
-
-          if (PreviewSkinId == "" && AllSkinIds.count > 0) {
-            PreviewSkinId = AllSkinIds[0];
-          }
-
-          declare MaxWidth = ML::Max(0.0, {{{ButtonWidth}}} * SkinsData.count - {{{C_ButtonGap}}});
-
-          VirtualScrollMaxY = ML::Max(0.0, MaxWidth - {{{C_ButtonsTotalWidth}}});
-          Quad_ScrollTarget.Size.X = Frame_ScrollContainer.Size.Y + VirtualScrollMaxY;
-          Frame_SkinButtonInstances.RelativePosition_V3.X = ML::Max(0.0, {{{C_ButtonsTotalWidth}}} - MaxWidth) / 2;
-
-          ScrollIntoIndex(AllSkinIds.keyof(PreviewSkinId), True);
+          NextFrameUpdateSkins = True;
         }
 
         case "{{{C_CustomEventType_SetPreviewSkinId}}}": {
-          declare NewPreviewSkinId = Event.CustomEventData[0];
-
-          if (AllSkinIds.exists(NewPreviewSkinId)) {
-            PreviewSkinId = NewPreviewSkinId;
-            ScrollIntoIndex(AllSkinIds.keyof(PreviewSkinId), True);
-          }
+          PreviewSkinId = Event.CustomEventData[0];
+          NextFrameScrollIntoPreview = True;
         }
 
         case "{{{C_CustomEventType_SetAppliedSkinId}}}": {
-          declare NewAppliedSkinId = Event.CustomEventData[0];
-
-          if (AllSkinIds.exists(NewAppliedSkinId)) {
-            AppliedSkinId = NewAppliedSkinId;
-
-            SetAppliedSkinIndex(AllSkinIds.keyof(AppliedSkinId));
-          }
+          AppliedSkinId = Event.CustomEventData[0];
+          NextFrameUpdateApplied = True;
         }
       }
     }
@@ -400,6 +377,54 @@ main() {
     if (!PageIsVisible) {
       yield;
       continue;
+    }
+
+    if (SameFrameExtraYield) {
+      SameFrameExtraYield = False;
+      yield;
+    }
+
+    if (NextFrameUpdateSkins) {
+      NextFrameUpdateSkins = False;
+
+      PrevScrollOffsetY = -1.0;
+      PrevStartIndex = -1000;
+
+      VirtualScroll_ResetControls();
+
+      AllSkinIds.clear();
+
+      foreach (_SkinData in SkinsData) {
+        AllSkinIds.add(_SkinData.Id);
+      }
+
+      if (!AllSkinIds.exists(PreviewSkinId)) {
+        PreviewSkinId = "";
+      }
+
+      if (PreviewSkinId == "" && AllSkinIds.count > 0) {
+        PreviewSkinId = AllSkinIds[0];
+      }
+
+      Frame_SkinButtonInstances.RelativePosition_V3.X = ML::Max(0.0, {{{C_ButtonsTotalWidth}}} - MaxWidth) / 2;
+
+      NextFrameScrollIntoPreview = True;
+    }
+
+    if (NextFrameScrollIntoPreview) {
+      NextFrameScrollIntoPreview = False;
+
+      if (AllSkinIds.exists(PreviewSkinId)) {
+        ScrollIntoIndex(AllSkinIds.keyof(PreviewSkinId), True);
+      }
+    }
+
+    if (NextFrameUpdateApplied) {
+      NextFrameUpdateApplied = False;
+
+      if (AllSkinIds.exists(AppliedSkinId)) {
+        SetAppliedSkinIndex(AllSkinIds.keyof(AppliedSkinId));
+      }
     }
 
     {{{MouseExt::InjectEvents(MouseExt::K_Options {
@@ -577,8 +602,8 @@ main() {
     if (PrevAnimPosY != Quad_AnimDummy.RelativePosition_V3.Y) {
       PrevAnimPosY = Quad_AnimDummy.RelativePosition_V3.Y;
 
-      if (PrevAnimPosY > VirtualScrollMaxY) {
-        PrevAnimPosY = VirtualScrollMaxY;
+      if (PrevAnimPosY > Frame_ScrollContainer.ScrollMax.Y) {
+        PrevAnimPosY = Frame_ScrollContainer.ScrollMax.Y;
 
         AnimMgr.Flush(Quad_AnimDummy);
       }
@@ -593,16 +618,9 @@ main() {
     if (ScrollIsDragging) {
       declare ScrollBarTrackLength = Quad_ScrollBarTrack.Size.X - Quad_ScrollBarHandle.Size.X;
       declare MouseDiff = Input.MousePos.X - ScrollMouseOriginX;
-      declare AddedOffset = VirtualScrollMaxY * (MouseDiff / ScrollBarTrackLength);
+      declare AddedOffset = Frame_ScrollContainer.ScrollMax.Y * (MouseDiff / ScrollBarTrackLength);
 
       Frame_ScrollContainer.ScrollOffset.Y = ScrollOffsetOriginX + AddedOffset;
-    }
-
-    // Clamp to fake scroll max
-    if (Frame_ScrollContainer.ScrollOffset.Y > VirtualScrollMaxY + 0.1) {
-      Frame_ScrollContainer.ScrollOffset.Y = VirtualScrollMaxY;
-
-      Frame_ScrollContainer.ScrollBumpBottom();
     }
 
     // Horizontal scrolling
@@ -610,12 +628,12 @@ main() {
       PrevScrollOffsetY = Frame_ScrollContainer.ScrollAnimOffset.Y;
 
       Frame_ScrollExempt.RelativePosition_V3.X = PrevScrollOffsetY;
-      Frame_ScrollBar.Visible = VirtualScrollMaxY > 1; // floating point issues
+      Frame_ScrollBar.Visible = Frame_ScrollContainer.ScrollMax.Y > 1; // floating point issues
       Quad_ScrollBarTarget.Visible = Frame_ScrollBar.Visible;
 
       if (Frame_ScrollBar.Visible) {
-        Quad_ScrollBarHandle.Size.X = (Quad_ScrollBarTrack.Size.X * Frame_ScrollContainer.Size.Y) / (Frame_ScrollContainer.Size.Y + VirtualScrollMaxY);
-        Quad_ScrollBarHandle.RelativePosition_V3.X = (Quad_ScrollBarTrack.Size.X - Quad_ScrollBarHandle.Size.X) * (PrevScrollOffsetY / VirtualScrollMaxY);
+        Quad_ScrollBarHandle.Size.X = (Quad_ScrollBarTrack.Size.X * Frame_ScrollContainer.Size.Y) / (Frame_ScrollContainer.Size.Y + Frame_ScrollContainer.ScrollMax.Y);
+        Quad_ScrollBarHandle.RelativePosition_V3.X = (Quad_ScrollBarTrack.Size.X - Quad_ScrollBarHandle.Size.X) * (PrevScrollOffsetY / Frame_ScrollContainer.ScrollMax.Y);
         Quad_ScrollBarTarget.Size.X = Quad_ScrollBarHandle.Size.X;
         Quad_ScrollBarTarget.RelativePosition_V3.X = Quad_ScrollBarHandle.RelativePosition_V3.X;
       }

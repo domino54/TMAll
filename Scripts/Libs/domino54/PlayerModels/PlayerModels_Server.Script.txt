@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2024-12-01
+ * @version 2025-01-04
  */
 
-#Const Version      "2024-12-01"
+#Const Version      "2025-01-04"
 #Const ScriptName   "Libs/domino54/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
@@ -121,7 +121,7 @@ Text Private_GetItemPath(Text _ItemPath) {
 /**
  * Pick a random skin for the player and remember it until the title is unloaded.
  */
-Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId) {
+Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId, Text _SkinGroupId) {
   declare Text[Text][Text] LibPlayerModels_RandomizedSkins for LoadedTitle;
 
   // Login not initialized in the store yet.
@@ -130,12 +130,13 @@ Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId) {
   }
 
   // There's already a random skin assigned to the model id.
+  // TODO: Store randomized skins per group
   if (LibPlayerModels_RandomizedSkins[_Login].existskey(_ModelId)) {
     return LibPlayerModels_RandomizedSkins[_Login][_ModelId];
   }
 
   // Pick a random skin and keep it on the server side.
-  declare SkinId = PMData::GetRandomSkinIdByModelId(_ModelId, False);
+  declare SkinId = PMData::GetRandomSkinIdByModelId(_ModelId, _SkinGroupId);
 
   if (SkinId != "") {
     LibPlayerModels_RandomizedSkins[_Login][_ModelId] = SkinId;
@@ -147,8 +148,9 @@ Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId) {
 /**
  * Get the player skin preference or a randomized skin.
  */
-Text Private_GetPlayerSkinId(CUser _User, Text _ModelId) {
+Text Private_GetPlayerSkinId(CUser _User, Text _ModelId, Text _SkinGroupId) {
   declare BaseModelId = PMData::GetBaseModelId(_ModelId);
+  // TODO: Read player's preference for the skin group
   declare PlayerPreferenceId = CustomSkins::GetPlayerSkinId(_User, BaseModelId);
 
   // Return the preference if set.
@@ -156,7 +158,7 @@ Text Private_GetPlayerSkinId(CUser _User, Text _ModelId) {
     return PlayerPreferenceId;
   }
 
-  return Private_GetPlayerRandomizedSkinId(_User.Login, BaseModelId);
+  return Private_GetPlayerRandomizedSkinId(_User.Login, BaseModelId, _SkinGroupId);
 }
 
 /**
@@ -168,7 +170,7 @@ Text[][Text] Private_GetLocalPlayerSkinIds() {
   // Users array exists in both game modes and maptypes.
   foreach (User in Users) {
     foreach (BaseModelId => __ in PMData::GetAllModels()) {
-      declare PlayerPreferenceId = Private_GetPlayerSkinId(User, BaseModelId);
+      declare PlayerPreferenceId = Private_GetPlayerSkinId(User, BaseModelId, "");
       if (PlayerPreferenceId == "") continue;
 
       if (Result.existskey(PlayerPreferenceId)) {
@@ -266,17 +268,17 @@ Void Private_LoadModelItems() {
 
     declare AsItemId = Private_GetLookupId(ModelId);
 
-    if (Model.LoadAs == PMData::C_LibPlayerModels_LoadAs_Archetype) {
+    if (Model.LoadAs == PMData::C_LoadAs_Archetype) {
       BaseModelItemPath[AsItemId] = Model.Archetype;
     } else {
       BaseModelItemPath[AsItemId] = Model.ItemPath;
     }
 
-    if (Model.LoadAs == PMData::C_LibPlayerModels_LoadAs_ItemAndArchetype || Model.LoadAs == PMData::C_LibPlayerModels_LoadAs_Item) {
+    if (Model.LoadAs == PMData::C_LoadAs_ItemAndArchetype || Model.LoadAs == PMData::C_LoadAs_Item) {
       ItemsToLoad[AsItemId] = [Private_GetItemPath(Model.ItemPath)];
     }
 
-    if (Model.LoadAs == PMData::C_LibPlayerModels_LoadAs_ItemAndArchetype || Model.LoadAs == PMData::C_LibPlayerModels_LoadAs_Archetype) {
+    if (Model.LoadAs == PMData::C_LoadAs_ItemAndArchetype || Model.LoadAs == PMData::C_LoadAs_Archetype) {
       declare AsArchetypeId = Private_GetLookupId(ModelId, True);
 
       ItemsToLoad[AsArchetypeId] = [Private_GetArchetypePath(Model.Archetype)];
@@ -305,11 +307,11 @@ Void Private_LoadModelItems() {
   // Load skins for base models.
   foreach (BaseModelId => Skins in SkinsByBaseModelId) {
     // Can't skip the skins in the loop above, because overlays may be allowed.
-    if (!Private_IsModelAllowlisted(BaseModelId) && BaseModelId != PMData::C_LibPlayerModels_CarCommonWildcard) continue;
+    if (!Private_IsModelAllowlisted(BaseModelId) && BaseModelId != PMData::C_CarCommonWildcard) continue;
 
     foreach (SkinId => SkinPath in Skins) {
       // CarCommon wildcard: Load the skin for every base player model available.
-      if (BaseModelId == PMData::C_LibPlayerModels_CarCommonWildcard) {
+      if (BaseModelId == PMData::C_CarCommonWildcard) {
         foreach (ModelId => __ in BaseModelItemPath) {
           if (Private_IsSkinAllowlisted(SkinId, BaseModelId)) continue;
 
@@ -347,8 +349,8 @@ Void Private_LoadModelItems() {
     }
 
     // If there are any CarCommon skins, apply them to the overlay.
-    if (SkinsByBaseModelId.existskey(PMData::C_LibPlayerModels_CarCommonWildcard)) {
-      foreach (SkinId => SkinPath in SkinsByBaseModelId[PMData::C_LibPlayerModels_CarCommonWildcard]) {
+    if (SkinsByBaseModelId.existskey(PMData::C_CarCommonWildcard)) {
+      foreach (SkinId => SkinPath in SkinsByBaseModelId[PMData::C_CarCommonWildcard]) {
         if (Private_IsSkinAllowlisted(SkinId, ModelOverlay.Extends)) continue;
 
         declare LookupId = Private_GetLookupId(ModelOverlayId, SkinId);
@@ -368,7 +370,7 @@ Boolean Private_CurrentMapRequiresUnlock() {
   return C_EnvironmentRequiresUnlock.exists(G_CurrentMapEnvironmentName);
 }
 
-Ident Private_GetModelLookupId(Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
+Ident Private_GetModelIdent(Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
   // If not specified to use custom items, try to match an archetype to preserve the regular skins.
   if (!_PreferCustom) {
     declare Archetype = Private_GetLookupId(_ModelId, True);
@@ -398,7 +400,7 @@ Ident Private_GetModelLookupId(Text _ModelId, Text _SkinId, Boolean _PreferCusto
   return NullId;
 }
 
-Void Private_AssignModel(CPlayer _Player, Ident _ItemId) {
+Void Private_AssignModelIdent(CPlayer _Player, Ident _ItemId) {
   switchtype (_Player) {
     case CSmPlayer: {
       (_Player as CSmPlayer).ForceModelId = _ItemId;
@@ -412,10 +414,18 @@ Void Private_AssignModel(CPlayer _Player, Ident _ItemId) {
   }
 }
 
-Ident Private_GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Text _SkinId, Boolean _PreferCustom) {
-  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+Void Private_AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
+  declare ModelIdent = Private_GetModelIdent(_ModelId, _SkinId, _PreferCustom);
 
-  return Private_GetModelLookupId(ModelId, _SkinId, _PreferCustom);
+  declare netwrite Text Net_LibPlayerModels_ModelId for _Player;
+  declare netwrite Text Net_LibPlayerModels_SkinId for _Player;
+  declare netwrite Boolean Net_LibPlayerModels_PreferCustom for _Player;
+
+  Net_LibPlayerModels_ModelId = _ModelId;
+  Net_LibPlayerModels_SkinId = _SkinId;
+  Net_LibPlayerModels_PreferCustom = _PreferCustom;
+
+  Private_AssignModelIdent(_Player, ModelIdent);
 }
 
 // ---------------------------------- //
@@ -455,12 +465,32 @@ Text GetMapPlayerModelId() {
 }
 
 /**
+ * Get the player skin preference or a randomized skin (of a specified group).
+ */
+Text GetPlayerSkinId(CUser _User, Text _ResolvableModelId, Text _SkinGroupId) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+
+  return Private_GetPlayerSkinId(_User, ModelId, _SkinGroupId);
+}
+
+/**
  * Get the player skin preference or a randomized skin.
  */
 Text GetPlayerSkinId(CUser _User, Text _ResolvableModelId) {
-  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+  return GetPlayerSkinId(_User, _ResolvableModelId, PMData::C_DefaultSkinGroupId);
+}
 
-  return Private_GetPlayerSkinId(_User, ModelId);
+/**
+ * Resolve player skin preference or a randomized skin, directly or via a group
+ */
+Text ResolvePlayerSkinId(CUser _User, Text _ResolvableModelId, Text _ResolvableSkinId) {
+  declare Result = PMData::ResolveSkinId(_ResolvableSkinId);
+
+  if (Result.SkinId != "") {
+    return Result.SkinId;
+  }
+
+  return GetPlayerSkinId(_User, _ResolvableModelId, Result.SkinGroupId);
 }
 
 /**
@@ -487,32 +517,42 @@ Boolean GetPlayerPreferCustom(CUser _User, Text _ResolvableModelId) {
 }
 
 /**
- * Assign a model to a player.
+ * Get a player's target model ident.
+ * For ghosts and bots only. For players, use AssignModel.
  */
-Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Text _SkinId, Boolean _PreferCustom) {
-  return Private_GetModelIdent(_Player, _ResolvableModelId, _SkinId, _PreferCustom);
+Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Text _ResolvableSkinId, Boolean _PreferCustom) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+  declare SkinId = ResolvePlayerSkinId(_Player.User, ModelId, _ResolvableSkinId);
+
+  return Private_GetModelIdent(ModelId, SkinId, _PreferCustom);
 }
 
 /**
- * Assign a model to a player (automatic skin).
+ * Get a player's target model ident (automatic skin).
+ * For ghosts and bots only. For players, use AssignModel.
  */
 Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Boolean _PreferCustom) {
-  declare SkinId = GetPlayerSkinId(_Player.User, _ResolvableModelId);
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+  declare SkinId = GetPlayerSkinId(_Player.User, ModelId);
 
-  return GetModelIdent(_Player, _ResolvableModelId, SkinId, _PreferCustom);
+  return Private_GetModelIdent(ModelId, SkinId, _PreferCustom);
 }
 
 /**
- * Assign a model to a player (automatic prefer custom).
+ * Get a player's target model ident (automatic prefer custom).
+ * For ghosts and bots only. For players, use AssignModel.
  */
-Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Text _SkinId) {
-  declare PreferCustom = GetPlayerPreferCustom(_Player.User, _ResolvableModelId);
+Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId, Text _ResolvableSkinId) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+  declare SkinId = ResolvePlayerSkinId(_Player.User, ModelId, _ResolvableSkinId);
+  declare PreferCustom = GetPlayerPreferCustom(_Player.User, ModelId);
 
-  return GetModelIdent(_Player, _ResolvableModelId, _SkinId, PreferCustom);
+  return GetModelIdent(_Player, ModelId, SkinId, PreferCustom);
 }
 
 /**
- * Assign a model to a player (automatic skin, prefer custom).
+ * Get a player's target model ident (automatic skin, prefer custom).
+ * For ghosts and bots only. For players, use AssignModel.
  */
 Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId) {
   declare PreferCustom = GetPlayerPreferCustom(_Player.User, _ResolvableModelId);
@@ -521,7 +561,8 @@ Ident GetModelIdent(CPlayer _Player, Text _ResolvableModelId) {
 }
 
 /**
- * Assign a model to a player (automatic model from current map, skin, prefer custom).
+ * Get a player's target model ident (automatic model from current map, skin, prefer custom).
+ * For ghosts and bots only. For players, use AssignModel.
  */
 Ident GetModelIdent(CPlayer _Player) {
   return GetModelIdent(_Player, G_CurrentMapPlayerModelId);
@@ -530,34 +571,46 @@ Ident GetModelIdent(CPlayer _Player) {
 /**
  * Assign a model to a player.
  */
-Void AssignModel(CPlayer _Player, Text _ResolvableModelId, Text _SkinId, Boolean _PreferCustom) {
-  Private_AssignModel(_Player, GetModelIdent(_Player, _ResolvableModelId, _SkinId, _PreferCustom));
+Void AssignModel(CPlayer _Player, Text _ResolvableModelId, Text _ResolvableSkinId, Boolean _PreferCustom) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+  declare SkinId = ResolvePlayerSkinId(_Player.User, ModelId, _ResolvableSkinId);
+
+  Private_AssignModel(_Player, ModelId, SkinId, _PreferCustom);
 }
 
 /**
  * Assign a model to a player (automatic skin).
  */
 Void AssignModel(CPlayer _Player, Text _ResolvableModelId, Boolean _PreferCustom) {
-  Private_AssignModel(_Player, GetModelIdent(_Player, _ResolvableModelId, _PreferCustom));
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+  declare SkinId = GetPlayerSkinId(_Player.User, ModelId);
+
+  Private_AssignModel(_Player, ModelId, SkinId, _PreferCustom);
 }
 
 /**
  * Assign a model to a player (automatic prefer custom).
  */
-Void AssignModel(CPlayer _Player, Text _ResolvableModelId, Text _SkinId) {
-  Private_AssignModel(_Player, GetModelIdent(_Player, _ResolvableModelId, _SkinId));
+Void AssignModel(CPlayer _Player, Text _ResolvableModelId, Text _ResolvableSkinId) {
+  declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
+  declare SkinId = ResolvePlayerSkinId(_Player.User, ModelId, _ResolvableSkinId);
+  declare PreferCustom = GetPlayerPreferCustom(_Player.User, ModelId);
+
+  Private_AssignModel(_Player, ModelId, SkinId, PreferCustom);
 }
 
 /**
  * Assign a model to a player (automatic skin, prefer custom).
  */
 Void AssignModel(CPlayer _Player, Text _ResolvableModelId) {
-  Private_AssignModel(_Player, GetModelIdent(_Player, _ResolvableModelId));
+  declare PreferCustom = GetPlayerPreferCustom(_Player.User, _ResolvableModelId);
+
+  AssignModel(_Player, _ResolvableModelId, PreferCustom);
 }
 
 /**
  * Assign a model to a player (automatic model from current map, skin, prefer custom).
  */
 Void AssignModel(CPlayer _Player) {
-  Private_AssignModel(_Player, GetModelIdent(_Player));
+  AssignModel(_Player, G_CurrentMapPlayerModelId);
 }

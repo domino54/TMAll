@@ -32,14 +32,12 @@
         "$ref": "#/$defs/overlay"
       }
     },
-    "SkinCategories": {
+    "SkinGroups": {
       "type": "array",
-      "title": "A list of skin categories. Skin categories are used to provide separate skin selection for specific use cases, for example separate Blue and Red team skins for the same model.",
+      "title": "A list of skin groups. Skin groups are used to provide separate skin selection for the same model, but different use cases. For example: separate Blue and Red team skins.",
+      "minItems": 1,
       "items": {
-        "type": "object",
-        "title": "Defined skin category",
-        "allOf": [{ "$ref": "#/$defs/base_object" }],
-        "unevaluatedProperties": false
+        "$ref": "#/$defs/skin_group"
       }
     },
     "Skins": {
@@ -61,7 +59,7 @@
     },
     "id_extends": {
       "type": "string",
-      "title": "Identifier of the base model this object applies to. If a base model with the specified identifier is not found, the object will be ignored and will not load.",
+      "title": "Identifier of the parent object this object applies to. If the parent object with the specified identifier is not found, this object will be ignored and will not load.",
       "pattern": "^[a-z0-9_]+:[a-z0-9_]+$"
     },
     "name": {
@@ -150,7 +148,7 @@
     },
     "overlay": {
       "type": "object",
-      "title": "Defined usable overlay. It is treated on the same level as a model in terms of selection and gameplay.",
+      "title": "Defined usable overlay. It is treated on the same level as a model in terms of selection and gameplay, while using the skins of its base model.",
       "allOf": [{ "$ref": "#/$defs/base_object" }],
       "properties": {
         "Extends": { "$ref": "#/$defs/id_extends" },
@@ -180,6 +178,22 @@
         },
         "Author": { "$ref": "#/$defs/author" },
         "Rarity": { "$ref": "#/$defs/rarity" },
+        "Groups": {
+          "type": "array",
+          "title": "A list of groups, in which this skin can be used. If omitted, assumes `[\"default\"]` as the value.",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/id_extends" },
+              {
+                "type": "string",
+                "title": "The skin will be applicable in the default selection.",
+                "const": "default"
+              }
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
         "IsHidden": {
           "type": "boolean",
           "title": "If set to true, the implementation of the skin selection interface can conisder this skin to be hidden."
@@ -190,6 +204,12 @@
           "default": 0
         }
       },
+      "unevaluatedProperties": false
+    },
+    "skin_group": {
+      "type": "object",
+      "title": "Defined skin category",
+      "allOf": [{ "$ref": "#/$defs/base_object" }],
       "unevaluatedProperties": false
     },
     "gameplay": {

@@ -1,13 +1,14 @@
 /**
  * @name GarageController.Script.txt
  * @author domino54
- * @version 2024-12-22
+ * @version 2025-01-04
  */
 
-#Const Version      "2024-12-22"
+#Const Version      "2025-01-04"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageController.Script.txt"
 
 #Include "ManiaApps/domino54/Garage/Components/GarageBackground/GarageBackground.Script.txt" as GarageBg
+#Include "ManiaApps/domino54/Garage/Components/GarageCameraDrag/GarageCameraDrag.Script.txt" as GarageCameraDrag
 #Include "ManiaApps/domino54/Garage/Components/SkinPreview/SkinPreview.Script.txt" as SkinPreview
 #Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
 #Include "ManiaApps/domino54/Garage/Core/GaragePlaygroundAPI.Script.txt" as GaragePlaygroundAPI
@@ -73,6 +74,7 @@ Void Load() {
 Void Show() {
   if (GaragePlaygroundAPI::IsPlayground()) {
     GarageBg::Hide();
+    GarageCameraDrag::Load();
   } else {
     SkinPreview::Show();
   }
@@ -92,6 +94,7 @@ Void Loop() {
 }
 
 Void Unload() {
+  GarageCameraDrag::Unload();
   GarageIntroPage::Unload();
   GarageMainPage::Unload();
   GarageTutorialPage::Unload();
