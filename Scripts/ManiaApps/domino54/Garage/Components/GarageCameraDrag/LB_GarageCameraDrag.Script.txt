@@ -1,0 +1,57 @@
+/**
+ * @name LB_GarageCameraDrag.Script.txt
+ * @author domino54
+ * @version 2025-01-04
+ */
+
+#Const Version      "2025-01-04"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/GarageCameraDrag/LB_GarageCameraDrag.Script.txt"
+
+#Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
+
+Text Build() {
+  return """
+<manialink version="3" name="L_GarageCameraDrag">
+<quad id="Quad_CameraDragTarget" z-index="-1" halign="center" valign="center" size="320 180" scriptevents="1" />
+
+<frame id="Frame_CameraDragTemp" hidden="1">
+  <quad halign="center" valign="top" size="2 40" bgcolor="F00" />
+</frame>
+
+<script><!--
+
+#Include "MathLib" as ML
+
+{{{MouseExt::InjectDeclares()}}}
+
+declare Frame_CameraDragTemp <=> (Page.GetFirstChild("Frame_CameraDragTemp") as CMlFrame);
+
+declare IsMoving = False;
+
+while (True) {
+  {{{MouseExt::InjectEvents(MouseExt::K_Options {
+    DragMin = -1.0,
+
+    DragStart = """
+      Frame_CameraDragTemp.Visible = True;
+      Frame_CameraDragTemp.RelativeRotation = 0.0;
+    """,
+
+    DragMove = """
+      declare MoveRad = 5.0 * (Input.MousePos.X - EventOrigin.X) / 320;
+
+      Frame_CameraDragTemp.RelativeRotation = -180 * MoveRad / ML::PI();
+    """,
+
+    DragEnd = """
+      Frame_CameraDragTemp.Visible = False;
+    """
+  })}}}
+
+  yield;
+}
+
+--></script>
+</manialink>
+  """;
+}

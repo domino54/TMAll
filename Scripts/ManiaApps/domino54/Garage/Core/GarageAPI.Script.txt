@@ -1,10 +1,10 @@
 /**
  * @name GarageAPI.Script.txt
  * @author domino54
- * @version 2024-12-25
+ * @version 2025-01-04
  */
 
-#Const Version      "2024-12-25"
+#Const Version      "2025-01-04"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt"
 
 #Include "TextLib" as TL
@@ -101,11 +101,11 @@ Void MarkTutorialAsSeen(Integer _TutorialVersion) {
 }
 
 Boolean IsVehicles() {
-  return PMData::ModelTypeCategory() == PMData::C_LibPlayerModels_ModelType_Vehicle;
+  return PMData::ModelTypeCategory() == PMData::C_ModelType_Vehicle;
 }
 
 Boolean IsCharacters() {
-  return PMData::ModelTypeCategory() == PMData::C_LibPlayerModels_ModelType_Character;
+  return PMData::ModelTypeCategory() == PMData::C_ModelType_Character;
 }
 
 K_Model[] GetSelectableModels() {
@@ -151,7 +151,7 @@ Text[] GetSelectableSkinIds(Text _ModelId) {
 }
 
 Boolean GetUsesArchetype(Text _ModelId) {
-  return PMData::GetModelById(_ModelId).LoadAs == PMData::C_LibPlayerModels_LoadAs_ItemAndArchetype;
+  return PMData::GetModelById(_ModelId).LoadAs == PMData::C_LoadAs_ItemAndArchetype;
 }
 
 Text GetSkinId() {

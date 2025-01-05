@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Data.Script.txt
  * @author domino54
- * @version 2024-11-05
+ * @version 2025-01-04
  */
 
-#Const Version      "2024-11-05"
+#Const Version      "2025-01-04"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt"
 
 #Include "MathLib" as ML
@@ -17,26 +17,27 @@
 // Constants
 // ---------------------------------- //
 
-#Const C_LibPlayerModels_Namespace                "player_models"
-#Const C_LibPlayerModels_EventId_GetIndexFile     "player_models:index"
-#Const C_LibPlayerModels_EventId_GetSourceFile    "player_models:source"
-#Const C_LibPlayerModels_DefaultIndexFileUrl      "file://Media/Data/PlayerModels/index.json"
-#Const C_LibPlayerModels_DataLoadingTimeout       10000
-#Const C_LibPlayerModels_ModelType_Character      "Character"
-#Const C_LibPlayerModels_ModelType_Vehicle        "Vehicle"
-#Const C_LibPlayerModels_LoadAs_Archetype         "Archetype"
-#Const C_LibPlayerModels_LoadAs_Item              "Item"
-#Const C_LibPlayerModels_LoadAs_ItemAndArchetype  "ItemAndArchetype"
-#Const C_LibPlayerModels_CarCommonWildcard        "*"
-#Const C_LibPlayerModels_CarCommonDirectory       "CarCommon\\"
-#Const C_LibPlayerModels_UserSkinsDirectories     ["Models", "Vehicles"]
-#Const C_LibPlayerModels_UserSkinsNamespace       "userdata"
-#Const C_LibPlayerModels_RegexFileNameFull        "[^\\/\\\\]+$"
-#Const C_LibPlayerModels_RegexItemName            "([^\\/\\\\]+)\\.Item\\.Gbx$"
-#Const C_LibPlayerModels_RegexReplacedSlashes     "[\\/\\\\]+"
-#Const C_LibPlayerModels_RegexMatchUserSkinPath   "^[^\\\\]+\\\\(.+)\\\\([^\\\\]+)\\.zip$"
-#Const C_LibPlayerModels_CharacterArchetypes      ["ArenaPlayer", "Minion"]
-#Const C_LibPlayerModels_TMUnitedArchetypes       ["DesertCar", "SnowCar", "RallyCar", "IslandCar", "BayCar", "CoastCar", "StadiumCar"]
+#Const C_EventsNamespace          "player_models"
+#Const C_EventId_GetIndexFile     "player_models:index"
+#Const C_EventId_GetSourceFile    "player_models:source"
+#Const C_DefaultIndexFileUrl      "file://Media/Data/PlayerModels/index.json"
+#Const C_DataLoadingTimeout       10000
+#Const C_ModelType_Character      "Character"
+#Const C_ModelType_Vehicle        "Vehicle"
+#Const C_LoadAs_Archetype         "Archetype"
+#Const C_LoadAs_Item              "Item"
+#Const C_LoadAs_ItemAndArchetype  "ItemAndArchetype"
+#Const C_CarCommonWildcard        "*"
+#Const C_CarCommonDirectory       "CarCommon\\"
+#Const C_UserSkinsDirectories     ["Models", "Vehicles"]
+#Const C_UserSkinsNamespace       "userdata"
+#Const C_RegexFileNameFull        "[^\\/\\\\]+$"
+#Const C_RegexItemName            "([^\\/\\\\]+)\\.Item\\.Gbx$"
+#Const C_RegexReplacedSlashes     "[\\/\\\\]+"
+#Const C_RegexMatchUserSkinPath   "^[^\\\\]+\\\\(.+)\\\\([^\\\\]+)\\.zip$"
+#Const C_CharacterArchetypes      ["ArenaPlayer", "Minion"]
+#Const C_TMUnitedArchetypes       ["DesertCar", "SnowCar", "RallyCar", "IslandCar", "BayCar", "CoastCar", "StadiumCar"]
+#Const C_DefaultSkinGroupId       "default"
 
 // ---------------------------------- //
 // Structs
@@ -44,9 +45,11 @@
 
 #Struct Structs::K_Model as K_Model
 #Struct Structs::K_Skin as K_Skin
+#Struct Structs::K_SkinGroup as K_SkinGroup
 #Struct Structs::K_Overlay as K_Overlay
 #Struct Structs::K_ModelInfo as K_ModelInfo
 #Struct Structs::K_GameplayInfo as K_GameplayInfo
+#Struct Structs::K_SkinResult as K_SkinResult
 
 #Struct K_Options {
   /** Override the default index file URL. */
@@ -71,6 +74,7 @@
   Text Id;
   K_Model[] Models;
   K_Skin[] Skins;
+  K_SkinGroup[] SkinGroups;
   K_Overlay[] Overlays;
 }
 
@@ -89,7 +93,7 @@ Void Private_Log(Text _Message) {
 }
 
 Text Private_GetBaseUrl(Text _Url) {
-  return TL::RegexReplace(C_LibPlayerModels_RegexFileNameFull, _Url, "i", "");
+  return TL::RegexReplace(C_RegexFileNameFull, _Url, "i", "");
 }
 
 Boolean Private_IsRelativeUrl(Text _Value) {
@@ -130,7 +134,7 @@ Text Private_TrimNamespace(Text _Id) {
  * `Vehicles/IslandCar.Item.Gbx` -> `IslandCar`
  */
 Text Private_NormalizeItemName(Text _ItemPath) {
-  declare Match = TL::RegexMatch(C_LibPlayerModels_RegexItemName, _ItemPath, "i");
+  declare Match = TL::RegexMatch(C_RegexItemName, _ItemPath, "i");
 
   if (Match.count < 2 || Match[1] == "") {
     return _ItemPath;
@@ -144,14 +148,26 @@ Text Private_NormalizeItemName(Text _ItemPath) {
  * @example `Vehicles\\CanyonCar.Item.Gbx` -> `Vehicles/CanyonCar.Item.Gbx`
  */
 Text Private_NormalizeItemPath(Text _ItemPath) {
-  return TL::ToLowerCase(TL::RegexReplace(C_LibPlayerModels_RegexReplacedSlashes, _ItemPath, "i", "/"));
+  return TL::ToLowerCase(TL::RegexReplace(C_RegexReplacedSlashes, _ItemPath, "i", "/"));
 }
 
 /**
  * Check if an archetype is a character.
  */
 Boolean Private_IsCharacter(Text _Archetype) {
-  return C_LibPlayerModels_CharacterArchetypes.exists(_Archetype);
+  return C_CharacterArchetypes.exists(_Archetype);
+}
+
+/**
+ * Check if a skin can be used within a group.
+ * Empty array is treated as if it contains the default group.
+ */
+Boolean Private_IsSkinForGroup(Text _TargetGroupId, Text[] _SkinGroupIds) {
+  if (_TargetGroupId == C_DefaultSkinGroupId && _SkinGroupIds.count <= 0) {
+    return True;
+  }
+
+  return _SkinGroupIds.exists(_TargetGroupId);
 }
 
 /**
@@ -199,7 +215,7 @@ Void Private_LoadIndexFileJson(Text _Body) {
     // Is later used to apply models in the correct order from the index file.
     LibPlayerModels_SourceFilesOrder.add(SourceUrl);
 
-    HttpClient::Get(C_LibPlayerModels_EventId_GetSourceFile, SourceUrl);
+    HttpClient::Get(C_EventId_GetSourceFile, SourceUrl);
   }
 }
 
@@ -224,8 +240,8 @@ Void Private_LoadSourceFileJson(Text _Url, Text _Body) {
  * HTTP requests loading loop.
  */
 Boolean Private_LoadingHttpRequests() {
-  while (HttpClient::HasPendingEvents(C_LibPlayerModels_Namespace)) {
-    declare Event = HttpClient::GetFirstEvent(C_LibPlayerModels_Namespace);
+  while (HttpClient::HasPendingEvents(C_EventsNamespace)) {
+    declare Event = HttpClient::GetFirstEvent(C_EventsNamespace);
 
     if (Event.StatusCode != 200) {
       Private_Log("""Failed to load resource {{{Event.Url}}}""");
@@ -233,17 +249,17 @@ Boolean Private_LoadingHttpRequests() {
 
     else {
       switch (Event.Id) {
-        case C_LibPlayerModels_EventId_GetIndexFile: {
+        case C_EventId_GetIndexFile: {
           Private_LoadIndexFileJson(Event.ResponseBody);
         }
-        case C_LibPlayerModels_EventId_GetSourceFile: {
+        case C_EventId_GetSourceFile: {
           Private_LoadSourceFileJson(Event.Url, Event.ResponseBody);
         }
       }
     }
   }
 
-  return HttpClient::HasPendingRequests(C_LibPlayerModels_Namespace);
+  return HttpClient::HasPendingRequests(C_EventsNamespace);
 }
 
 /**
@@ -380,6 +396,25 @@ Void Private_AppendSkin(K_Skin _Skin, Text _BaseUrl) {
 }
 
 /**
+ * Register a new skin group, or replace existing fields if a value is given.
+ */
+ Void Private_AppendSkinGroup(K_SkinGroup _SkinGroup, Text _BaseUrl) {
+  declare K_SkinGroup[Text] LibPlayerModels_SkinGroupById for LoadedTitle;
+
+  if (!LibPlayerModels_SkinGroupById.existskey(_SkinGroup.Id)) {
+    LibPlayerModels_SkinGroupById[_SkinGroup.Id] = _SkinGroup;
+  }
+
+  else if (_SkinGroup.Name != "") {
+    LibPlayerModels_SkinGroupById[_SkinGroup.Id].Name = _SkinGroup.Name;
+  }
+
+  if (_SkinGroup.Assets.count > 0) {
+    LibPlayerModels_SkinGroupById[_SkinGroup.Id].Assets = Private_AppendAssets(LibPlayerModels_SkinGroupById[_SkinGroup.Id].Assets, _SkinGroup.Assets, _BaseUrl);
+  }
+}
+
+/**
  * Register a new gameplay overlay or replace existing fields if a value is given.
  */
 Void Private_AppendOverlay(K_Overlay _Overlay, Text _BaseUrl) {
@@ -413,8 +448,8 @@ Void Private_AppendOverlay(K_Overlay _Overlay, Text _BaseUrl) {
  */
 Text Private_ResolvePlayerModelIdFromSkinDirectory(Text _SkinDirectory) {
   // CarCommon quick check (direct).
-  if (_SkinDirectory == C_LibPlayerModels_CarCommonDirectory) {
-    return C_LibPlayerModels_CarCommonWildcard;
+  if (_SkinDirectory == C_CarCommonDirectory) {
+    return C_CarCommonWildcard;
   }
 
   declare Text[Text] LibPlayerModels_ModelIdBySkinDirectory for LoadedTitle;
@@ -432,8 +467,8 @@ Text Private_ResolvePlayerModelIdFromSkinDirectory(Text _SkinDirectory) {
   }
 
   // CarCommon slow check (subfolder).
-  if (TL::StartsWith(_SkinDirectory, C_LibPlayerModels_CarCommonDirectory, True, False)) {
-    return C_LibPlayerModels_CarCommonWildcard;
+  if (TL::StartsWith(_SkinDirectory, C_CarCommonDirectory, True, False)) {
+    return C_CarCommonWildcard;
   }
 
   return "";
@@ -443,7 +478,7 @@ Text Private_ResolvePlayerModelIdFromSkinDirectory(Text _SkinDirectory) {
  * Parse user directory skin path and append a skin if a matching model is found.
  */
 K_Skin Private_CreateSkinFromPath(Text _SkinPath) {
-  declare Match = TL::RegexMatch(C_LibPlayerModels_RegexMatchUserSkinPath, _SkinPath, "i");
+  declare Match = TL::RegexMatch(C_RegexMatchUserSkinPath, _SkinPath, "i");
 
   if (Match.count != 3) {
     return K_Skin {};
@@ -456,7 +491,7 @@ K_Skin Private_CreateSkinFromPath(Text _SkinPath) {
   }
 
   return K_Skin {
-    Id = """{{{C_LibPlayerModels_UserSkinsNamespace}}}:{{{_SkinPath}}}""",
+    Id = """{{{C_UserSkinsNamespace}}}:{{{_SkinPath}}}""",
     AppliesTo = ModelId,
     Name = Match[2],
     SkinPath = """file://Skins/{{{TL::Replace(_SkinPath, "\\", "/")}}}"""
@@ -477,7 +512,7 @@ Void Private_AppendModelIdAlias(Text _ModelId, Text _Alias) {
    * Stores the custom model id by the respective item path.
    * ["canyoncar" => "trackmania:canyoncar"]
    * ["vehicles/trafficcar.item.gbx" => "trackmania:trafficcar"]
-   * ["valleycar4x" => "tmall:valleycar4x"]
+   * ["ValLeYcAr4x" => "tmall:valleycar4x"]
    */
   declare Text[Text] LibPlayerModels_ModelIdByAlias for LoadedTitle;
 
@@ -574,6 +609,7 @@ Void Private_FinalizeSourceFiles() {
 
   declare K_Model[Text] LibPlayerModels_ModelById for LoadedTitle;
   declare K_Skin[Text] LibPlayerModels_SkinById for LoadedTitle;
+  declare K_SkinGroup[Text] LibPlayerModels_SkinGroupById for LoadedTitle;
   declare K_Overlay[Text] LibPlayerModels_OverlayById for LoadedTitle;
 
   // Append skins and overlays.
@@ -582,11 +618,15 @@ Void Private_FinalizeSourceFiles() {
     declare BaseUrl = Private_GetBaseUrl(Url);
 
     foreach (Skin in SourceFile.Skins) {
-      if (Skin.Id == "" || (!LibPlayerModels_ModelById.existskey(Skin.AppliesTo) && Skin.Id != C_LibPlayerModels_CarCommonWildcard)) {
+      if (Skin.Id == "" || (!LibPlayerModels_ModelById.existskey(Skin.AppliesTo) && Skin.Id != C_CarCommonWildcard)) {
         continue;
       }
 
       Private_AppendSkin(Skin, BaseUrl);
+    }
+
+    foreach (SkinGroup in SourceFile.SkinGroups) {
+      Private_AppendSkinGroup(SkinGroup, BaseUrl);
     }
 
     foreach (Overlay in SourceFile.Overlays) {
@@ -623,6 +663,7 @@ Void Private_FinalizeSourceFiles() {
   // Get the metrics.
   declare NbModels = LibPlayerModels_ModelById.count;
   declare NbSkins = LibPlayerModels_SkinById.count;
+  declare NbSkinGroups = LibPlayerModels_SkinGroupById.count;
   declare NbOverlays = LibPlayerModels_OverlayById.count;
   declare LoadTime = Now - LibPlayerModels_LoadingStartTime;
 
@@ -632,14 +673,14 @@ Void Private_FinalizeSourceFiles() {
   declare Text LibPlayerModels_ModelTypeCategory for LoadedTitle;
 
   if (NbModels == NbCharacters) {
-    LibPlayerModels_ModelTypeCategory = C_LibPlayerModels_ModelType_Character;
+    LibPlayerModels_ModelTypeCategory = C_ModelType_Character;
   }
 
   if (NbModels == NbVehicles) {
-    LibPlayerModels_ModelTypeCategory = C_LibPlayerModels_ModelType_Vehicle;
+    LibPlayerModels_ModelTypeCategory = C_ModelType_Vehicle;
   }
 
-  Private_Log("""Loaded data of {{{NbModels}}} models, {{{NbSkins}}} skins, {{{NbOverlays}}} overlays in {{{LoadTime}}} ms""");
+  Private_Log("""Loaded data of {{{NbModels}}} models, {{{NbSkins}}} skins, {{{NbSkinGroups}}} skin groups, {{{NbOverlays}}} overlays in {{{LoadTime}}} ms""");
 }
 
 /**
@@ -651,9 +692,15 @@ Void Private_ClearData() {
   declare Text[] LibPlayerModels_SortingOverrides for LoadedTitle;
   declare K_Model[Text] LibPlayerModels_ModelById for LoadedTitle;
   declare K_Skin[Text] LibPlayerModels_SkinById for LoadedTitle;
+  declare K_SkinGroup[Text] LibPlayerModels_SkinGroupById for LoadedTitle;
   declare K_Overlay[Text] LibPlayerModels_OverlayById for LoadedTitle;
   declare Text[Text] LibPlayerModels_ModelIdBySkinDirectory for LoadedTitle;
   declare Text[Text] LibPlayerModels_ModelIdByAlias for LoadedTitle;
+
+  declare DefaultSkinGroup = K_SkinGroup {
+    Id = C_DefaultSkinGroupId,
+    Name = _("Default")
+  };
 
   LibPlayerModels_LoadingStartTime = -1;
   LibPlayerModels_Options = K_Options {};
@@ -661,6 +708,7 @@ Void Private_ClearData() {
   LibPlayerModels_OverlayById.clear();
   LibPlayerModels_ModelById.clear();
   LibPlayerModels_SkinById.clear();
+  LibPlayerModels_SkinGroupById = [DefaultSkinGroup.Id => DefaultSkinGroup];
   LibPlayerModels_ModelIdByAlias.clear();
   LibPlayerModels_ModelIdBySkinDirectory.clear();
 }
@@ -672,7 +720,7 @@ Void Private_StartLoading(K_Options _Options) {
   declare Options = _Options;
 
   if (Options.IndexFileUrl == "") {
-    Options.IndexFileUrl = C_LibPlayerModels_DefaultIndexFileUrl;
+    Options.IndexFileUrl = C_DefaultIndexFileUrl;
   }
 
   if (!HttpClient::IsValidUrl(Options.IndexFileUrl)) {
@@ -687,7 +735,7 @@ Void Private_StartLoading(K_Options _Options) {
   LibPlayerModels_LoadingStartTime = Now;
   LibPlayerModels_Options = Options;
 
-  HttpClient::Get(C_LibPlayerModels_EventId_GetIndexFile, LibPlayerModels_Options.IndexFileUrl);
+  HttpClient::Get(C_EventId_GetIndexFile, LibPlayerModels_Options.IndexFileUrl);
 
   if (!LibPlayerModels_Options.LoadUserSkinsDirectory || DataFileMgr == Null) {
     return;
@@ -695,7 +743,7 @@ Void Private_StartLoading(K_Options _Options) {
 
   declare CTaskResult_FileList[Ident] G_PendingTasks for LoadedTitle;
 
-  foreach (Directory in C_LibPlayerModels_UserSkinsDirectories) {
+  foreach (Directory in C_UserSkinsDirectories) {
     declare Task <=> Private_CreateUserDataTask(Directory);
 
     G_PendingTasks[Task.Id] = Task;
@@ -726,7 +774,7 @@ Void Load(K_Options _Options) {
   declare K_Options LibPlayerModels_Options for LoadedTitle;
 
   // Don't wait for the previously fired loading if it takes too long.
-  if (LibPlayerModels_LoadingStartTime > 0 && Now - LibPlayerModels_LoadingStartTime > C_LibPlayerModels_DataLoadingTimeout) {
+  if (LibPlayerModels_LoadingStartTime > 0 && Now - LibPlayerModels_LoadingStartTime > C_DataLoadingTimeout) {
     LibPlayerModels_LoadingStartTime = -1;
   }
 
@@ -772,6 +820,10 @@ Text ModelTypeCategory() {
  * @example `Vehicles/IslandCar.Item.Gbx` -> `trackmania:islandcar`
  */
 Text ResolveModelId(Text _ItemPath) {
+  if (_ItemPath == "") {
+    return _ItemPath;
+  }
+
   declare K_Model[Text] LibPlayerModels_ModelById for LoadedTitle;
 
   // Direct model hit!
@@ -805,6 +857,31 @@ Text ResolveModelId(Text _ItemPath) {
 }
 
 /**
+ * @returns Existing skin id or skin group id of the given value.
+ */
+K_SkinResult ResolveSkinId(Text _Value) {
+  if (_Value == "") {
+    return K_SkinResult {};
+  }
+
+  // Group direct hit!
+  declare K_SkinGroup[Text] LibPlayerModels_SkinGroupById for LoadedTitle;
+
+  if (LibPlayerModels_SkinGroupById.existskey(_Value)) {
+    return  K_SkinResult { SkinGroupId = _Value };
+  }
+
+  declare K_Skin[Text] LibPlayerModels_SkinById for LoadedTitle;
+
+  // Direct skin hit!
+  if (LibPlayerModels_SkinById.existskey(_Value)) {
+    return K_SkinResult { SkinId = _Value };
+  }
+
+  return K_SkinResult {};
+}
+
+/**
  * @returns Base custom model id of the gameplay extension, or the custom model id itself.
  */
 Text GetBaseModelId(Text _ModelId) {
@@ -835,6 +912,12 @@ K_Skin[Text] GetAllSkins() {
   return LibPlayerModels_SkinById;
 }
 
+K_SkinGroup[Text] GetAllSkinGroups() {
+  declare K_SkinGroup[Text] LibPlayerModels_SkinGroupById for LoadedTitle;
+
+  return LibPlayerModels_SkinGroupById;
+}
+
 K_Overlay[Text] GetAllOverlays() {
   declare K_Overlay[Text] LibPlayerModels_OverlayById for LoadedTitle;
 
@@ -851,6 +934,12 @@ K_Skin GetSkinById(Text _SkinId) {
   declare K_Skin[Text] LibPlayerModels_SkinById for LoadedTitle;
   if (!LibPlayerModels_SkinById.existskey(_SkinId)) return K_Skin {};
   return LibPlayerModels_SkinById[_SkinId];
+}
+
+K_SkinGroup GetSkinGroupById(Text _SkinGroupId) {
+  declare K_SkinGroup[Text] LibPlayerModels_SkinGroupById for LoadedTitle;
+  if (!LibPlayerModels_SkinGroupById.existskey(_SkinGroupId)) return K_SkinGroup {};
+  return LibPlayerModels_SkinGroupById[_SkinGroupId];
 }
 
 K_Overlay GetOverlayById(Text _OverlayId) {
@@ -900,14 +989,18 @@ K_Model[] GetModelsList() {
   return GetModelsList(False);
 }
 
-K_Skin[] GetSkinsListByModelId(Text _ModelId, Boolean _IncludeHidden) {
+K_Skin[] GetSkinsListByModelId(Text _ModelId, Text _SkinGroupId, Boolean _IncludeHidden) {
   declare BaseModelId = GetBaseModelId(_ModelId);
   declare K_Skin[] Result;
 
   declare K_Skin[Text] LibPlayerModels_SkinById for LoadedTitle;
 
   foreach (Skin in LibPlayerModels_SkinById) {
-    if (Skin.AppliesTo != BaseModelId && Skin.AppliesTo != C_LibPlayerModels_CarCommonWildcard) {
+    if (Skin.AppliesTo != BaseModelId && Skin.AppliesTo != C_CarCommonWildcard) {
+      continue;
+    }
+
+    if (_SkinGroupId != "" && !Private_IsSkinForGroup(_SkinGroupId, Skin.Groups)) {
       continue;
     }
 
@@ -921,12 +1014,20 @@ K_Skin[] GetSkinsListByModelId(Text _ModelId, Boolean _IncludeHidden) {
   return Result;
 }
 
+K_Skin[] GetSkinsListByModelId(Text _ModelId, Text _SkinGroupId) {
+  return GetSkinsListByModelId(_ModelId, _SkinGroupId, False);
+}
+
+K_Skin[] GetSkinsListByModelId(Text _ModelId, Boolean _IncludeHidden) {
+  return GetSkinsListByModelId(_ModelId, "", _IncludeHidden);
+}
+
 K_Skin[] GetSkinsListByModelId(Text _ModelId) {
   return GetSkinsListByModelId(_ModelId, False);
 }
 
-Text GetRandomSkinIdByModelId(Text _ModelId, Boolean _IncludeHidden) {
-  declare Skins = GetSkinsListByModelId(_ModelId, _IncludeHidden);
+Text GetRandomSkinIdByModelId(Text _ModelId, Text _SkinGroupId, Boolean _IncludeHidden) {
+  declare Skins = GetSkinsListByModelId(_ModelId, _SkinGroupId, _IncludeHidden);
 
   if (Skins.count <= 0) {
     return "";
@@ -939,6 +1040,14 @@ Text GetRandomSkinIdByModelId(Text _ModelId, Boolean _IncludeHidden) {
   declare Index = ML::Rand(0, Skins.count - 1);
 
   return Skins[Index].Id;
+}
+
+Text GetRandomSkinIdByModelId(Text _ModelId, Text _SkinGroupId) {
+  return GetRandomSkinIdByModelId(_ModelId, _SkinGroupId, False);
+}
+
+Text GetRandomSkinIdByModelId(Text _ModelId, Boolean _IncludeHidden) {
+  return GetRandomSkinIdByModelId(_ModelId, "", _IncludeHidden);
 }
 
 Text GetRandomSkinIdByModelId(Text _ModelId) {
@@ -958,7 +1067,7 @@ Text GetModelArchetype(Text _ModelId) {
 }
 
 Boolean GetArchetypeIsUnitedVehicle(Text _Archetype) {
-  return C_LibPlayerModels_TMUnitedArchetypes.exists(_Archetype);
+  return C_TMUnitedArchetypes.exists(_Archetype);
 }
 
 Boolean GetPlayerModelIsUnitedVehicle(Text _ModelId) {

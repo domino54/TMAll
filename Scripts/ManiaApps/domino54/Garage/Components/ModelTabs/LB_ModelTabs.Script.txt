@@ -1,10 +1,10 @@
 /**
  * @name LB_ModelTabs.Script.txt
  * @author domino54
- * @version 2024-11-21
+ * @version 2025-01-04
  */
 
-#Const Version      "2024-11-21"
+#Const Version      "2025-01-04"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/ModelTabs/LB_ModelTabs.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
@@ -36,6 +36,8 @@ Text Build() {
   declare MainFont = Font::GetFontName("Main");
   declare SubFont = Font::GetFontName("SubTitle");
 
+  declare MenuText = ""; // _("Press 'M' for menu");
+
   return """
 <manialink version="3" name="L_ModelTabs">
 <stylesheet>
@@ -62,18 +64,19 @@ Text Build() {
 <frame id="Frame_AnimSlideIn">
   <frame id="Frame_MenuTabsContainer" pos="-50 63">
     <label id="Label_HeaderText" pos="0 11" halign="left" valign="center2" size="44" textfont="{{{MainFont}}}" textsize="9" textcolor="FFF" textemboss="1" textprefix="$t" />
+    <label id="Label_SubtitleText" pos="0 4.25" halign="left" valign="center2" size="44" textfont="{{{SubFont}}}" textsize="2" textcolor="FFF" textemboss="1" textprefix="$t" text="{{{MenuText}}}" />
 
     <quad class="LineColor" halign="left" valign="bottom" size="26 1.25" bgcolor="FFF" />
     <quad class="LineColor" halign="left" valign="bottom" size="50 0.25" bgcolor="FFF" />
 
     <frame id="Frame_MoreLeft" pos="46 5" hidden="1">
-      <quad id="Quad_MoreLeft" class="ArrowMore" rot="180" />
-      <quad id="Quad_MoreLeftButton" class="ArrowButton Focus" data-nodrag="1" scriptevents="1" />
+      <quad id="Quad_MoreLeft" class="ArrowMore" autoscale="0" rot="180" />
+      <quad id="Quad_MoreLeftButton" class="ArrowButton Focus" autoscale="0" data-nodrag="1" scriptevents="1" />
     </frame>
 
     <frame id="Frame_MoreRight" pos="186 5" hidden="1">
-      <quad id="Quad_MoreRight" class="ArrowMore" />
-      <quad id="Quad_MoreRightButton" class="ArrowButton Focus" data-nodrag="1" scriptevents="1" />
+      <quad id="Quad_MoreRight" class="ArrowMore" autoscale="0" />
+      <quad id="Quad_MoreRightButton" class="ArrowButton Focus" autoscale="0" data-nodrag="1" scriptevents="1" />
     </frame>
 
     <frame id="Frame_ScrollContainer" pos="50 -2" rot="-90" halign="left" valign="top" size="30 132" scroll="1" scrollgrid="0 {{{SizeX / 4}}}" scrollmax="0 100000">
@@ -183,8 +186,7 @@ Void ScrollIntoOffset(Real _Offset, Boolean _Instant) {
 
   Quad_AnimDummy.RelativePosition_V3.Y = Frame_ScrollContainer.ScrollOffset.Y;
 
-  declare Real VirtualScrollMaxY for Frame_ScrollContainer;
-  declare Clamped = ML::Clamp(_Offset, Frame_ScrollContainer.ScrollMin.Y, VirtualScrollMaxY);
+  declare Clamped = ML::Clamp(_Offset, Frame_ScrollContainer.ScrollMin.Y, Frame_ScrollContainer.ScrollMax.Y);
 
   AnimMgr.Flush(Quad_AnimDummy);
 
@@ -234,8 +236,6 @@ main() {
   foreach (Control in Frame_ButtonsInstances.Controls) {
     Frame_TabButtons.add((Control as CMlFrame));
   }
-
-  declare Real VirtualScrollMaxY for Frame_ScrollContainer;
 
   declare Text MenuTabsHeaderText for Page;
   declare Vec3 MenuTabsLineColor for Page;
@@ -301,7 +301,7 @@ main() {
 
           declare MaxWidth = ML::Max(0.0, {{{SizeX}}} * MenuTabsData.count);
 
-          VirtualScrollMaxY = ML::Max(0.0, MaxWidth - Frame_ScrollContainer.Size.Y);
+          Frame_ScrollContainer.ScrollMax.Y = ML::Max(0.0, MaxWidth - Frame_ScrollContainer.Size.Y);
           Quad_ScrollTarget.Size.X = MenuTabsData.count * {{{SizeX}}};
           Quad_LineEnd.RelativePosition_V3.X = Quad_ScrollTarget.Size.X;
 
@@ -456,38 +456,14 @@ main() {
       Frame_ScrollContainer.ScrollOffset.Y = PrevAnimPosY;
     }
 
-    // Clamp to fake scroll max
-    if (Frame_ScrollContainer.ScrollOffset.Y > VirtualScrollMaxY + 0.1) {
-      Frame_ScrollContainer.ScrollOffset.Y = VirtualScrollMaxY;
-
-      Frame_ScrollContainer.ScrollBumpBottom();
-    }
-
-    // Content hidden on the left
-    Frame_MoreLeft.Visible = Frame_ScrollContainer.ScrollAnimOffset.Y > 1;
-
-    if (Frame_MoreLeft.Visible) {
-      declare Coef = ML::Sin(Now * ML::PI() / 500);
-
-      Quad_MoreLeft.RelativePosition_V3.X = -Coef / 4;
-      Quad_MoreLeft.Opacity = 0.5 + (Coef + 1) / 4;
-    }
-
-    // Content hidden on the right
-    Frame_MoreRight.Visible = Frame_ScrollContainer.ScrollAnimOffset.Y < VirtualScrollMaxY - 1;
-
-    if (Frame_MoreRight.Visible) {
-      declare Coef = ML::Sin(Now * ML::PI() / 500);
-
-      Quad_MoreRight.RelativePosition_V3.X = Coef / 4;
-      Quad_MoreRight.Opacity = 0.5 + (Coef + 1) / 4;
-    }
-
     // Horizontal scrolling
     if (PrevScrollOffsetY != Frame_ScrollContainer.ScrollAnimOffset.Y) {
       PrevScrollOffsetY = Frame_ScrollContainer.ScrollAnimOffset.Y;
 
       StartIndex = ML::FloorInteger((PrevScrollOffsetY + {{{SizeX}}}) / {{{SizeX}}}) - 1;
+
+      Frame_MoreLeft.Visible = Frame_ScrollContainer.ScrollAnimOffset.Y > 1;
+      Frame_MoreRight.Visible = Frame_ScrollContainer.ScrollAnimOffset.Y < Frame_ScrollContainer.ScrollMax.Y - 1;
     }
 
     if (PrevStartIndex != StartIndex) {
@@ -500,6 +476,20 @@ main() {
         FormatMenuTab(Frame, I, MenuTabsData[I]);
         SetTabIsActive(Frame, MenuTab.Id == ActiveTabId);
       }
+    }
+
+    if (Frame_MoreLeft.Visible) {
+      declare Coef = ML::Sin(Now * ML::PI() / 500);
+
+      Quad_MoreLeft.RelativePosition_V3.X = -Coef / 4;
+      Quad_MoreLeft.Opacity = 0.5 + (Coef + 1) / 4;
+    }
+
+    if (Frame_MoreRight.Visible) {
+      declare Coef = ML::Sin(Now * ML::PI() / 500);
+
+      Quad_MoreRight.RelativePosition_V3.X = Coef / 4;
+      Quad_MoreRight.Opacity = 0.5 + (Coef + 1) / 4;
     }
 
     yield;

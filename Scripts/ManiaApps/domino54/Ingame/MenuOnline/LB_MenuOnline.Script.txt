@@ -1,10 +1,10 @@
 /**
  * @name LB_MenuOnline.Script.txt
  * @author domino54
- * @version 2024-11-05
+ * @version 2025-01-04
  */
 
-#Const Version    "2024-11-05"
+#Const Version    "2025-01-04"
 #Const ScriptName "Libs/domino54/MenuOnline/LB_MenuOnline.Script.txt"
 
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
@@ -256,6 +256,9 @@ Void PressSelect() {
 
 main() {
   Init();
+
+  // Fix rare crash due to map not being loaded in yet
+  wait(Map != Null);
 
   {{{Inject_SoloMapInfosBase::InjectInMain()}}}
 

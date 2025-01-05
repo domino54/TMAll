@@ -1,0 +1,31 @@
+/**
+ * @name GarageCameraDrag.Script.txt
+ * @author domino54
+ * @version 2025-01-04
+ */
+
+#Const Version      "2025-01-04"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/GarageCameraDrag/GarageCameraDrag.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/GarageCameraDrag/LB_GarageCameraDrag.Script.txt" as LB_GarageCameraDrag
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_GarageCameraDrag"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB_GarageCameraDrag::Build());
+}
