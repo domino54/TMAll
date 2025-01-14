@@ -1,0 +1,49 @@
+/**
+ * @name Countdown321Go_Client.Script.txt
+ * @author domino54
+ * @version 2025-01-14
+ */
+
+#Const Version      "2025-01-14"
+#Const ScriptName   "ManiaApps/domino54/Ingame/Countdown321Go/Countdown321Go_Client.Script.txt"
+
+#Include "TextLib" as TL
+#Include "ManiaApps/domino54/Ingame/Countdown321Go/LB_Countdown321Go.Script.txt" as LB_Countdown321Go
+#Include "ManiaApps/domino54/Layers.Script.txt" as Layers
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_Countdown321Go"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+
+  ClientUI.OverlayHide321Go = False;
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, True, LB_Countdown321Go::Build());
+
+  ClientUI.OverlayHide321Go = True;
+}
+
+Void Loop() {
+  foreach (Event in PendingEvents) {
+    if (Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
+    if (Event.CustomEventType != LB_Countdown321Go::C_CustomEventType_PlaySound) continue;
+    if (Event.CustomEventData.count < 1) continue;
+
+    declare Variant = TL::ToInteger(Event.CustomEventData[0]);
+
+    // Manialinks cannot play sounds when hidden, so play them via the app.
+    Audio.PlaySoundEvent(CAudioManager::ELibSound::Countdown, Variant, 0.0);
+  }
+}
