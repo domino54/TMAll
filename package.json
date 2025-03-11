@@ -1,0 +1,25 @@
+{
+  "name": "tmall",
+  "keywords": [
+    "trackmania",
+    "maniaplanet",
+    "multienvironment",
+    "maniascript",
+    "manialink",
+    "title pack"
+  ],
+  "homepage": "https://github.com/domino54/TMAll#readme",
+  "bugs": {
+    "url": "https://github.com/domino54/TMAll/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domino54/TMAll.git"
+  },
+  "scripts": {
+    "lint": "mslint --config mslint.json"
+  },
+  "devDependencies": {
+    "@maniascript/mslint": "^4.2.0"
+  }
+}
