@@ -7,7 +7,7 @@
     {
       "Id": "tm2trailer:03old",
       "AppliesTo": "trackmania:canyoncar",
-      "Name": "03Old",
+      "Name": "Ace (03Old)",
       "SkinPath": "Skins/Models/CanyonCar/03Old.zip",
       "Author": "NADEO",
       "Assets": {
@@ -17,7 +17,7 @@
     {
       "Id": "tm2trailer:04old",
       "AppliesTo": "trackmania:canyoncar",
-      "Name": "04Old",
+      "Name": "Ace (04Old)",
       "SkinPath": "Skins/Models/CanyonCar/04Old.zip",
       "Author": "NADEO",
       "Assets": {
@@ -27,7 +27,7 @@
     {
       "Id": "tm2trailer:05oldblue",
       "AppliesTo": "trackmania:canyoncar",
-      "Name": "05OldBlue",
+      "Name": "Ace (05OldBlue)",
       "SkinPath": "Skins/Models/CanyonCar/05OldBlue.zip",
       "Author": "NADEO",
       "Assets": {
@@ -37,7 +37,7 @@
     {
       "Id": "tm2trailer:05oldgreen",
       "AppliesTo": "trackmania:canyoncar",
-      "Name": "05OldGreen",
+      "Name": "Ace (05OldGreen)",
       "SkinPath": "Skins/Models/CanyonCar/05OldGreen.zip",
       "Author": "NADEO",
       "Assets": {
@@ -47,7 +47,7 @@
     {
       "Id": "tm2trailer:05oldred",
       "AppliesTo": "trackmania:canyoncar",
-      "Name": "05OldRed",
+      "Name": "Ace (05OldRed)",
       "SkinPath": "Skins/Models/CanyonCar/05OldRed.zip",
       "Author": "NADEO",
       "Assets": {
@@ -87,7 +87,7 @@
     {
       "Id": "tm2trailer:gt500blue",
       "AppliesTo": "trackmania:canyoncar",
-      "Name": "GT500Blue",
+      "Name": "GT500 (Blue)",
       "SkinPath": "Skins/Models/CanyonCar/GT500Blue.zip",
       "Author": "NADEO",
       "Assets": {
