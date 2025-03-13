@@ -3,18 +3,16 @@
  *
  * @name ModeTMAllMaker.Script.txt
  * @author domino54
- * @version 2024-12-01
+ * @version 2025-03-13
  */
 #Extends "Modes/TrackMania/Base/ModeTrackmania.Script.txt"
 
-#Const MB_TMAll_Version     "2024-12-01"
+#Const MB_TMAll_Version     "2025-03-13"
 #Const MB_TMAll_ScriptName  "Modes/TrackMania/Base/ModeTMAllMaker.Script.txt"
 
-#Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
-#Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt" as PlayerModels_Server
-#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
+#Include "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt" as GameplayCoefs_Server
 
 // ---------------------------------- //
 // Global variables
@@ -33,10 +31,8 @@ declare Integer TMAll_Settings_PlayerModelsLoadingMode;
 ***
 Log::RegisterScript(MB_TMAll_ScriptName, MB_TMAll_Version);
 Log::RegisterScript(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
-Log::RegisterScript(HttpClient::ScriptName, HttpClient::Version);
 Log::RegisterScript(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
 Log::RegisterScript(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
-Log::RegisterScript(TextLibExt::ScriptName, TextLibExt::Version);
 ***
 
 ***MB_Private_Settings***
@@ -50,13 +46,8 @@ TMAll_Settings_PlayerModelsLoadingMode = PlayerModels_Server::C_LoadingMode_Comp
 // ---------------------------------- //
 ***MB_Private_LoadLibraries***
 ***
-HttpClient::Load();
 GameplayCoefs_Server::Load();
 PlayerModels_Data::Load();
-
-while (PlayerModels_Data::Loading()) {
-  MB_Yield();
-}
 ***
 
 // ---------------------------------- //
@@ -65,10 +56,13 @@ while (PlayerModels_Data::Loading()) {
 ***MB_Private_StartServer***
 ***
 ItemList_Begin();
+
 PlayerModels_Server::Load(This, PlayerModels_Server::K_Options {
   LoadingMode = TMAll_Settings_PlayerModelsLoadingMode
 });
+
 +++TMAll_ItemList+++
+
 ItemList_End();
 ***
 
@@ -94,19 +88,10 @@ if (TMAll_Settings_AutoIntroSequenceModel) {
 ***
 
 // ---------------------------------- //
-// Mode yield
-// ---------------------------------- //
-***MB_Private_Yield***
-***
-HttpClient::Yield();
-***
-
-// ---------------------------------- //
 // Unload libraries
 // ---------------------------------- //
 ***MB_Private_UnloadLibraries***
 ***
-HttpClient::Unload();
 GameplayCoefs_Server::Unload();
 PlayerModels_Server::Unload();
 PlayerModels_Data::Unload();

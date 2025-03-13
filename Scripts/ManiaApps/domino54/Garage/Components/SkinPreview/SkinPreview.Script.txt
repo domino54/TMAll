@@ -1,10 +1,10 @@
 /**
  * @name SkinPreview.Script.txt
  * @author domino54
- * @version 2024-10-31
+ * @version 2025-03-13
  */
 
-#Const Version      "2024-10-31"
+#Const Version      "2025-03-13"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinPreview/SkinPreview.Script.txt"
 
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
@@ -40,7 +40,7 @@ Void Private_SetPreviewImageUrl(Text _ImageUrl) {
 Void Unload() {
   Layers::Destroy(C_ManialinkLayerId);
 
-  G_PrevSkinId = "";
+  G_PrevSkinId = "<first update dummy>";
 }
 
 Void Load() {
@@ -65,5 +65,8 @@ Void Loop() {
 
   G_PrevSkinId = GarageAPI::GetSkinId();
 
-  Private_SetPreviewImageUrl(GarageAPI::GetSkinPreviewUrl(G_PrevSkinId));
+  declare ModelId = GarageAPI::GetModelId();
+  declare PreviewUrl = GarageAPI::GetSkinPreviewUrl(ModelId, G_PrevSkinId);
+
+  Private_SetPreviewImageUrl(PreviewUrl);
 }

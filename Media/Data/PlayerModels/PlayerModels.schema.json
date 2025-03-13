@@ -32,12 +32,12 @@
         "$ref": "#/$defs/overlay"
       }
     },
-    "SkinGroups": {
+    "SkinCategories": {
       "type": "array",
-      "title": "A list of skin groups. Skin groups are used to provide separate skin selection for the same model, but different use cases. For example: separate Blue and Red team skins.",
+      "title": "A list of skin categories. Skin categories are used to provide separate skin selection for the same model, but different use cases. For example: separate Blue and Red team skins.",
       "minItems": 1,
       "items": {
-        "$ref": "#/$defs/skin_group"
+        "$ref": "#/$defs/skin_category"
       }
     },
     "Skins": {
@@ -178,9 +178,9 @@
         },
         "Author": { "$ref": "#/$defs/author" },
         "Rarity": { "$ref": "#/$defs/rarity" },
-        "Groups": {
+        "Categories": {
           "type": "array",
-          "title": "A list of groups, in which this skin can be used. If omitted, assumes `[\"default\"]` as the value.",
+          "title": "A list of categories, in which this skin can be used. If omitted, assumes `[\"default\"]` as the value.",
           "items": {
             "oneOf": [
               { "$ref": "#/$defs/id_extends" },
@@ -206,7 +206,7 @@
       },
       "unevaluatedProperties": false
     },
-    "skin_group": {
+    "skin_category": {
       "type": "object",
       "title": "Defined skin category",
       "allOf": [{ "$ref": "#/$defs/base_object" }],

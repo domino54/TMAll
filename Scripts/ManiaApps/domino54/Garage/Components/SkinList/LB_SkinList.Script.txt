@@ -1,10 +1,10 @@
 /**
  * @name LB_SkinList.Script.txt
  * @author domino54
- * @version 2025-01-04
+ * @version 2025-03-13
  */
 
-#Const Version      "2025-01-04"
+#Const Version      "2025-03-13"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinList/LB_SkinList.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
@@ -146,7 +146,7 @@ Void SetSkinButtonSelected(CMlFrame _Frame, Boolean _IsSelected, Boolean _Instan
   AnimMgr.Flush(Label_SkinName);
 
   Quad_SkinPreviewed.Visible = _IsSelected;
-  Quad_SkinPreviewed.RelativeScale = 1.01;
+  Quad_SkinPreviewed.RelativeScale = 1.0;
   Label_SkinName.RelativePosition_V3.Y = 0.0;
 
   if (_IsSelected) {
@@ -319,7 +319,7 @@ main() {
   declare Real PageDraggingOffset;
 
   declare MaxWidth = 0.0;
-  declare SameFrameExtraYield = False;
+  declare NextFrameContinueEarly = False;
   declare NextFrameUpdateSkins = False;
   declare NextFrameScrollIntoPreview = False;
   declare NextFrameUpdateApplied = False;
@@ -356,7 +356,7 @@ main() {
             // Scroll max does not update in the same frame.
             // This means if the new scroll max is bigger, all updates should defer to one frame later.
             // Without this, page cannot auto scroll to the end of the updated, bigger list.
-            SameFrameExtraYield = True;
+            NextFrameContinueEarly = True;
           }
 
           NextFrameUpdateSkins = True;
@@ -379,9 +379,10 @@ main() {
       continue;
     }
 
-    if (SameFrameExtraYield) {
-      SameFrameExtraYield = False;
+    if (NextFrameContinueEarly) {
+      NextFrameContinueEarly = False;
       yield;
+      continue;
     }
 
     if (NextFrameUpdateSkins) {

@@ -1,15 +1,15 @@
-#RequireContext CManiaApp
+#RequireContext CManiaApp // @mslint-disable-line require-context-valid-class
 // ^ Must be the first line for the browser to load the maniaapp.
 
 /**
  * @name Garage.Script.txt
  * @author domino54
- * @version 2024-11-19
+ * @version 2025-03-13
  */
 
 #Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
 
-#Const Version    "2024-11-19"
+#Const Version    "2025-03-13"
 #Const ScriptName "ManiaApps/Garage.Script.txt"
 
 #Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
@@ -36,11 +36,6 @@ if (GaragePlaygroundAPI::IsPlayground()) {
 
 GarageAPI::Load();
 GarageController::Init();
-
-while (GarageAPI::IsLoading()) {
-  AB_Yield();
-}
-
 GarageAPI::SetModelId(GarageAPI::GetInitialModelId());
 GarageController::Load();
 
