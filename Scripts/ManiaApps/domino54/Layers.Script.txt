@@ -1,7 +1,7 @@
 /**
  * @name Layers.Script.txt
  * @author domino54
- * @version 2025-01-13
+ * @version 2025-03-13
  *
  * Library meant as a seamless extension for Nadeo's Layers library within playground ManiaApps.
  * Adds an optional parameter to create separate instances of the layer for each split screen viewport.
@@ -12,7 +12,7 @@
  * the layer on that screen, even if the layer is globally hidden and later shown on all screens at once.
  */
 
-#Const Version    "2025-01-13"
+#Const Version    "2025-03-13"
 #Const ScriptName "ManiaApps/domino54/Layers.Script.txt"
 
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
@@ -111,9 +111,9 @@ Void Destroy(Text _LayerName) {
     Layers::Destroy(SubLayerName);
   }
 
-  declare Removed0 = G_LayerGroups.removekey(_LayerName);
-  declare Removed1 = G_LayerGroupVisibility.removekey(_LayerName);
-  declare Removed2 = G_SubLayerVisibility.removekey(_LayerName);
+  declare Removed0 = G_LayerGroups.removekey(_LayerName); // @mslint-disable-line no-unused-variables
+  declare Removed1 = G_LayerGroupVisibility.removekey(_LayerName); // @mslint-disable-line no-unused-variables
+  declare Removed2 = G_SubLayerVisibility.removekey(_LayerName); // @mslint-disable-line no-unused-variables
 }
 
 /**
@@ -375,13 +375,6 @@ Boolean CheckVisible(Text _LayerName, Integer _ScreenNum) {
 }
 
 /**
- * (Alias) Check if a layer is visible on a specific screen.
- */
-Boolean IsVisible(Text _LayerName, Integer _ScreenNum) {
-  return CheckVisible(_LayerName, _ScreenNum);
-}
-
-/**
  * Check if a layer is visible on any screen.
  */
 Boolean CheckVisible(Text _LayerName) {
@@ -396,13 +389,6 @@ Boolean CheckVisible(Text _LayerName) {
   }
 
   return False;
-}
-
-/**
- * (Alias) Check if a layer is visible on any screen.
- */
-Boolean IsVisible(Text _LayerName) {
-  return CheckVisible(_LayerName);
 }
 
 /**
