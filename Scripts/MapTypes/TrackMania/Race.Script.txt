@@ -3,12 +3,12 @@
  *
  * @name Race.Script.txt
  * @author domino54
- * @version 2024-10-25
+ * @version 2025-03-13
  */
 
 #Extends "MapTypes/Base/MapTypeTMAll.Script.txt"
 
-#Const Version    "2024-10-25"
+#Const Version    "2025-03-13"
 #Const ScriptName "MapTypes/TrackMania/Race.Script.txt"
 
 #Include "Libs/Nadeo/Common/Ingame/MapType.Script.txt" as MapType
@@ -162,7 +162,7 @@ if (Player.RaceStartTime <= 0 && Game::IsWaiting(Player)) {
 
 // Events
 foreach (Event in Mode.PendingEvents) {
-  declare Passed = Mode.PassOn(Event);
+  declare Passed = Mode.PassOn(Event); // @mslint-disable-line no-unused-variables
 
   if (Event.Type != CTmModeEvent::EType::WayPoint || !Event.IsEndRace) {
     continue;
@@ -215,17 +215,19 @@ foreach (Event in Mode.PendingEvents) {
       Mode.Discard(Event);
     }
 
-    if (PrevAnswerUpdate != UI_Validation::GetAnswerUpdate()) {
-      declare StopValidation = UI_Validation::GetAnswer();
-
-      if (StopValidation)  {
-        MTB_StopValidation();
-      } else {
-        Game::WaitRace(Player);
-      }
-
-      break;
+    if (PrevAnswerUpdate == UI_Validation::GetAnswerUpdate()) {
+      continue;
     }
+
+    declare StopValidation = UI_Validation::GetAnswer();
+
+    if (StopValidation)  {
+      MTB_StopValidation();
+    } else {
+      Game::WaitRace(Player);
+    }
+
+    break;
   }
 
   UI_Validation::SetTime(G_BestTime, PlayerTime);

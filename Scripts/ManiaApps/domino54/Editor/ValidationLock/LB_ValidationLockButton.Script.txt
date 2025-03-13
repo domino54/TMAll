@@ -1,10 +1,10 @@
 /**
  * @name LB_ValidationLockButton.Script.txt
  * @author domino54
- * @version 2024-11-04
+ * @version 2025-03-13
  */
 
-#Const Version      "2024-11-04"
+#Const Version      "2025-03-13"
 #Const ScriptName   "ManiaApps/domino54/Editor/ValidationLockButton/LB_ValidationLockButton.Script.txt"
 
 #Const C_ButtonTooltip  _("Toggle the Validation Lock")
@@ -29,8 +29,8 @@ Text Build() {
 
 #Const C_ValidationColors [
   "{{{CMapType::ValidationStatus::NotValidable}}}" => <1.0, 0.0, 0.0>,
-  "{{{CMapType::ValidationStatus::Validable}}}" => <1.0, {{{2/3.}}}, 0.0>,
-  "{{{CMapType::ValidationStatus::Validated}}}" => <0.0, 1.0, {{{1/3.}}}>
+  "{{{CMapType::ValidationStatus::Validable}}}" => <1.0, {{{2/3.0}}}, 0.0>,
+  "{{{CMapType::ValidationStatus::Validated}}}" => <0.0, 1.0, {{{1/3.0}}}>
 ]
 
 Void SetIsEnabled(Boolean _IsEnabled) {

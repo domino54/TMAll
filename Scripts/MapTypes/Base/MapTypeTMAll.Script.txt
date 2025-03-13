@@ -3,6 +3,7 @@
  *
  * @name MapTypeTMAll.Script.txt
  * @author domino54
+ * @version 2025-03-13
  */
 
 #Extends "MapTypes/Base/MapTypeTrackmania.Script.txt"
@@ -21,7 +22,7 @@
 // Constants
 // ---------------------------------- //
 
-#Const G_LibTMAllEditor_NormalizeAssetId "gameplaycoefs:normalize"
+#Const C_LibTMAllEditor_NormalizeAssetId "gameplaycoefs:normalize"
 
 // ---------------------------------- //
 // Global variables
@@ -84,7 +85,7 @@ ValidationLock::Loop();
 ***MTB_Loop***
 ***
 if (GameplayCoefs_Editor::IsDialogRequested()) {
-  TMAll_OpenGameplayCeofsEditor();
+  TMAll_OpenGameplayCoefsEditor();
 }
 ***
 
@@ -208,7 +209,7 @@ Void TMAll_NormalizeCoefsIfUninitialized() {
   TMAll_ProbeMapPlayerModelName();
 
   declare ModelId = PlayerModels_Server::GetMapPlayerModelId();
-  declare NeedsNormalize = PlayerModels_Data::GetModelAsset(ModelId, G_LibTMAllEditor_NormalizeAssetId, "");
+  declare NeedsNormalize = PlayerModels_Data::GetModelAsset(ModelId, C_LibTMAllEditor_NormalizeAssetId, "");
 
   if (TL::RegexFind("^1|true$", NeedsNormalize, "i").count <= 0) {
     return;
@@ -219,7 +220,7 @@ Void TMAll_NormalizeCoefsIfUninitialized() {
   GameplayCoefs_Editor::NormalizeCoefsIfUninitialized(GameplayInfo.AccelCoef, GameplayInfo.ControlCoef, GameplayInfo.GravityCoef);
 }
 
-Void TMAll_OpenGameplayCeofsEditor() {
+Void TMAll_OpenGameplayCoefsEditor() {
   TMAll_NormalizeCoefsIfUninitialized();
 
   declare ModelId = PlayerModels_Server::GetMapPlayerModelId();
