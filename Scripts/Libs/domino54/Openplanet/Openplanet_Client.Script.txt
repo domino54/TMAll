@@ -1,0 +1,74 @@
+/**
+ * @name Openplanet_Client.Script.txt
+ * @author domino54
+ * @version 2025-03-13
+ */
+
+#Const Version      "2025-03-13"
+#Const ScriptName   "Libs/domino54/Openplanet/Openplanet_Client.Script.txt"
+
+#Include "TextLib" as TL
+#Include "Libs/Nadeo/Log.Script.txt" as Log
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_LibOpenplanet_ExtraToolRegex "^Openplanet ([\\w\\.-]+(?:[\\w\\.-]+)+) \\((\\w+), (\\w+), ([\\d-]+)\\)"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_OpenplanetInfo {
+  Text Version;
+  Text Branch;
+  Text BuildName;
+  Text BuildDate;
+}
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Boolean G_HasOpenplanet;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+K_OpenplanetInfo Private_TestForOpenplanet(Text _Value) {
+  declare Match = TL::RegexMatch(C_LibOpenplanet_ExtraToolRegex, _Value, "");
+
+  if (Match.count < 5) {
+    return K_OpenplanetInfo {};
+  }
+
+  return K_OpenplanetInfo {
+    Version = Match[1],
+    Branch = Match[2],
+    BuildName = Match[3],
+    BuildDate = Match[4]
+  };
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Load() {
+  declare netwrite Boolean LibOpenplanet_HasOpenplanet for UI;
+
+  declare Openplanet = Private_TestForOpenplanet(System.ExtraTool_Info);
+
+  G_HasOpenplanet = Openplanet.Version != "";
+  LibOpenplanet_HasOpenplanet = G_HasOpenplanet;
+
+  if (G_HasOpenplanet) {
+    Log::Log("[Openplanet] Version: "^Openplanet.Version^" | Branch: "^Openplanet.Branch^" | Build name: "^Openplanet.BuildName^" | Build date: "^Openplanet.BuildDate);
+  }
+}
+
+Boolean HasOpenplanet() {
+  return G_HasOpenplanet;
+}
