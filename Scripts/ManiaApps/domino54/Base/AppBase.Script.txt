@@ -1,18 +1,17 @@
 /**
  * @name AppBase.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2025-03-13
  *
  * Base for a standard ManiaApp.
  * Based on Nadeo's standard AppBase.Script.txt but without #RequireContext.
  */
 
-#Const AB_Version     "2024-10-30"
+#Const AB_Version     "2025-03-13"
 #Const AB_ScriptName  "ManiaApps/domino54/AppBase.Script.txt"
 
 #Include "Libs/Nadeo/Env.Script.txt" as Env
 #Include "Libs/Nadeo/Log.Script.txt" as Log
-#Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
 
 // ---------------------------------- //
@@ -32,7 +31,6 @@ Log::RegisterScript(AB_ScriptName, AB_Version);
 Log::RegisterScript(Env::ScriptName, Env::Version);
 Log::RegisterScript(Log::ScriptName, Log::Version);
 Log::RegisterScript(Layers::ScriptName, Layers::Version);
-Log::RegisterScript(HttpClient::ScriptName, HttpClient::Version);
 ***
 
 ***AB_LoadLibraries***
@@ -42,12 +40,6 @@ Env::Load();
 Env::Set(S_ScriptEnvironment);
 Log::Load();
 Layers::Load();
-HttpClient::Load();
-***
-
-***AB_Yield***
-***
-HttpClient::Yield();
 ***
 
 ***AB_UnloadLibraries***
@@ -55,7 +47,6 @@ HttpClient::Yield();
 Layers::Unload();
 Log::Unload();
 Env::Unload();
-HttpClient::Unload();
 ***
 
 // ---------------------------------- //
@@ -71,8 +62,10 @@ HttpClient::Unload();
  * This should be the only place in the complete ManiaApp where the script yields.
  */
 Void AB_Yield() {
-  yield;
   +++AB_Yield+++
+
+  // yield after the loop, because some events may be otherwise missed.
+  yield;
 }
 
 /**

@@ -1,8 +1,11 @@
 /**
  * @name GaragePlaygroundAPI.Script.txt
  * @author domino54
- * @version 2024-11-19
+ * @version 2025-03-13
  */
+
+#Const Version      "2025-03-13"
+#Const ScriptName   "ManiaApps/domino54/Garage/Core/GaragePlaygroundAPI.Script.txt"
 
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
 
@@ -21,31 +24,33 @@ Text Private_CreateManialinkIsSpawned() {
 <manialink version="3" name="{{{C_ManialinkLayerId}}}">
 <script><!--
 
-wait(PageIsVisible && !ParentApp.Playground.IsLoadingScreen);
+main() {
+  wait(PageIsVisible && !ParentApp.Playground.IsLoadingScreen);
 
-declare CMlScript _Context = This;
+  declare CMlScript _Context = This;
 
-switchtype (_Context) {
-  case CTmMlScriptIngame: {
-    declare Context <=> (_Context as CTmMlScriptIngame);
+  switchtype (_Context) {
+    case CTmMlScriptIngame: {
+      declare Context <=> (_Context as CTmMlScriptIngame);
 
-    wait(Context.GUIPlayer != Null && Context.GUIPlayer.IsSpawned);
+      wait(Context.GUIPlayer != Null && Context.GUIPlayer.IsSpawned);
+    }
+
+    case CSmMlScriptIngame: {
+      declare Context <=> (_Context as CSmMlScriptIngame);
+
+      wait(Context.GUIPlayer != Null && Context.GUIPlayer.SpawnStatus == CSmPlayer::ESpawnStatus::Spawned);
+    }
+
+    default: {
+      assert(False, "This layer should be created only in a playground app");
+    }
   }
 
-  case CSmMlScriptIngame: {
-    declare Context <=> (_Context as CSmMlScriptIngame);
+  declare Boolean HasSpawnedOnce for Page;
 
-    wait(Context.GUIPlayer != Null && Context.GUIPlayer.SpawnStatus == CSmPlayer::ESpawnStatus::Spawned);
-  }
-
-  default: {
-    assert(False, "This layer should be created only in a playground app");
-  }
+  HasSpawnedOnce = True;
 }
-
-declare Boolean HasSpawnedOnce for Page;
-
-HasSpawnedOnce = True;
 
 --></script>
 </manialink>

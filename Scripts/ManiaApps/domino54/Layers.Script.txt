@@ -1,0 +1,422 @@
+/**
+ * @name Layers.Script.txt
+ * @author domino54
+ * @version 2025-03-13
+ *
+ * Library meant as a seamless extension for Nadeo's Layers library within playground ManiaApps.
+ * Adds an optional parameter to create separate instances of the layer for each split screen viewport.
+ * It can be used to provide split screen support to any game mode.
+ *
+ * If there is a need to hide/show a layer, it is advised to use visibility functions of this library only.
+ * This is because the library allows hiding the layer on a specific screen, which will persistently hide
+ * the layer on that screen, even if the layer is globally hidden and later shown on all screens at once.
+ */
+
+#Const Version    "2025-03-13"
+#Const ScriptName "ManiaApps/domino54/Layers.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Text[Integer][Text] G_LayerGroups;
+declare Boolean[Text] G_LayerGroupVisibility;
+declare Boolean[Integer][Text] G_SubLayerVisibility;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+/**
+ * @returns The name of a layer for a specific screen.
+ */
+Text Private_GetSubLayerName(Text _LayerName, Integer _ScreenNum) {
+  return """{{{_LayerName}}}#{{{_ScreenNum}}}""";
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+/**
+ * @returns True if a layer exists on specific screen.
+ */
+Boolean Exists(Text _LayerName, Integer _ScreenNum) {
+  declare SubLayerName = Private_GetSubLayerName(_LayerName, _ScreenNum);
+
+  return Layers::Exists(SubLayerName);
+}
+
+/**
+ * @returns True if a layer exists on any screen.
+ */
+Boolean Exists(Text _LayerName) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::Exists(_LayerName);
+  }
+
+  foreach (SubLayerName in G_LayerGroups[_LayerName]) {
+    if (Layers::Exists(SubLayerName)) {
+      return True;
+    }
+  }
+
+  return False;
+}
+
+/**
+ * Get a layer by its name on specific screen.
+ */
+CUILayer Get(Text _LayerName, Integer _ScreenNum) {
+  declare SubLayerName = Private_GetSubLayerName(_LayerName, _ScreenNum);
+
+  return Layers::Get(SubLayerName);
+}
+
+/**
+ * Get a layer by its name.
+ */
+CUILayer Get(Text _LayerName) {
+  return Layers::Get(_LayerName);
+}
+
+/**
+ * Get all layers by their name, with their screen number.
+ */
+CUILayer[Integer] GetAll(Text _LayerName) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return [];
+  }
+
+  declare CUILayer[Integer] Result;
+
+  foreach (ScreenNum => SubLayerName in G_LayerGroups[_LayerName]) {
+    Result[ScreenNum] = Layers::Get(SubLayerName);
+  }
+
+  return Result;
+}
+
+/**
+ * Destroy a layer.
+ */
+Void Destroy(Text _LayerName) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::Destroy(_LayerName);
+  }
+
+  foreach (SubLayerName in G_LayerGroups[_LayerName]) {
+    Layers::Destroy(SubLayerName);
+  }
+
+  declare Removed0 = G_LayerGroups.removekey(_LayerName); // @mslint-disable-line no-unused-variables
+  declare Removed1 = G_LayerGroupVisibility.removekey(_LayerName); // @mslint-disable-line no-unused-variables
+  declare Removed2 = G_SubLayerVisibility.removekey(_LayerName); // @mslint-disable-line no-unused-variables
+}
+
+/**
+ * Destroy all layers.
+ */
+Void DestroyAll() {
+  Layers::DestroyAll();
+
+  G_LayerGroups.clear();
+  G_LayerGroupVisibility.clear();
+  G_SubLayerVisibility.clear();
+}
+
+/**
+ * Create a new layer.
+ * If a layer with the same name already exists, destroys and replaces it.
+ *
+ * @param _LayerName The name of the layer to create.
+ * @param _SplitScreen If True, a copy of the layer will be created for all split screen viewports.
+ * @param _WithGlobal If True, an additional layer instance will be created for the global viewport.
+ * @param _LayerManialink The content of the layer's manialink page.
+ */
+Void Create(Text _LayerName, Boolean _SplitScreen, Boolean _WithGlobal, Text _LayerManialink) {
+  if (!_SplitScreen || SplitScreenCount <= 0) {
+    return Layers::Create(_LayerName, _LayerManialink);
+  }
+
+  if (Exists(_LayerName)) {
+    Destroy(_LayerName);
+  }
+
+  G_LayerGroups[_LayerName] = [];
+  G_LayerGroupVisibility[_LayerName] = True;
+  G_SubLayerVisibility = [];
+
+  declare StartIndex = 1;
+
+  if (_WithGlobal) {
+    StartIndex = 0;
+  }
+
+  for (ScreenNum, StartIndex, SplitScreenCount) {
+    declare SubLayerName = Private_GetSubLayerName(_LayerName, ScreenNum);
+
+    Layers::Create(SubLayerName, _LayerManialink);
+
+    declare NewLayer = Layers::Get(SubLayerName);
+
+    assert(NewLayer != Null, "Could not create a new layer");
+
+    SplitScreenAssignLayer(NewLayer, ScreenNum);
+
+    G_LayerGroups[_LayerName][ScreenNum] = SubLayerName;
+  }
+}
+
+Void Create(Text _LayerName, Boolean _SplitScreen, Text _LayerManialink) {
+  Create(_LayerName, _SplitScreen, False, _LayerManialink);
+}
+
+Void Create(Text _LayerName, Text _LayerManialink) {
+  Layers::Create(_LayerName, _LayerManialink);
+}
+
+Void Create(Text _LayerName, Boolean _SplitScreen, Boolean _WithGlobal) {
+  Create(_LayerName, _SplitScreen, _WithGlobal, "");
+}
+
+Void Create(Text _LayerName, Boolean _SplitScreen) {
+  Create(_LayerName, _SplitScreen, False, "");
+}
+
+Void Create(Text _LayerName) {
+  Layers::Create(_LayerName);
+}
+
+/**
+ * Update layer's manialink on a specific screen.
+ */
+Void Update(Text _LayerName, Integer _ScreenNum, Text _LayerManialink) {
+  declare SubLayerName = Private_GetSubLayerName(_LayerName, _ScreenNum);
+
+  Layers::Update(SubLayerName, _LayerManialink);
+}
+
+/**
+ * Update a layer manialink.
+ */
+Void Update(Text _LayerName, Text _LayerManialink) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::Update(_LayerName, _LayerManialink);
+  }
+
+  foreach (SubLayerName in G_LayerGroups[_LayerName]) {
+    Layers::Update(SubLayerName, _LayerManialink);
+  }
+}
+
+/**
+ * Set the type of a layer on a specific screen.
+ */
+Void SetType(Text _LayerName, Integer _ScreenNum, CUILayer::EUILayerType _LayerType) {
+  declare SubLayerName = Private_GetSubLayerName(_LayerName, _ScreenNum);
+
+  Layers::SetType(SubLayerName, _LayerType);
+}
+
+/**
+ * Set the type of a layer.
+ */
+Void SetType(Text _LayerName, CUILayer::EUILayerType _LayerType) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::SetType(_LayerName, _LayerType);
+  }
+
+  foreach (SubLayerName in G_LayerGroups[_LayerName]) {
+    Layers::SetType(SubLayerName, _LayerType);
+  }
+}
+
+/**
+ * Set the in/out animation type of a layer on a specific screen.
+ */
+Void SetAnimationType(Text _LayerName, Integer _ScreenNum, CUILayer::EUILayerAnimation _LayerAnimation) {
+  declare SubLayerName = Private_GetSubLayerName(_LayerName, _ScreenNum);
+
+  Layers::SetAnimationType(SubLayerName, _LayerAnimation);
+}
+
+/**
+ * Set the in/out animation type of a layer.
+ */
+Void SetAnimationType(Text _LayerName, CUILayer::EUILayerAnimation _LayerAnimation) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::SetAnimationType(_LayerName, _LayerAnimation);
+  }
+
+  foreach (SubLayerName in G_LayerGroups[_LayerName]) {
+    Layers::SetAnimationType(SubLayerName, _LayerAnimation);
+  }
+}
+
+/**
+ * Set the out animation type of a layer on a specific screen.
+ */
+Void SetAnimationTypeOut(Text _LayerName, Integer _ScreenNum, CUILayer::EUILayerAnimation _LayerAnimation) {
+  declare SubLayerName = Private_GetSubLayerName(_LayerName, _ScreenNum);
+
+  Layers::SetAnimationTypeOut(SubLayerName, _LayerAnimation);
+}
+
+/**
+ * Set the out animation type of a layer.
+ */
+Void SetAnimationTypeOut(Text _LayerName, CUILayer::EUILayerAnimation _LayerAnimation) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::SetAnimationTypeOut(_LayerName, _LayerAnimation);
+  }
+
+  foreach (SubLayerName in G_LayerGroups[_LayerName]) {
+    Layers::SetAnimationTypeOut(SubLayerName, _LayerAnimation);
+  }
+}
+
+/**
+ * Set the in animation type of a layer on a specific screen.
+ */
+Void SetAnimationTypeIn(Text _LayerName, Integer _ScreenNum, CUILayer::EUILayerAnimation _LayerAnimation) {
+  declare SubLayerName = Private_GetSubLayerName(_LayerName, _ScreenNum);
+
+  Layers::SetAnimationTypeIn(SubLayerName, _LayerAnimation);
+}
+
+/**
+ * Set the in animation type of a layer.
+ */
+Void SetAnimationTypeIn(Text _LayerName, CUILayer::EUILayerAnimation _LayerAnimation) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::SetAnimationTypeIn(_LayerName, _LayerAnimation);
+  }
+
+  foreach (SubLayerName in G_LayerGroups[_LayerName]) {
+    Layers::SetAnimationTypeIn(SubLayerName, _LayerAnimation);
+  }
+}
+
+/**
+ * Set the layer visibility on a specific screen.
+ */
+Void SetVisibility(Text _LayerName, Integer _ScreenNum, Boolean _IsVisible) {
+  if (!G_LayerGroups.existskey(_LayerName) || !G_LayerGroups[_LayerName].existskey(_ScreenNum)) {
+    return;
+  }
+
+  declare SubLayerName = G_LayerGroups[_LayerName][_ScreenNum];
+  declare IsLayerGroupVisible = !G_LayerGroupVisibility.existskey(_LayerName) || G_LayerGroupVisibility[_LayerName];
+
+  if (!G_SubLayerVisibility.existskey(_LayerName)) {
+    G_SubLayerVisibility[_LayerName] = [];
+  }
+
+  G_SubLayerVisibility[_LayerName][_ScreenNum] = _IsVisible;
+
+  Layers::SetVisibility(SubLayerName, IsLayerGroupVisible && _IsVisible);
+}
+
+/**
+ * Set the layer visibility.
+ */
+Void SetVisibility(Text _LayerName, Boolean _IsVisible) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::SetVisibility(_LayerName, _IsVisible);
+  }
+
+  G_LayerGroupVisibility[_LayerName] = _IsVisible;
+
+  foreach (ScreenNum => SubLayerName in G_LayerGroups[_LayerName]) {
+    declare IsSubLayerVisible = !G_SubLayerVisibility.existskey(_LayerName) || !G_SubLayerVisibility[_LayerName].existskey(ScreenNum) || G_SubLayerVisibility[_LayerName][ScreenNum];
+
+    Layers::SetVisibility(SubLayerName, IsSubLayerVisible);
+  }
+}
+
+/**
+ * Show a layer on a specific screen.
+ */
+Void Show(Text _LayerName, Integer _ScreenNum) {
+  SetVisibility(_LayerName, _ScreenNum, True);
+}
+
+/**
+ * Show a layer.
+ */
+Void Show(Text _LayerName) {
+  SetVisibility(_LayerName, True);
+}
+
+/**
+ * Hide a layer on a specific screen.
+ */
+Void Hide(Text _LayerName, Integer _ScreenNum) {
+  SetVisibility(_LayerName, _ScreenNum, False);
+}
+
+/**
+ * Hide a layer.
+ */
+Void Hide(Text _LayerName) {
+  SetVisibility(_LayerName, False);
+}
+
+/**
+ * Check if a layer is visible on a specific screen.
+ */
+Boolean CheckVisible(Text _LayerName, Integer _ScreenNum) {
+  declare SubLayerName = Private_GetSubLayerName(_LayerName, _ScreenNum);
+
+  return Layers::CheckVisible(SubLayerName);
+}
+
+/**
+ * Check if a layer is visible on any screen.
+ */
+Boolean CheckVisible(Text _LayerName) {
+  if (!G_LayerGroups.existskey(_LayerName)) {
+    return Layers::CheckVisible(_LayerName);
+  }
+
+  foreach (SubLayerName in G_LayerGroups[_LayerName]) {
+    if (Layers::CheckVisible(SubLayerName)) {
+      return True;
+    }
+  }
+
+  return False;
+}
+
+/**
+ * Get the name of a layer.
+ * Note: Currently does not support screens.
+ */
+Text GetName(CUILayer _Layer) {
+  return Layers::GetName(_Layer);
+}
+
+/**
+ * Get the name of a layer.
+ * Note: Currently does not support screens.
+ */
+Text GetName(Ident _LayerId) {
+  return Layers::GetName(_LayerId);
+}
+
+/**
+ * Unload the library.
+ */
+Void Unload() {
+  DestroyAll();
+}
+
+/**
+ * Load the library.
+ */
+Void Load() {
+  Unload();
+}

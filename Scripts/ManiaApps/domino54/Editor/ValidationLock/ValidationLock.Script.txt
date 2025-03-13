@@ -1,10 +1,10 @@
 /**
  * @name ValidationLock.Script.txt
  * @author domino54
- * @version 2024-11-06
+ * @version 2025-03-13
  */
 
-#Const Version      "2024-11-06"
+#Const Version      "2025-03-13"
 #Const ScriptName   "ManiaApps/domino54/Editor/ValidationLock/ValidationLock.Script.txt"
 
 #Include "TextLib" as TL
@@ -25,7 +25,7 @@
 // ---------------------------------- //
 
 declare Boolean G_IsEnabled;
-declare Boolean G_HasCopiedObjectves;
+declare Boolean G_HasCopiedObjectives;
 
 declare Integer G_Copied_TMObjective_AuthorTime;
 declare Integer G_Copied_TMObjective_GoldTime;
@@ -102,7 +102,7 @@ Void ShowDialog() {
 
 Void Unload() {
   G_IsEnabled = False;
-  G_HasCopiedObjectves = False;
+  G_HasCopiedObjectives = False;
 
   Layers::Destroy(C_ButtonManialinkLayerId);
   Layers::Destroy(C_DialogManialinkLayerId);
@@ -158,11 +158,11 @@ Void CopyObjectives() {
   G_Copied_ObjectiveTextSilver = Map.ObjectiveTextSilver;
   G_Copied_ObjectiveTextBronze = Map.ObjectiveTextBronze;
 
-  G_HasCopiedObjectves = True;
+  G_HasCopiedObjectives = True;
 }
 
 CMapType::ValidationStatus RestoreObjectives(CMapType::ValidationStatus _ProjectedStatus) {
-  if (!IsEnabled() || !G_HasCopiedObjectves) {
+  if (!IsEnabled() || !G_HasCopiedObjectives) {
     return _ProjectedStatus;
   }
 

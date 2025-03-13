@@ -1,0 +1,55 @@
+/**
+ * @name CustomSkins_ClientPlayground.Script.txt
+ * @author domino54
+ * @version 2025-03-13
+ */
+
+#Const Version      "2025-03-13"
+#Const ScriptName   "Libs/domino54/CustomSkins/CustomSkins_ClientPlayground.Script.txt"
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Integer G_LastUpdate;
+
+// ---------------------------------- //
+// Private functions
+// ---------------------------------- //
+
+Void Private_SendPreferencesToServer() {
+  declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for LocalUser;
+  declare persistent Text[] Persistent_LibCustomSkins_UseCustomOverArchetype for LocalUser;
+
+  declare netwrite Text[Text] Net_LibCustomSkins_ModelIdToSkinId for UI;
+  declare netwrite Text[] Net_LibCustomSkins_UseCustomOverArchetype for UI;
+
+  Net_LibCustomSkins_ModelIdToSkinId = Persistent_LibCustomSkins_ModelIdToSkinId;
+  Net_LibCustomSkins_UseCustomOverArchetype = Persistent_LibCustomSkins_UseCustomOverArchetype;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  G_LastUpdate = -1;
+}
+
+Void Load() {
+  Unload();
+
+  Private_SendPreferencesToServer();
+}
+
+Void Loop() {
+  declare persistent Integer Persistent_LibCustomSkins_LastUpdate for LocalUser;
+
+  if (G_LastUpdate == Persistent_LibCustomSkins_LastUpdate) {
+    return;
+  }
+
+  G_LastUpdate = Persistent_LibCustomSkins_LastUpdate;
+
+  Private_SendPreferencesToServer();
+}

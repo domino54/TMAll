@@ -7,6 +7,8 @@
 #Const Version      "2024-12-01"
 #Const ScriptName   "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt"
 
+#Include "Libs/domino54/CustomSkins/CustomSkins_Common.Script.txt" as Common
+
 // ---------------------------------- //
 // Global variables
 // ---------------------------------- //
@@ -18,7 +20,10 @@ declare CMode G_Mode;
 // ---------------------------------- //
 
 CUIConfig Private_GetUI(CUser _User) {
-  if (_User == Null) return Null;
+  if (_User == Null) {
+    return Null;
+  }
+
   return G_Mode.UIManager.GetUI(_User);
 }
 
@@ -30,14 +35,15 @@ Void Load(CMode _Mode) {
   G_Mode <=> _Mode;
 }
 
-Text GetPlayerSkinId(CUser _User, Text _ModelId) {
+Text GetPlayerSkinId(CUser _User, Text _ModelId, Text _SkinCategoryId) {
+  declare Index = Common::GetIndex(_ModelId, _SkinCategoryId);
   declare UI <=> Private_GetUI(_User);
 
   if (UI != Null) {
     declare netread Text[Text] Net_LibCustomSkins_ModelIdToSkinId for UI;
 
-    if (Net_LibCustomSkins_ModelIdToSkinId.existskey(_ModelId)) {
-      return Net_LibCustomSkins_ModelIdToSkinId[_ModelId];
+    if (Net_LibCustomSkins_ModelIdToSkinId.existskey(Index)) {
+      return Net_LibCustomSkins_ModelIdToSkinId[Index];
     }
   }
 
@@ -48,15 +54,31 @@ Text GetPlayerSkinId(CUser _User, Text _ModelId) {
 
   declare persistent Text[Text] Persistent_LibCustomSkins_ModelIdToSkinId for _User;
 
-  if (Persistent_LibCustomSkins_ModelIdToSkinId.existskey(_ModelId)) {
-    return Persistent_LibCustomSkins_ModelIdToSkinId[_ModelId];
+  if (Persistent_LibCustomSkins_ModelIdToSkinId.existskey(Index)) {
+    return Persistent_LibCustomSkins_ModelIdToSkinId[Index];
   }
 
   return "";
 }
 
+Text GetPlayerSkinId(CUser _User, Text _ModelId) {
+  return GetPlayerSkinId(_User, _ModelId, Common::C_DefaultSkinCategoryId);
+}
+
+Text GetPlayerSkinId(CPlayer _Player, Text _ModelId, Text _SkinCategoryId) {
+  return GetPlayerSkinId(_Player.User, _ModelId, _SkinCategoryId);
+}
+
 Text GetPlayerSkinId(CPlayer _Player, Text _ModelId) {
-  return GetPlayerSkinId(_Player.User, _ModelId);
+  return GetPlayerSkinId(_Player.User, _ModelId, Common::C_DefaultSkinCategoryId);
+}
+
+Text GetPlayerSkinId(CClient _Client, Text _ModelId, Text _SkinCategoryId) {
+  return GetPlayerSkinId(_Client.User, _ModelId, _SkinCategoryId);
+}
+
+Text GetPlayerSkinId(CClient _Client, Text _ModelId) {
+  return GetPlayerSkinId(_Client.User, _ModelId, Common::C_DefaultSkinCategoryId);
 }
 
 Boolean GetPlayerUseCustomOverArchetype(CUser _User, Text _ModelId) {
@@ -82,4 +104,8 @@ Boolean GetPlayerUseCustomOverArchetype(CUser _User, Text _ModelId) {
 
 Boolean GetPlayerUseCustomOverArchetype(CPlayer _Player, Text _ModelId) {
   return GetPlayerUseCustomOverArchetype(_Player.User, _ModelId);
+}
+
+Boolean GetPlayerUseCustomOverArchetype(CClient _Client, Text _ModelId) {
+  return GetPlayerUseCustomOverArchetype(_Client.User, _ModelId);
 }

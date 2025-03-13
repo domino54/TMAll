@@ -1,0 +1,119 @@
+/**
+ * @name LB_Countdown321Go.Script.txt
+ * @author domino54
+ * @version 2025-03-13
+ */
+
+#Const Version      "2025-03-13"
+#Const ScriptName   "ManiaApps/domino54/Ingame/Countdown321Go/LB_Countdown321Go.Script.txt"
+
+#Const C_CustomEventType_PlaySound    "321go:play_sound"
+
+Text Build() {
+  return """
+<manialink version="3" name="L_Countdown321Go">
+<stylesheet>
+  <style class="Digit" size="24 24" halign="center" valign="center" />
+</stylesheet>
+
+<frame id="Frame_Countdown321Go" pos="0 12" z-index="-1">
+  <quad class="Digit" style="321Go" opacity="0" />
+  <quad class="Digit" style="321Go" opacity="0" />
+  <quad class="Digit" style="321Go" opacity="0" />
+  <quad class="Digit" style="321Go" opacity="0" />
+</frame>
+
+<script><!--
+
+#Include "MathLib" as ML
+#Include "TextLib" as TL
+
+#Const C_CountdownDigitsInSecond  1.2
+#Const C_CountdownMaximumDigit    3
+
+#Const C_Easing CAnimManager::EAnimManagerEasing::Linear
+#Const C_SubStyles ["Go!", "1", "2", "3"]
+
+Void Anim321(CMlQuad _Quad) {
+  _Quad.Opacity = 1.0;
+  _Quad.RelativeScale = 1.0;
+
+  AnimMgr.Add(_Quad, "<quad scale='1.5' />", 500, C_Easing);
+  AnimMgr.Add(_Quad, "<quad opacity='0' />", Now + 400, 100, C_Easing);
+}
+
+Void AnimGo(CMlQuad _Quad) {
+  _Quad.Opacity = 1.0;
+  _Quad.RelativeScale = 2.0;
+
+  AnimMgr.Add(_Quad, "<quad scale='2.125' />", 50, C_Easing);
+  AnimMgr.AddChain(_Quad, "<quad scale='2' opacity='0.8' />", 50, C_Easing);
+  AnimMgr.AddChain(_Quad, "<quad opacity='0' />", 300, C_Easing);
+}
+
+main() {
+  yield;
+
+  declare Frame_Countdown321Go <=> (Page.GetFirstChild("Frame_Countdown321Go") as CMlFrame);
+  declare CMlQuad[] Quad_Digits;
+
+  foreach (I => Control in Frame_Countdown321Go.Controls) {
+    declare Quad <=> (Control as CMlQuad);
+
+    Quad_Digits.add(Quad);
+    Quad.Substyle = C_SubStyles[I];
+  }
+
+  yield;
+
+  declare PrevCountdownDigit = 1;
+
+  while (True) {
+    wait(GUIPlayer != Null && GUIPlayer.IsSpawned && GUIPlayer.RaceStartTime > 0);
+
+    declare CountdownDigit = -ML::FloorInteger((GameTime - GUIPlayer.RaceStartTime) * C_CountdownDigitsInSecond / 1000);
+
+    if (PrevCountdownDigit == CountdownDigit) {
+      yield;
+      continue;
+    }
+
+    PrevCountdownDigit = CountdownDigit;
+
+    if (CountdownDigit > C_CountdownMaximumDigit || CountdownDigit < -1) {
+      yield;
+      continue;
+    }
+
+    if (CountdownDigit >= 0) {
+      SendCustomEvent("{{{C_CustomEventType_PlaySound}}}", [TL::ToText(CountdownDigit)]);
+    }
+
+    if (!PageIsVisible) {
+      yield;
+      continue;
+    }
+
+    foreach (ControlDigit => Quad in Quad_Digits) {
+      if (ControlDigit == CountdownDigit) {
+        Quad.Show();
+
+        if (CountdownDigit == 0) {
+          AnimGo(Quad);
+        } else {
+          Anim321(Quad);
+        }
+      }
+      else {
+        Quad.Hide();
+      }
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

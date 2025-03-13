@@ -1,0 +1,46 @@
+/**
+ * @name Openplanet_Server.Script.txt
+ * @author domino54
+ * @version 2025-03-13
+ */
+
+#Const Version      "2025-03-13"
+#Const ScriptName   "Libs/domino54/Openplanet/Openplanet_Server.Script.txt"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Boolean HasOpenplanet(CUIConfig _UI) {
+  if (_UI == Null) {
+    return False;
+  }
+
+  declare netread Boolean LibOpenplanet_HasOpenplanet for _UI;
+
+  return LibOpenplanet_HasOpenplanet;
+}
+
+Boolean HasOpenplanet(CUser _User) {
+  if (_User == Null) {
+    return False;
+  }
+
+  return HasOpenplanet(UIManager.GetUI(_User));
+}
+
+Boolean HasOpenplanet(CPlayer _Player) {
+  if (_Player == Null) {
+    return False;
+  }
+
+  return HasOpenplanet(UIManager.GetUI(_Player));
+}
+
+Boolean HasOpenplanet(CClient _Client) {
+  if (_Client == Null) {
+    return False;
+  }
+
+  return HasOpenplanet(UIManager.GetUI(_Client));
+}

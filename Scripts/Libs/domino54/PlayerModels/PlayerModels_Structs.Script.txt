@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Structs.Script.txt
  * @author domino54
- * @version 2025-01-04
+ * @version 2025-03-13
  */
 
-#Const Version      "2025-01-04"
+#Const Version      "2025-03-13"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Structs.Script.txt"
 
 // ---------------------------------- //
@@ -32,12 +32,12 @@
   Text Author;
   Integer Rarity;
   Integer SortIndex;
-  Text[] Groups;
+  Text[] Categories;
   Text[Text] Assets;
   Boolean IsCustom;
 }
 
-#Struct K_SkinGroup {
+#Struct K_SkinCategory {
   Text Id;
   Text Name;
   Text[Text] Assets;
@@ -66,9 +66,9 @@
   Text ItemPath;
 }
 
-#Struct K_SkinResult {
+#Struct K_SkinIdResult {
   Text SkinId;
-  Text SkinGroupId;
+  Text SkinCategoryId;
 }
 
 // ---------------------------------- //
@@ -98,11 +98,12 @@ Text Manialink() {
   Text Author;
   Integer Rarity;
   Integer SortIndex;
+  Text[] Categories;
   Text[Text] Assets;
   Boolean IsCustom;
 }
 
-#Struct K_SkinGroup {
+#Struct K_SkinCategory {
   Text Id;
   Text Name;
   Text[Text] Assets;
@@ -131,9 +132,9 @@ Text Manialink() {
   Text ItemPath;
 }
 
-#Struct K_SkinResult {
+#Struct K_SkinIdResult {
   Text SkinId;
-  Text SkinGroupId;
+  Text SkinCategoryId;
 }
   """;
 }

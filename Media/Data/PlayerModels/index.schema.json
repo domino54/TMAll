@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "title": "An index file for loading player models. This is the central and sole definition of all models and skins present in the title pack. The file must be located in the directory corresponsing to path `file://Media/Data/PlayerModels/index.json`.",
+  "title": "An index file for loading player models. This is the central and sole definition of all models and skins present in the title pack. The file must be located in the directory corresponding to path `file://Media/Data/PlayerModels/index.json`.",
   "additionalProperties": false,
   "properties": {
     "$schema": {

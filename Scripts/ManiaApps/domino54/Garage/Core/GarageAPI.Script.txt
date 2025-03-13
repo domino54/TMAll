@@ -1,14 +1,14 @@
 /**
  * @name GarageAPI.Script.txt
  * @author domino54
- * @version 2025-01-04
+ * @version 2025-03-13
  */
 
-#Const Version      "2025-01-04"
+#Const Version      "2025-03-13"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt"
 
 #Include "TextLib" as TL
-#Include "Libs/domino54/CustomSkins/CustomSkins_Client.Script.txt" as CustomSkins
+#Include "Libs/domino54/CustomSkins/CustomSkins_ClientCommon.Script.txt" as CustomSkins
 #Include "Libs/domino54/Garage/ServerComm.Script.txt" as GarageServer
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PMData
 #Include "Libs/domino54/PlayerModels/PlayerModels_Structs.Script.txt" as PMStructs
@@ -40,8 +40,9 @@
 // Global variables
 // ---------------------------------- //
 
-declare Text G_LibGarageAPI_PreviewModelId;
-declare Text G_LibGarageAPI_PreviewSkinId;
+declare Text G_PreviewModelId;
+declare Text G_PreviewSkinId;
+declare Text G_PreviewSkinCategoryId;
 
 // ---------------------------------- //
 // Public functions
@@ -55,10 +56,6 @@ Void Load() {
   Unload();
 
   PMData::Load();
-}
-
-Boolean IsLoading() {
-  return PMData::Loading();
 }
 
 Void SendModeEvent(Text _CustomEventName, Text[] _CustomEventData) {
@@ -87,17 +84,33 @@ Void Close() {
   }
 }
 
+Text GetSelectedSkinId(Text _ModelId, Text _SkinCategoryId) {
+  return CustomSkins::GetPlayerSkinId(_ModelId, _SkinCategoryId);
+}
+
+Void SetSelectedSkinId(Text _ModelId, Text _SkinCategoryId, Text _SkinId) {
+  return CustomSkins::SetPlayerSkinId(_ModelId, _SkinCategoryId, _SkinId);
+}
+
+Boolean GetPreferCustom(Text _ModelId) {
+  return CustomSkins::GetPlayerUseCustomOverArchetype(_ModelId);
+}
+
+Void SetPreferCustom(Text _ModelId, Boolean _PreferCustom) {
+  return CustomSkins::SetPlayerUseCustomOverArchetype(_ModelId, _PreferCustom);
+}
+
 Boolean HasSeenTutorial(Integer _TutorialVersion) {
-  declare /* persistent */ Integer Garage_SeenTutorial for LocalUser;
+  // declare persistent Integer Garage_SeenTutorial for LocalUser;
 
   // return Garage_SeenTutorial >= _TutorialVersion;
   return True;
 }
 
 Void MarkTutorialAsSeen(Integer _TutorialVersion) {
-  declare /* persistent */ Integer Garage_SeenTutorial for LocalUser;
+  // declare persistent Integer Garage_SeenTutorial for LocalUser;
 
-  Garage_SeenTutorial = _TutorialVersion;
+  // Garage_SeenTutorial = _TutorialVersion;
 }
 
 Boolean IsVehicles() {
@@ -112,19 +125,40 @@ K_Model[] GetSelectableModels() {
   return PMData::GetModelsList();
 }
 
-K_Skin[] GetSelectableSkins(Text _ModelId) {
-  declare K_Skin[Text] SkinsToSort;
+K_Skin[] GetSelectableSkins(Text _ModelId, Text _SkinCategoryId) {
+  declare K_Skin[] Result;
 
-  foreach (Skin in PMData::GetSkinsListByModelId(_ModelId)) {
-    SkinsToSort[TL::ToUpperCase("""{{{Skin.IsCustom}}}|{{{Skin.SortIndex}}}|{{{Skin.Name}}}""")] = Skin;
+  // Add a default option for handling the unselected skin state.
+  Result.add(K_Skin {
+    Id = "",
+    Name = _("(randomized)"),
+    AppliesTo = _ModelId
+  });
+
+  // Add existing skin options.
+  declare K_Skin[Text] SkinsToSort;
+  declare Text[] ExistingSkinIds;
+
+  foreach (Skin in PMData::GetSkinsListByModelId(_ModelId, _SkinCategoryId)) {
+    SkinsToSort[TL::ToUpperCase("""{{{Skin.IsCustom}}}|{{{Skin.SortIndex}}}|{{{Skin.Name}}}|{{{Skin.Id}}}""")] = Skin;
   }
 
   SkinsToSort = SkinsToSort.sortkey();
 
-  declare K_Skin[] Result;
-
   foreach (Skin in SkinsToSort) {
     Result.add(Skin);
+    ExistingSkinIds.add(Skin.Id);
+  }
+
+  // If it doesn't exist in the data, add the current skin ID as a fallback option.
+  declare PlayerSkinId = GetSelectedSkinId(_ModelId, _SkinCategoryId);
+
+  if (PlayerSkinId != "" && !ExistingSkinIds.exists(PlayerSkinId)) {
+    Result.add(K_Skin {
+      Id = PlayerSkinId,
+      Name = PlayerSkinId,
+      AppliesTo = _ModelId
+    });
   }
 
   return Result;
@@ -140,10 +174,10 @@ Text[] GetSelectableModelIds() {
   return Result;
 }
 
-Text[] GetSelectableSkinIds(Text _ModelId) {
+Text[] GetSelectableSkinIds(Text _ModelId, Text _SkinCategoryId) {
   declare Text[] Result;
 
-  foreach (Skin in PMData::GetSkinsListByModelId(_ModelId)) {
+  foreach (Skin in GetSelectableSkins(_ModelId, _SkinCategoryId)) {
     Result.add(Skin.Id);
   }
 
@@ -155,13 +189,21 @@ Boolean GetUsesArchetype(Text _ModelId) {
 }
 
 Text GetSkinId() {
-  return G_LibGarageAPI_PreviewSkinId;
+  return G_PreviewSkinId;
 }
 
 Void SetSkinId(Text _SkinId) {
-  G_LibGarageAPI_PreviewSkinId = _SkinId;
+  G_PreviewSkinId = _SkinId;
 
   GarageServer::SetPreviewSkinId(LocalUser, _SkinId);
+}
+
+Text GetSkinCategoryId() {
+  return G_PreviewSkinCategoryId;
+}
+
+Void SetSkinCategoryId(Text _SkinCategoryId) {
+  G_PreviewSkinCategoryId = _SkinCategoryId;
 }
 
 Text GetLastModelId() {
@@ -185,35 +227,20 @@ Text GetInitialModelId() {
   return "";
 }
 
-Text GetSelectedSkinId(Text _ModelId) {
-  return CustomSkins::GetPlayerSkinId(_ModelId);
-}
-
-Void SetSelectedSkinId(Text _ModelId, Text _SkinId) {
-  return CustomSkins::SetPlayerSkinId(_ModelId, _SkinId);
-}
-
-Boolean GetPreferCustom(Text _ModelId) {
-  return CustomSkins::GetPlayerUseCustomOverArchetype(_ModelId);
-}
-
-Void SetPreferCustom(Text _ModelId, Boolean _PreferCustom) {
-  return CustomSkins::SetPlayerUseCustomOverArchetype(_ModelId, _PreferCustom);
-}
-
 Text GetModelId() {
-  return G_LibGarageAPI_PreviewModelId;
+  return G_PreviewModelId;
 }
 
 Void SetModelId(Text _ModelId) {
-  G_LibGarageAPI_PreviewModelId = _ModelId;
+  G_PreviewModelId = _ModelId;
 
   declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
 
   Persistent_Garage_LastPlayerModelId = _ModelId;
 
-  declare PlayerSkinId = GetSelectedSkinId(_ModelId);
-  declare SkinIds = GetSelectableSkinIds(_ModelId);
+  declare SkinCategoryId = GetSkinCategoryId();
+  declare PlayerSkinId = GetSelectedSkinId(_ModelId, SkinCategoryId);
+  declare SkinIds = GetSelectableSkinIds(_ModelId, SkinCategoryId);
 
   GarageServer::SetPreviewModelId(LocalUser, _ModelId);
 
@@ -229,19 +256,35 @@ Void SetModelId(Text _ModelId) {
 }
 
 Text GetModelName(Text _ModelId, Text _Fallback) {
-  return PMData::GetPlayerModelAsset(_ModelId, C_GarageAssetId_ModelAliasName, _Fallback);
+  return PMData::GetModelAsset(_ModelId, C_GarageAssetId_ModelAliasName, _Fallback);
 }
 
 Text GetModelIconUrl(Text _ModelId) {
-  return PMData::GetPlayerModelAsset(_ModelId, C_GarageAssetId_ModelTabIcon, C_ImgBase^C_GarageDefaultModelTabIcon);
+  return PMData::GetModelAsset(_ModelId, C_GarageAssetId_ModelTabIcon, C_ImgBase^C_GarageDefaultModelTabIcon);
 }
 
-Text GetSkinIconUrl(Text _SkinId) {
+Text GetSkinCardUrl(K_Skin _Skin) {
+  declare Result = PMData::GetSkinAsset(_Skin.Id, C_GarageAssetId_SkinCardIcon, "");
+
+  if (Result == "") {
+    Result = PMData::GetModelAsset(_Skin.AppliesTo, C_GarageAssetId_SkinCardIcon, C_ImgBase^C_GarageDefaultSkinCardIcon);
+  }
+
+  return Result;
+}
+
+Text GetSkinCardUrl(Text _SkinId) {
   return PMData::GetSkinAsset(_SkinId, C_GarageAssetId_SkinCardIcon, C_ImgBase^C_GarageDefaultSkinCardIcon);
 }
 
-Text GetSkinPreviewUrl(Text _SkinId) {
-  return PMData::GetSkinAsset(_SkinId, C_GarageAssetId_SkinPreview, C_ImgBase^C_GarageDefaultSkinPreview);
+Text GetSkinPreviewUrl(Text _ModelId, Text _SkinId) {
+  declare Result = PMData::GetSkinAsset(_SkinId, C_GarageAssetId_SkinPreview, "");
+
+  if (Result == "") {
+    Result = PMData::GetModelAsset(_ModelId, C_GarageAssetId_SkinPreview, C_ImgBase^C_GarageDefaultSkinPreview);
+  }
+
+  return Result;
 }
 
 Text GetSkinAuthorName(Text _SkinId) {

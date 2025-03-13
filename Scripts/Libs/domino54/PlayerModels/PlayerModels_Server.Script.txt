@@ -1,14 +1,15 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2025-01-04
+ * @version 2025-03-13
  */
 
-#Const Version      "2025-01-04"
-#Const ScriptName   "Libs/domino54/PlayerModels_Server.Script.txt"
+#Const Version      "2025-03-13"
+#Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
 #Include "Libs/Nadeo/Log.Script.txt" as Log
+#Include "Libs/domino54/CommonPlayground.Script.txt" as Playground
 #Include "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt" as CustomSkins
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PMData
 
@@ -70,7 +71,6 @@ declare CMode G_Mode;
 declare K_Options G_Options;
 
 declare Text G_CurrentMapEnvironmentName;
-declare Text G_CurrentMapPlayerModelName;
 declare Text G_CurrentMapPlayerModelId;
 
 /**
@@ -118,10 +118,18 @@ Text Private_GetItemPath(Text _ItemPath) {
   return _ItemPath;
 }
 
+Text Private_GetRandomEntryInternalIndex(Text _ModelId, Text _SkinCategoryId) {
+  if (_SkinCategoryId == "" || _SkinCategoryId == PMData::C_DefaultSkinCategoryId) {
+    return _ModelId;
+  }
+
+  return """{{{_ModelId}}}:{{{_SkinCategoryId}}}""";
+}
+
 /**
  * Pick a random skin for the player and remember it until the title is unloaded.
  */
-Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId, Text _SkinGroupId) {
+Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId, Text _SkinCategoryId) {
   declare Text[Text][Text] LibPlayerModels_RandomizedSkins for LoadedTitle;
 
   // Login not initialized in the store yet.
@@ -130,16 +138,17 @@ Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId, Text _SkinGro
   }
 
   // There's already a random skin assigned to the model id.
-  // TODO: Store randomized skins per group
-  if (LibPlayerModels_RandomizedSkins[_Login].existskey(_ModelId)) {
-    return LibPlayerModels_RandomizedSkins[_Login][_ModelId];
+  declare Index = Private_GetRandomEntryInternalIndex(_ModelId, _SkinCategoryId);
+
+  if (LibPlayerModels_RandomizedSkins[_Login].existskey(Index)) {
+    return LibPlayerModels_RandomizedSkins[_Login][Index];
   }
 
   // Pick a random skin and keep it on the server side.
-  declare SkinId = PMData::GetRandomSkinIdByModelId(_ModelId, _SkinGroupId);
+  declare SkinId = PMData::GetRandomSkinIdByModelId(_ModelId, _SkinCategoryId);
 
   if (SkinId != "") {
-    LibPlayerModels_RandomizedSkins[_Login][_ModelId] = SkinId;
+    LibPlayerModels_RandomizedSkins[_Login][Index] = SkinId;
   }
 
   return SkinId;
@@ -148,17 +157,16 @@ Text Private_GetPlayerRandomizedSkinId(Text _Login, Text _ModelId, Text _SkinGro
 /**
  * Get the player skin preference or a randomized skin.
  */
-Text Private_GetPlayerSkinId(CUser _User, Text _ModelId, Text _SkinGroupId) {
+Text Private_GetPlayerSkinId(CUser _User, Text _ModelId, Text _SkinCategoryId) {
   declare BaseModelId = PMData::GetBaseModelId(_ModelId);
-  // TODO: Read player's preference for the skin group
-  declare PlayerPreferenceId = CustomSkins::GetPlayerSkinId(_User, BaseModelId);
+  declare PlayerPreferenceId = CustomSkins::GetPlayerSkinId(_User, BaseModelId, _SkinCategoryId);
 
   // Return the preference if set.
   if (PlayerPreferenceId != "") {
     return PlayerPreferenceId;
   }
 
-  return Private_GetPlayerRandomizedSkinId(_User.Login, BaseModelId, _SkinGroupId);
+  return Private_GetPlayerRandomizedSkinId(_User.Login, BaseModelId, _SkinCategoryId);
 }
 
 /**
@@ -171,7 +179,10 @@ Text[][Text] Private_GetLocalPlayerSkinIds() {
   foreach (User in Users) {
     foreach (BaseModelId => __ in PMData::GetAllModels()) {
       declare PlayerPreferenceId = Private_GetPlayerSkinId(User, BaseModelId, "");
-      if (PlayerPreferenceId == "") continue;
+
+      if (PlayerPreferenceId == "") {
+        continue;
+      }
 
       if (Result.existskey(PlayerPreferenceId)) {
         Result[PlayerPreferenceId].add(BaseModelId);
@@ -247,6 +258,7 @@ Integer Private_LoadItems(Text[][Text] _ItemsToLoad) {
     }
 
     declare ResultId = Private_ItemListAdd(ItemProps);
+
     CachedItemIds[ReusableIndex] = ResultId;
     G_LoadedItemIdByLookupId[ModelId] = ResultId;
   }
@@ -264,7 +276,9 @@ Void Private_LoadModelItems() {
 
   // Prepare base player models.
   foreach (ModelId => Model in PMData::GetAllModels()) {
-    if (!Private_IsModelAllowlisted(ModelId)) continue;
+    if (!Private_IsModelAllowlisted(ModelId)) {
+      continue;
+    }
 
     declare AsItemId = Private_GetLookupId(ModelId);
 
@@ -295,7 +309,9 @@ Void Private_LoadModelItems() {
 
   // Prepare skins.
   foreach (SkinId => Skin in PMData::GetAllSkins()) {
-    if (!Private_IsSkinAllowlisted(SkinId)) continue;
+    if (!Private_IsSkinAllowlisted(SkinId)) {
+      continue;
+    }
 
     if (SkinsByBaseModelId.existskey(Skin.AppliesTo)) {
       SkinsByBaseModelId[Skin.AppliesTo][SkinId] = Skin.SkinPath;
@@ -304,59 +320,69 @@ Void Private_LoadModelItems() {
     }
   }
 
-  // Load skins for base models.
+  // Regular skins: Load for a single base player model.
   foreach (BaseModelId => Skins in SkinsByBaseModelId) {
-    // Can't skip the skins in the loop above, because overlays may be allowed.
-    if (!Private_IsModelAllowlisted(BaseModelId) && BaseModelId != PMData::C_CarCommonWildcard) continue;
+    // Must check it here, because overlays deriving from BaseModelId may be allowed.
+    if (!Private_IsModelAllowlisted(BaseModelId) || BaseModelId == PMData::C_CarCommonWildcard) {
+      continue;
+    }
 
     foreach (SkinId => SkinPath in Skins) {
-      // CarCommon wildcard: Load the skin for every base player model available.
-      if (BaseModelId == PMData::C_CarCommonWildcard) {
-        foreach (ModelId => __ in BaseModelItemPath) {
-          if (Private_IsSkinAllowlisted(SkinId, BaseModelId)) continue;
+      declare LookupId = Private_GetLookupId(BaseModelId, SkinId);
 
-          declare LookupId = Private_GetLookupId(ModelId, SkinId);
+      ItemsToLoad[LookupId] = [Private_GetItemPath(BaseModelItemPath[BaseModelId]), SkinPath];
+    }
+  }
 
-          ItemsToLoad[LookupId] = [Private_GetItemPath(BaseModelItemPath[ModelId]), SkinPath];
-        }
+  // CarCommon wildcard: Load the skin for every base player model available.
+  declare CarCommonSkins = SkinsByBaseModelId.get(PMData::C_CarCommonWildcard, []);
+
+  foreach (SkinId => SkinPath in CarCommonSkins) {
+    foreach (ModelId => __ in BaseModelItemPath) {
+      if (!Private_IsSkinAllowlisted(SkinId, ModelId)) {
+        continue;
       }
 
-      // Regular skin: Load for a single base player model.
-      else {
-        declare LookupId = Private_GetLookupId(BaseModelId, SkinId);
+      declare LookupId = Private_GetLookupId(ModelId, SkinId);
 
-        ItemsToLoad[LookupId] = [Private_GetItemPath(BaseModelItemPath[BaseModelId]), SkinPath];
-      }
+      ItemsToLoad[LookupId] = [Private_GetItemPath(BaseModelItemPath[ModelId]), SkinPath];
     }
   }
 
   // Prepare overlays.
   foreach (ModelOverlayId => ModelOverlay in PMData::GetAllOverlays()) {
-    if (G_Options.SkipOverlays) break;
-    if (!Private_IsModelAllowlisted(ModelOverlayId)) continue;
+    if (G_Options.SkipOverlays) {
+      break;
+    }
+
+    if (!Private_IsModelAllowlisted(ModelOverlayId)) {
+      continue;
+    }
 
     declare BaseModelLookupId = Private_GetLookupId(ModelOverlayId);
 
     ItemsToLoad[BaseModelLookupId] = [Private_GetItemPath(ModelOverlay.ItemPath)];
 
     // Overlay is using the same skins as the overlay's base player model.
-    if (SkinsByBaseModelId.existskey(ModelOverlay.Extends)) {
-      foreach (SkinId => SkinPath in SkinsByBaseModelId[ModelOverlay.Extends]) {
-        declare LookupId = Private_GetLookupId(ModelOverlayId, SkinId);
+    declare BaseModelSkins = SkinsByBaseModelId.get(ModelOverlay.Extends, []);
 
-        ItemsToLoad[LookupId] = [Private_GetItemPath(ModelOverlay.ItemPath), SkinPath];
-      }
+    foreach (SkinId => SkinPath in BaseModelSkins) {
+      declare LookupId = Private_GetLookupId(ModelOverlayId, SkinId);
+
+      ItemsToLoad[LookupId] = [Private_GetItemPath(ModelOverlay.ItemPath), SkinPath];
     }
 
     // If there are any CarCommon skins, apply them to the overlay.
-    if (SkinsByBaseModelId.existskey(PMData::C_CarCommonWildcard)) {
-      foreach (SkinId => SkinPath in SkinsByBaseModelId[PMData::C_CarCommonWildcard]) {
-        if (Private_IsSkinAllowlisted(SkinId, ModelOverlay.Extends)) continue;
+    declare CarCommonSkins = SkinsByBaseModelId.get(PMData::C_CarCommonWildcard, []);
 
-        declare LookupId = Private_GetLookupId(ModelOverlayId, SkinId);
-
-        ItemsToLoad[LookupId] = [Private_GetItemPath(ModelOverlay.ItemPath), SkinPath];
+    foreach (SkinId => SkinPath in CarCommonSkins) {
+      if (!Private_IsSkinAllowlisted(SkinId, ModelOverlay.Extends)) {
+        continue;
       }
+
+      declare LookupId = Private_GetLookupId(ModelOverlayId, SkinId);
+
+      ItemsToLoad[LookupId] = [Private_GetItemPath(ModelOverlay.ItemPath), SkinPath];
     }
   }
 
@@ -400,20 +426,6 @@ Ident Private_GetModelIdent(Text _ModelId, Text _SkinId, Boolean _PreferCustom) 
   return NullId;
 }
 
-Void Private_AssignModelIdent(CPlayer _Player, Ident _ItemId) {
-  switchtype (_Player) {
-    case CSmPlayer: {
-      (_Player as CSmPlayer).ForceModelId = _ItemId;
-    }
-    case CTmPlayer: {
-      (_Player as CTmPlayer).ForceModelId = _ItemId;
-    }
-    default: {
-      assert(False, "Attempted to assign player model to unsupported player class instance.");
-    }
-  }
-}
-
 Void Private_AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _PreferCustom) {
   declare ModelIdent = Private_GetModelIdent(_ModelId, _SkinId, _PreferCustom);
 
@@ -425,7 +437,7 @@ Void Private_AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _
   Net_LibPlayerModels_SkinId = _SkinId;
   Net_LibPlayerModels_PreferCustom = _PreferCustom;
 
-  Private_AssignModelIdent(_Player, ModelIdent);
+  Playground::AssignModelIdent(_Player, ModelIdent);
 }
 
 // ---------------------------------- //
@@ -456,7 +468,6 @@ Void Load(CMode _Mode) {
 
 Void SetMapProperties(Text _Environment, Text _MapPlayerModelName) {
   G_CurrentMapEnvironmentName = _Environment;
-  G_CurrentMapPlayerModelName = _MapPlayerModelName;
   G_CurrentMapPlayerModelId = PMData::ResolveModelId(_MapPlayerModelName);
 }
 
@@ -465,23 +476,23 @@ Text GetMapPlayerModelId() {
 }
 
 /**
- * Get the player skin preference or a randomized skin (of a specified group).
+ * Get the player skin preference or a randomized skin (of a specified category).
  */
-Text GetPlayerSkinId(CUser _User, Text _ResolvableModelId, Text _SkinGroupId) {
+Text GetPlayerSkinId(CUser _User, Text _ResolvableModelId, Text _SkinCategoryId) {
   declare ModelId = PMData::ResolveModelId(_ResolvableModelId);
 
-  return Private_GetPlayerSkinId(_User, ModelId, _SkinGroupId);
+  return Private_GetPlayerSkinId(_User, ModelId, _SkinCategoryId);
 }
 
 /**
  * Get the player skin preference or a randomized skin.
  */
 Text GetPlayerSkinId(CUser _User, Text _ResolvableModelId) {
-  return GetPlayerSkinId(_User, _ResolvableModelId, PMData::C_DefaultSkinGroupId);
+  return GetPlayerSkinId(_User, _ResolvableModelId, PMData::C_DefaultSkinCategoryId);
 }
 
 /**
- * Resolve player skin preference or a randomized skin, directly or via a group
+ * Resolve player skin preference or a randomized skin, directly or via a category.
  */
 Text ResolvePlayerSkinId(CUser _User, Text _ResolvableModelId, Text _ResolvableSkinId) {
   declare Result = PMData::ResolveSkinId(_ResolvableSkinId);
@@ -490,7 +501,7 @@ Text ResolvePlayerSkinId(CUser _User, Text _ResolvableModelId, Text _ResolvableS
     return Result.SkinId;
   }
 
-  return GetPlayerSkinId(_User, _ResolvableModelId, Result.SkinGroupId);
+  return GetPlayerSkinId(_User, _ResolvableModelId, Result.SkinCategoryId);
 }
 
 /**

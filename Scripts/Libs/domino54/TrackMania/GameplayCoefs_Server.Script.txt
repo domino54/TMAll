@@ -1,10 +1,10 @@
 /**
  * @name GameplayCoefs_Server.Script.txt
  * @author domino54
- * @version 2024-12-01
+ * @version 2025-03-13
  */
 
-#Const Version      "2024-12-01"
+#Const Version      "2025-03-13"
 #Const ScriptName   "Libs/domino54/TrackMania/GameplayCoefs_Server.Script.txt"
 
 #Include "MathLib" as ML
@@ -94,9 +94,9 @@ Void Private_CompatGalaxy(CMap _Map) {
  * ExtraWorld compatibility.
  */
 Void Private_CompatExtraWorld(CMap _Map) {
-  declare metadata Real MapCarAccelCoef for Map = C_UninitializedExtraWorld;
-  declare metadata Real MapCarControlCoef for Map = C_UninitializedExtraWorld;
-  declare metadata Real MapCarGravityCoef for Map = C_UninitializedExtraWorld;
+  declare metadata Real MapCarAccelCoef for _Map = C_UninitializedExtraWorld;
+  declare metadata Real MapCarControlCoef for _Map = C_UninitializedExtraWorld;
+  declare metadata Real MapCarGravityCoef for _Map = C_UninitializedExtraWorld;
 
   Private_UpdateAccelCoefIfSet(MapCarAccelCoef);
   Private_UpdateControlCoefIfSet(MapCarControlCoef);

@@ -1,0 +1,30 @@
+{
+  "patterns": [
+    "Media/Apps/**",
+    "Media/ManiaApps/**",
+    "Scripts/Libs/domino54/**",
+    "Scripts/ManiaApps/domino54/**",
+    "Scripts/MapTypes/**",
+    "Scripts/Modes/Base/**"
+  ],
+  "linter": [
+    "mslint:recommended",
+    {
+      "ignores": ["**/Nadeo/**"]
+    },
+    {
+      "rules": {
+        "format-real": [
+          "error",
+          { "hasIntegerPart": true, "hasDecimalPart": true }
+        ],
+        "id-length": "off",
+        "init-declaration": "off",
+        "max-depth": ["error", { "maximum": 3 }],
+        "no-now-class-member": "off",
+        "no-sleep": "error",
+        "type-declaration": "off"
+      }
+    }
+  ]
+}

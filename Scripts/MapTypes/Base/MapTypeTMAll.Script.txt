@@ -3,16 +3,15 @@
  *
  * @name MapTypeTMAll.Script.txt
  * @author domino54
- * @version 2024-12-01
+ * @version 2025-03-13
  */
 
 #Extends "MapTypes/Base/MapTypeTrackmania.Script.txt"
 
-#Const TMAll_Version      "2024-12-01"
+#Const TMAll_Version      "2025-03-13"
 #Const TMAll_ScriptName   "MapTypes/Base/MapTypeTMAll.Script.txt"
 
 #Include "TextLib" as TL
-#Include "Libs/domino54/HttpClient.Script.txt" as HttpClient
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt" as PlayerModels_Server
 #Include "Libs/domino54/TrackMania/GameplayCoefs_Editor.Script.txt" as GameplayCoefs_Editor
@@ -23,7 +22,7 @@
 // Constants
 // ---------------------------------- //
 
-#Const G_LibTMAllEditor_NormalizeAssetId "gameplaycoefs:normalize"
+#Const C_LibTMAllEditor_NormalizeAssetId "gameplaycoefs:normalize"
 
 // ---------------------------------- //
 // Global variables
@@ -39,7 +38,6 @@ declare Boolean TMAll_Private_HasProbedMapPlayerModelName;
 Log::RegisterScript(TMAll_ScriptName, TMAll_Version);
 Log::RegisterScript(GameplayCoefs_Editor::ScriptName, GameplayCoefs_Editor::Version);
 Log::RegisterScript(GameplayCoefs_Server::ScriptName, GameplayCoefs_Server::Version);
-Log::RegisterScript(HttpClient::ScriptName, HttpClient::Version);
 Log::RegisterScript(PlayerModels_Data::ScriptName, PlayerModels_Data::Version);
 Log::RegisterScript(PlayerModels_Server::ScriptName, PlayerModels_Server::Version);
 Log::RegisterScript(ValidationLock::ScriptName, ValidationLock::Version);
@@ -50,15 +48,10 @@ Log::RegisterScript(ValidationLock::ScriptName, ValidationLock::Version);
 // ---------------------------------- //
 ***MTB_LoadLibraries***
 ***
-HttpClient::Load();
 GameplayCoefs_Editor::Load(False);
 GameplayCoefs_Server::Load();
 PlayerModels_Data::Load();
 ValidationLock::Load();
-
-while (PlayerModels_Data::Loading()) {
-  MTB_Yield();
-}
 ***
 
 // ---------------------------------- //
@@ -82,7 +75,6 @@ ValidationLock::CopyObjectives();
 // ---------------------------------- //
 ***MTB_Yield***
 ***
-HttpClient::Yield();
 GameplayCoefs_Editor::Loop();
 ValidationLock::Loop();
 ***
@@ -93,7 +85,7 @@ ValidationLock::Loop();
 ***MTB_Loop***
 ***
 if (GameplayCoefs_Editor::IsDialogRequested()) {
-  TMAll_OpenGameplayCeofsEditor();
+  TMAll_OpenGameplayCoefsEditor();
 }
 ***
 
@@ -186,7 +178,6 @@ PlayerModels_Server::Unload();
 // ---------------------------------- //
 ***MTB_UnloadLibraries***
 ***
-HttpClient::Unload();
 GameplayCoefs_Editor::Unload();
 GameplayCoefs_Server::Unload();
 PlayerModels_Data::Unload();
@@ -218,7 +209,7 @@ Void TMAll_NormalizeCoefsIfUninitialized() {
   TMAll_ProbeMapPlayerModelName();
 
   declare ModelId = PlayerModels_Server::GetMapPlayerModelId();
-  declare NeedsNormalize = PlayerModels_Data::GetPlayerModelAsset(ModelId, G_LibTMAllEditor_NormalizeAssetId, "");
+  declare NeedsNormalize = PlayerModels_Data::GetModelAsset(ModelId, C_LibTMAllEditor_NormalizeAssetId, "");
 
   if (TL::RegexFind("^1|true$", NeedsNormalize, "i").count <= 0) {
     return;
@@ -229,7 +220,7 @@ Void TMAll_NormalizeCoefsIfUninitialized() {
   GameplayCoefs_Editor::NormalizeCoefsIfUninitialized(GameplayInfo.AccelCoef, GameplayInfo.ControlCoef, GameplayInfo.GravityCoef);
 }
 
-Void TMAll_OpenGameplayCeofsEditor() {
+Void TMAll_OpenGameplayCoefsEditor() {
   TMAll_NormalizeCoefsIfUninitialized();
 
   declare ModelId = PlayerModels_Server::GetMapPlayerModelId();

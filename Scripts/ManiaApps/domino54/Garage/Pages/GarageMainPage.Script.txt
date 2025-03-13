@@ -7,7 +7,6 @@
 #Const Version      "2024-12-25"
 #Const ScriptName   "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt"
 
-#Include "TextLib" as TL
 #Include "ColorLib" as CL
 #Include "ManiaApps/domino54/Garage/Components/ModelTabs/ModelTabs.Script.txt" as ModelTabs
 #Include "ManiaApps/domino54/Garage/Components/SkinAuthorName/SkinAuthorName.Script.txt" as SkinAuthorName
@@ -60,27 +59,31 @@ K_MenuTab[] Private_CreateModelTabs() {
   return Result;
 }
 
-K_SkinOption[] Private_CreateSkinOptions(Text _ModelId) {
+K_SkinOption[] Private_CreateSkinOptions(Text _ModelId, Text _SkinCategoryId) {
   declare K_SkinOption[] Result;
 
-  foreach (Skin in GarageAPI::GetSelectableSkins(_ModelId)) {
+  foreach (Skin in GarageAPI::GetSelectableSkins(_ModelId, _SkinCategoryId)) {
     Result.add(K_SkinOption {
       Id = Skin.Id,
       Name = Skin.Name,
-      IconUrl = GarageAPI::GetSkinIconUrl(Skin.Id)
+      IconUrl = GarageAPI::GetSkinCardUrl(Skin)
     });
   }
 
   return Result;
 }
 
-Void Private_UpdateCurrentSkins(Text _ModelId) {
-  SkinList::SetSkinsData(Private_CreateSkinOptions(_ModelId));
-  SkinList::SetPreviewSkinId(GarageAPI::GetSkinId());
-  SkinList::SetAppliedSkinId(GarageAPI::GetSelectedSkinId(_ModelId));
-  SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(GarageAPI::GetSkinId()));
-  SkinFallbackInfo::SetButtonVisibility(GarageAPI::GetUsesArchetype(_ModelId));
-  SkinFallbackInfo::SetPreferCustom(GarageAPI::GetPreferCustom(_ModelId));
+Void Private_UpdateCurrentSkins() {
+  declare ModelId = GarageAPI::GetModelId();
+  declare SkinCategoryId = GarageAPI::GetSkinCategoryId();
+  declare SkinId = GarageAPI::GetSkinId();
+
+  SkinList::SetSkinsData(Private_CreateSkinOptions(ModelId, SkinCategoryId));
+  SkinList::SetPreviewSkinId(SkinId);
+  SkinList::SetAppliedSkinId(GarageAPI::GetSelectedSkinId(ModelId, SkinCategoryId));
+  SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(SkinId));
+  SkinFallbackInfo::SetButtonVisibility(GarageAPI::GetUsesArchetype(ModelId));
+  SkinFallbackInfo::SetPreferCustom(GarageAPI::GetPreferCustom(ModelId));
 }
 
 Void Private_TogglePreferCustom(Text _ModelId) {
@@ -116,7 +119,7 @@ Void Load() {
   ModelTabs::SetTabsData(Private_CreateModelTabs());
   ModelTabs::SetActiveTabId(GarageAPI::GetModelId());
 
-  Private_UpdateCurrentSkins(GarageAPI::GetModelId());
+  Private_UpdateCurrentSkins();
 }
 
 Void Show() {
@@ -143,7 +146,7 @@ Void Loop() {
       case ModelTabs::C_CustomEventType_ActiveTab: {
         GarageAPI::SetModelId(Event.CustomEventData[0]);
 
-        Private_UpdateCurrentSkins(GarageAPI::GetModelId());
+        Private_UpdateCurrentSkins();
       }
       case SkinList::C_CustomEventType_SetPreviewSkinId: {
         GarageAPI::SetSkinId(Event.CustomEventData[0]);
@@ -151,7 +154,7 @@ Void Loop() {
         SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(GarageAPI::GetSkinId()));
       }
       case SkinList::C_CustomEventType_SetAppliedSkinId: {
-        GarageAPI::SetSelectedSkinId(GarageAPI::GetModelId(), Event.CustomEventData[0]);
+        GarageAPI::SetSelectedSkinId(GarageAPI::GetModelId(), GarageAPI::GetSkinCategoryId(), Event.CustomEventData[0]);
       }
       case SkinFallbackInfo::C_CustomEventType_TogglePreferCustom: {
         Private_TogglePreferCustom(GarageAPI::GetModelId());
