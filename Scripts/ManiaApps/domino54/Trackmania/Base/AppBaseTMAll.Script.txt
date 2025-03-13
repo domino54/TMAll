@@ -5,14 +5,16 @@
  *
  * @name MapTypeTMAll.Script.txt
  * @author domino54
- * @version 2024-11-04
+ * @version 2025-03-13
  */
 #Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
 
-#Const TMAll_Version      "2024-11-04"
+#Const TMAll_Version      "2025-03-13"
 #Const TMAll_ScriptName   "ManiaApps/domino54/TrackMania/Base/AppBaseTMAll.Script.txt"
 
-#Include "Libs/domino54/CustomSkins/CustomSkins_Client.Script.txt" as CustomSkins
+#Include "Libs/domino54/CustomSkins/CustomSkins_ClientPlayground.Script.txt" as CustomSkins
+#Include "Libs/domino54/Openplanet/Openplanet_Client.Script.txt" as Openplanet
+#Include "ManiaApps/domino54/Ingame/Countdown321Go/Countdown321Go_Client.Script.txt" as Countdown321Go
 #Include "ManiaApps/domino54/Ingame/MenuOnline/MenuOnline_Client.Script.txt" as MenuOnline
 #Include "ManiaApps/Nadeo/TrackMania/UI_Client.Script.txt" as UI
 
@@ -22,8 +24,10 @@
 ***AB_LoadLibraries***
 ***
 UI::Load();
+Countdown321Go::Load();
 CustomSkins::Load();
 MenuOnline::Load("");
+Openplanet::Load();
 
 // Chase compatibility.
 +++LoadLibraries+++
@@ -45,6 +49,7 @@ Log::RegisterScript(MenuOnline::ScriptName, MenuOnline::Version);
 ***AB_Yield***
 ***
 UI::Yield();
+Countdown321Go::Loop();
 CustomSkins::Loop();
 ***
 
@@ -54,6 +59,7 @@ CustomSkins::Loop();
 ***AB_UnloadLibraries***
 ***
 UI::Unload();
+Countdown321Go::Unload();
 CustomSkins::Unload();
 MenuOnline::Unload();
 

@@ -1,10 +1,10 @@
 /**
  * @name LB_Countdown321Go.Script.txt
  * @author domino54
- * @version 2025-01-14
+ * @version 2025-03-13
  */
 
-#Const Version      "2025-01-14"
+#Const Version      "2025-03-13"
 #Const ScriptName   "ManiaApps/domino54/Ingame/Countdown321Go/LB_Countdown321Go.Script.txt"
 
 #Const C_CustomEventType_PlaySound    "321go:play_sound"
@@ -32,7 +32,7 @@ Text Build() {
 #Const C_CountdownMaximumDigit    3
 
 #Const C_Easing CAnimManager::EAnimManagerEasing::Linear
-#Const C_Substyles ["Go!", "1", "2", "3"]
+#Const C_SubStyles ["Go!", "1", "2", "3"]
 
 Void Anim321(CMlQuad _Quad) {
   _Quad.Opacity = 1.0;
@@ -61,7 +61,7 @@ main() {
     declare Quad <=> (Control as CMlQuad);
 
     Quad_Digits.add(Quad);
-    Quad.Substyle = C_Substyles[I];
+    Quad.Substyle = C_SubStyles[I];
   }
 
   yield;
