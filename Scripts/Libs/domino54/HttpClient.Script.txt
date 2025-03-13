@@ -1,7 +1,7 @@
 /**
  * @name HttpClient.Script.txt
  * @author domino54
- * @version 2024-10-05
+ * @version 2025-03-13
  *
  * @example ```ts
  * Void Load() {
@@ -28,7 +28,7 @@
  * ```
  */
 
-#Const Version      "2024-10-05"
+#Const Version      "2025-03-13"
 #Const ScriptName   "Libs/domino54/HttpClient.Script.txt"
 
 #Include "TextLib" as TL
@@ -37,18 +37,20 @@
 // Constants
 // ---------------------------------- //
 
-#Const C_LibHttpClient_DefaultTimeout      5000
-#Const C_LibHttpClient_DefaultUseCache     False
-#Const C_LibHttpClient_DefaultHeaders      ""
-#Const C_LibHttpClient_EHttpMethodGet      "GET"
-#Const C_LibHttpClient_EHttpMethodPost     "POST"
-#Const C_LibHttpClient_TimeoutStatusCode   0
+#Const C_LibHttpClient_DefaultTimeout         5000
+#Const C_LibHttpClient_DefaultUseCache        False
+#Const C_LibHttpClient_DefaultHeaders         ""
+#Const C_LibHttpClient_EHttpMethodGet         "GET"
+#Const C_LibHttpClient_EHttpMethodPost        "POST"
+#Const C_LibHttpClient_EHttpMethodPostFile    "POSTFILE"
+#Const C_LibHttpClient_TimeoutStatusCode      0
+#Const C_LibHttpClient_CancelledStatusCode    0
 
 // ---------------------------------- //
 // Structs
 // ---------------------------------- //
 
-#Struct K_QueuedHttpRequest {
+#Struct K_HttpRequestOptions {
   Text Namespace;
   Text Id;
   Text Method;
@@ -71,7 +73,8 @@
 // Global variables
 // ---------------------------------- //
 
-declare K_QueuedHttpRequest[] G_LibHttpClient_RequestsQueue;
+declare Text[] G_LibHttpClient_PendingNamespaces;
+declare K_HttpRequestOptions[] G_LibHttpClient_RequestsQueue;
 declare K_HttpClientEvent[] G_LibHttpClient_PendingEvents;
 
 // ---------------------------------- //
@@ -86,54 +89,58 @@ Text Private_GetNamespace(Text _Id) {
   return Namespace;
 }
 
-Void Private_AssignRequestMetadata(CHttpRequest _Request, Text _Namespace, Text _Id, Integer _Timeout) {
-  declare Text LibHttpClient_Namespace for _Request;
-  declare Text LibHttpClient_PrivateId for _Request;
-  declare Integer LibHttpClient_Timeout for _Request;
+Void Private_HttpCreate(K_HttpRequestOptions _Options) {
+  declare CHttpRequest Request;
 
-  LibHttpClient_Namespace = _Namespace;
-  LibHttpClient_PrivateId = _Id;
-  LibHttpClient_Timeout = Now + _Timeout;
+  switch (_Options.Method) {
+    case C_LibHttpClient_EHttpMethodGet: {
+      Request = Http.CreateGet(_Options.Url, _Options.UseCache, _Options.Headers);
+    }
+    case C_LibHttpClient_EHttpMethodPost: {
+      Request = Http.CreatePost(_Options.Url, _Options.Payload, _Options.Headers);
+    }
+    case C_LibHttpClient_EHttpMethodPostFile: {
+      Request = Http.CreatePostFile(_Options.Url, _Options.Payload, _Options.Headers);
+    }
+    default: {
+      assert(False, """Unsupported HTTP request method {{{_Options.Method}}}, supported methods: {{{C_LibHttpClient_EHttpMethodGet}}}, {{{C_LibHttpClient_EHttpMethodPost}}}, {{{C_LibHttpClient_EHttpMethodPostFile}}}""");
+    }
+  }
+
+  // Requests to local files and cached requests may complete immediately.
+  if (Request.IsCompleted) {
+    G_LibHttpClient_PendingEvents.add(K_HttpClientEvent{
+      Namespace = _Options.Namespace,
+      Id = _Options.Id,
+      Url = Request.Url,
+      StatusCode = Request.StatusCode,
+      ResponseBody = Request.Result
+    });
+
+    declare Removed = G_LibHttpClient_PendingNamespaces.remove(_Options.Namespace); // @mslint-disable-line no-unused-variables
+
+    Http.Destroy(Request);
+
+    return;
+  }
+
+  declare Text LibHttpClient_Namespace for Request;
+  declare Text LibHttpClient_PrivateId for Request;
+  declare Integer LibHttpClient_Timeout for Request;
+
+  LibHttpClient_Namespace = _Options.Namespace;
+  LibHttpClient_PrivateId = _Options.Id;
+  LibHttpClient_Timeout = Now + _Options.Timeout;
 }
 
-Void Private_QueueGet(Text _Namespace, Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache, Text _Headers) {
-  declare Request = K_QueuedHttpRequest{
-    Namespace = _Namespace,
-    Id = _Id,
-    Method = C_LibHttpClient_EHttpMethodGet,
-    Url = _Url,
-    Timeout = _Timeout,
-    UseCache = _UseCache,
-    Headers = _Headers
-  };
+Void Private_CreateOrEnqueue(K_HttpRequestOptions _Options) {
+  G_LibHttpClient_PendingNamespaces.add(_Options.Namespace);
 
-  G_LibHttpClient_RequestsQueue.add(Request);
-}
-
-Void Private_CreateGet(Text _Namespace, Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache, Text _Headers) {
-  declare Request = Http.CreateGet(_Url, _UseCache, _Headers);
-
-  Private_AssignRequestMetadata(Request, _Namespace, _Id, _Timeout);
-}
-
-Void Private_QueuePost(Text _Namespace, Text _Id, Text _Url, Text _Payload, Integer _Timeout, Text _Headers) {
-  declare Request = K_QueuedHttpRequest{
-    Namespace = _Namespace,
-    Id = _Id,
-    Method = C_LibHttpClient_EHttpMethodPost,
-    Url = _Url,
-    Payload = _Payload,
-    Timeout = _Timeout,
-    Headers = _Headers
-  };
-
-  G_LibHttpClient_RequestsQueue.add(Request);
-}
-
-Void Private_CreatePost(Text _Namespace, Text _Id, Text _Url, Text _Payload, Integer _Timeout, Text _Headers) {
-  declare Request = Http.CreatePost(_Url, _Payload, _Headers);
-
-  Private_AssignRequestMetadata(Request, _Namespace, _Id, _Timeout);
+  if (Http.SlotsAvailable > 0) {
+    Private_HttpCreate(_Options);
+  } else {
+    G_LibHttpClient_RequestsQueue.add(_Options);
+  }
 }
 
 // ---------------------------------- //
@@ -148,12 +155,12 @@ Void Unload() {
   G_LibHttpClient_RequestsQueue.clear();
   G_LibHttpClient_PendingEvents.clear();
 
-  declare Ident[] RequestsToDestroy = [];
+  declare Ident[] RequestsToDestroy;
 
   foreach (Request in Http.Requests) {
-    declare Text LibHttpClient_PrivateId for Request;
+    declare Text LibHttpClient_Namespace for Request;
 
-    if (LibHttpClient_PrivateId != "") {
+    if (LibHttpClient_Namespace != "") {
       RequestsToDestroy.add(Request.Id);
     }
   }
@@ -173,64 +180,78 @@ Void Load() {
 
 /**
  * This method MUST be called after every `yield;` keyword in your script's execution context.
- * This can be done for example in your gamemode's `***MB_Private_Yield***` label.
+ * This can be done for example in your game mode's `***MB_Private_Yield***` label.
  */
 Void Yield() {
+  // Enqueue requests that originally have exceeded the available slots.
   while (G_LibHttpClient_RequestsQueue.count > 0 && Http.SlotsAvailable > 0) {
     declare Request = G_LibHttpClient_RequestsQueue[0];
-    declare Removed = G_LibHttpClient_RequestsQueue.removekey(0);
+    declare Removed = G_LibHttpClient_RequestsQueue.removekey(0); // @mslint-disable-line no-unused-variables
 
-    switch (Request.Method) {
-       case C_LibHttpClient_EHttpMethodGet: {
-          Private_CreateGet(Request.Namespace, Request.Id, Request.Url, Request.Timeout, Request.UseCache, Request.Headers);
-       }
-       case C_LibHttpClient_EHttpMethodPost: {
-          Private_CreatePost(Request.Namespace, Request.Id, Request.Url, Request.Payload, Request.Timeout, Request.Headers);
-       }
-    }
+    Private_HttpCreate(Request);
   }
 
-  declare Ident[] RequestsToDestroy = [];
-
-  foreach (Request in Http.Requests) {
-    declare Text LibHttpClient_PrivateId for Request;
-
-    if (LibHttpClient_PrivateId == "") {
+  // Handle completed requests.
+  foreach (Event in Http.PendingEvents) {
+    if (Event.Type != CHttpEvent::EType::RequestComplete || Event.Request == Null) {
       continue;
     }
 
-    declare Text LibHttpClient_Namespace for Request;
-    declare Integer LibHttpClient_Timeout for Request;
+    declare Text LibHttpClient_Namespace for Event.Request;
 
-    if (Request.IsCompleted) {
-      declare Event = K_HttpClientEvent{
-        Namespace = LibHttpClient_Namespace,
-        Id = LibHttpClient_PrivateId,
-        Url = Request.Url,
-        StatusCode = Request.StatusCode,
-        ResponseBody = Request.Result
-      };
-
-      G_LibHttpClient_PendingEvents.add(Event);
-      RequestsToDestroy.add(Request.Id);
+    if (LibHttpClient_Namespace == "") {
+      continue;
     }
 
-    else if (Now >= LibHttpClient_Timeout) {
-      declare Event = K_HttpClientEvent{
+    declare Text LibHttpClient_PrivateId for Event.Request;
+
+    G_LibHttpClient_PendingEvents.add(K_HttpClientEvent{
+      Namespace = LibHttpClient_Namespace,
+      Id = LibHttpClient_PrivateId,
+      Url = Event.Request.Url,
+      StatusCode = Event.Request.StatusCode,
+      ResponseBody = Event.Request.Result
+    });
+
+    declare Removed = G_LibHttpClient_PendingNamespaces.remove(LibHttpClient_Namespace); // @mslint-disable-line no-unused-variables
+
+    Http.Destroy(Event.Request);
+  }
+
+  // Handle custom timeouts.
+  if (Http.Requests.count > 0) {
+    declare Ident[] RequestsToDestroy;
+
+    foreach (Request in Http.Requests) {
+      declare Integer LibHttpClient_Timeout for Request;
+
+      if (Request.IsCompleted || LibHttpClient_Timeout <= 0 || Now < LibHttpClient_Timeout) {
+        continue;
+      }
+
+      declare Text LibHttpClient_Namespace for Request;
+      declare Text LibHttpClient_PrivateId for Request;
+
+      G_LibHttpClient_PendingEvents.add(K_HttpClientEvent{
         Namespace = LibHttpClient_Namespace,
         Id = LibHttpClient_PrivateId,
         Url = Request.Url,
         StatusCode = C_LibHttpClient_TimeoutStatusCode
-      };
+      });
 
-      G_LibHttpClient_PendingEvents.add(Event);
+      declare Removed = G_LibHttpClient_PendingNamespaces.remove(LibHttpClient_Namespace); // @mslint-disable-line no-unused-variables
+
       RequestsToDestroy.add(Request.Id);
     }
-  }
 
-  foreach (RequestId in RequestsToDestroy) {
-    Http.Destroy(Http.Requests[RequestId]);
+    foreach (RequestId in RequestsToDestroy) {
+      Http.Destroy(Http.Requests[RequestId]);
+    }
   }
+}
+
+Integer SlotsAvailable() {
+  return Http.SlotsAvailable - G_LibHttpClient_RequestsQueue.count;
 }
 
 Boolean IsValidUrl(Text _Url) {
@@ -238,21 +259,7 @@ Boolean IsValidUrl(Text _Url) {
 }
 
 Boolean HasPendingRequests(Text _Namespace) {
-  foreach (Request in G_LibHttpClient_RequestsQueue) {
-    if (Request.Namespace == _Namespace) {
-      return True;
-    }
-  }
-
-  foreach (Request in Http.Requests) {
-    declare Text LibHttpClient_Namespace for Request;
-
-    if (LibHttpClient_Namespace == _Namespace) {
-      return True;
-    }
-  }
-
-  return False;
+  return G_LibHttpClient_PendingNamespaces.exists(_Namespace);
 }
 
 Boolean HasPendingEvents(Text _Namespace) {
@@ -278,20 +285,26 @@ K_HttpClientEvent GetFirstEvent(Text _Namespace) {
   }
 
   if (Index >= 0) {
-    declare Removed = G_LibHttpClient_PendingEvents.removekey(Index);
+    declare Removed = G_LibHttpClient_PendingEvents.removekey(Index); // @mslint-disable-line no-unused-variables
   }
 
   return FirstEvent;
 }
 
-Void Get(Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache, Text _Headers) {
-  declare Namespace = Private_GetNamespace(_Id);
+Void Request(K_HttpRequestOptions _Options) {
+  Private_CreateOrEnqueue(_Options);
+}
 
-  if (Http.SlotsAvailable > 0) {
-    Private_CreateGet(Namespace, _Id, _Url, _Timeout, _UseCache, _Headers);
-  } else {
-    Private_QueueGet(Namespace, _Id, _Url, _Timeout, _UseCache, _Headers);
-  }
+Void Get(Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache, Text _Headers) {
+  Private_CreateOrEnqueue(K_HttpRequestOptions{
+    Namespace = Private_GetNamespace(_Id),
+    Id = _Id,
+    Method = C_LibHttpClient_EHttpMethodGet,
+    Url = _Url,
+    Timeout = _Timeout,
+    UseCache = _UseCache,
+    Headers = _Headers
+  });
 }
 
 Void Get(Text _Id, Text _Url, Integer _Timeout, Boolean _UseCache) {
@@ -323,13 +336,15 @@ Void Get(Text _Id, Text _Url) {
 }
 
 Void Post(Text _Id, Text _Url, Text _Payload, Integer _Timeout, Text _Headers) {
-  declare Namespace = Private_GetNamespace(_Id);
-
-  if (Http.SlotsAvailable > 0) {
-    Private_CreatePost(Namespace, _Id, _Url, _Payload, _Timeout, _Headers);
-  } else {
-    Private_QueuePost(Namespace, _Id, _Url, _Payload, _Timeout, _Headers);
-  }
+  Private_CreateOrEnqueue(K_HttpRequestOptions{
+    Namespace = Private_GetNamespace(_Id),
+    Id = _Id,
+    Method = C_LibHttpClient_EHttpMethodPost,
+    Url = _Url,
+    Payload = _Payload,
+    Timeout = _Timeout,
+    Headers = _Headers
+  });
 }
 
 Void Post(Text _Id, Text _Url, Text _Payload, Integer _Timeout) {
@@ -342,4 +357,33 @@ Void Post(Text _Id, Text _Url, Text _Payload, Text _Headers) {
 
 Void Post(Text _Id, Text _Url, Text _Payload) {
   Post(_Id, _Url, _Payload, C_LibHttpClient_DefaultTimeout);
+}
+
+Boolean Cancel(CHttpRequest _Request) {
+  if (_Request == Null) {
+    return False;
+  }
+
+  declare Text LibHttpClient_Namespace for _Request;
+  declare Text LibHttpClient_PrivateId for _Request;
+
+  G_LibHttpClient_PendingEvents.add(K_HttpClientEvent{
+    Namespace = LibHttpClient_Namespace,
+    Id = LibHttpClient_PrivateId,
+    Url = _Request.Url,
+    StatusCode = C_LibHttpClient_CancelledStatusCode,
+    ResponseBody = _Request.Result
+  });
+
+  Http.Destroy(_Request);
+
+  return G_LibHttpClient_PendingNamespaces.remove(LibHttpClient_Namespace);
+}
+
+Boolean Cancel(Ident _RequestId) {
+  if (!Http.Requests.existskey(_RequestId)) {
+    return False;
+  }
+
+  return Cancel(Http.Requests[_RequestId]);
 }
