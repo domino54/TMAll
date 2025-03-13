@@ -1,10 +1,10 @@
 /**
  * @name MouseExt.Script.txt
  * @author domino54
- * @version 2025-01-04
+ * @version 2025-03-13
  */
 
-#Const Version      "2025-01-04"
+#Const Version      "2025-03-13"
 #Const ScriptName   "Libs/domino54/MouseExt.Script.txt"
 
 // ---------------------------------- //
@@ -28,6 +28,16 @@
    * Variables: CMlControl EventControl, Vec2 EventOrigin.
    */
   Text MouseUp;
+  /**
+   * Fired when right mouse button is pressed on the hovered control.
+   * Variables: CMlControl EventControl, Vec2 EventOrigin.
+   */
+  Text MouseRightDown;
+  /**
+   * Fired when right mouse button is released on the clicked control.
+   * Variables: CMlControl EventControl, Vec2 EventOrigin.
+   */
+  Text MouseRightUp;
   /**
    * Optional parameter for minimum distance required to start dragging.
    */
@@ -57,17 +67,21 @@ Text InjectDeclares() {
   return """
 declare CMlControl G_MouseClickControl;
 declare Vec2 G_MouseClickOrigin;
-declare Boolean G_MouseClickHasFocus;
 
 declare CMlControl G_MouseDragControl;
 declare Vec2 G_MouseDragOrigin;
 declare Vec2 G_MouseDragPrev;
+
+declare Boolean G_MouseRightPrev;
+declare CMlControl G_MouseRightControl;
+declare Vec2 G_MouseRightOrigin;
   """;
 }
 
 Text InjectEvents(K_Options _Options) {
   declare DragMin = _Options.DragMin;
   declare HasDrag = _Options.DragStart != "" || _Options.DragMove != "" || _Options.DragEnd != "";
+  declare HasMouseRight = _Options.MouseRightDown != "" || _Options.MouseRightUp != "";
 
   if (DragMin == 0.0) {
     DragMin = C_DefaultDragSensitivity;
@@ -78,55 +92,70 @@ foreach (Event in PendingEvents) {
   if (Event.Type == CMlScriptEvent::Type::MouseClick) {
     G_MouseClickControl = Event.Control;
     G_MouseClickOrigin = Input.MousePos;
-    G_MouseClickHasFocus = True;
-    G_MouseDragControl = Null;
-  }
-  else if (Event.Type == CMlScriptEvent::Type::MouseOut) {
-    if (Event.Control == G_MouseClickControl) {
-      G_MouseClickHasFocus = False;
-    }
-  }
-  else if (Event.Type == CMlScriptEvent::Type::MouseOver) {
-    if (Event.Control == G_MouseClickControl) {
-      G_MouseClickHasFocus = True;
-    }
   }
 }
-
-if (G_MouseClickControl != Null) {
   """;
+
+  if (HasMouseRight) {
+    Result ^= """
+if (G_MouseRightPrev != Input.MouseRightButton) {
+  G_MouseRightPrev = Input.MouseRightButton;
+
+  if (Input.MouseRightButton && Page.FocusedControl != Null) {
+    G_MouseRightControl = Page.FocusedControl;
+    G_MouseRightOrigin = Input.MousePos;
+
+    declare EventControl = G_MouseRightControl;
+    declare EventOrigin = G_MouseRightOrigin;
+
+    {{{_Options.MouseRightDown}}}
+  }
+
+  else if (!Input.MouseRightButton && G_MouseRightControl != Null) {
+    if (Page.FocusedControl == G_MouseRightControl) {
+      declare EventControl = G_MouseRightControl;
+      declare EventOrigin = G_MouseRightOrigin;
+
+      {{{_Options.MouseRightUp}}}
+    }
+
+    G_MouseRightControl = Null;
+  }
+}
+    """;
+  }
 
   if (HasDrag) {
     Result ^= """
+if (G_MouseClickControl != Null) {
   if (Input.MouseLeftButton && G_MouseDragControl == Null && !G_MouseClickControl.DataAttributeExists("nodrag") && (ML::Abs(Input.MousePos.X - G_MouseClickOrigin.X) > {{{DragMin}}} || ML::Abs(Input.MousePos.Y - G_MouseClickOrigin.Y) > {{{DragMin}}})) {
     G_MouseDragControl = G_MouseClickControl;
     G_MouseDragOrigin = Input.MousePos;
     G_MouseDragPrev = Input.MousePos;
 
     G_MouseClickControl = Null;
-    G_MouseClickHasFocus = False;
 
     declare EventControl = G_MouseClickControl;
     declare EventOrigin = G_MouseClickOrigin;
 
     {{{_Options.DragStart}}}
   }
+}
     """;
   }
 
   Result ^= """
-  if (!Input.MouseLeftButton) {
-    if (G_MouseClickHasFocus) {
-      declare EventControl = G_MouseClickControl;
-      declare EventOrigin = G_MouseClickOrigin;
+if (G_MouseClickControl != Null && !Input.MouseLeftButton) {
+  if (Page.FocusedControl == G_MouseClickControl) {
+    declare EventControl = G_MouseClickControl;
+    declare EventOrigin = G_MouseClickOrigin;
 
-      {{{_Options.MouseUp}}}
-    }
-
-    G_MouseClickControl = Null;
-    G_MouseClickHasFocus = False;
+    {{{_Options.MouseUp}}}
   }
-}""";
+
+  G_MouseClickControl = Null;
+}
+  """;
 
   if (HasDrag) {
     Result ^= """
