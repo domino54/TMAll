@@ -1,0 +1,15 @@
+{
+  "name": "TMAll",
+  "version": "0.2",
+  "language": "en",
+  "import": ["cspell-dict-maniascript"],
+  "dictionaryDefinitions": [
+    {
+      "name": "tmall",
+      "description": "Terms used within the TMAll project.",
+      "path": "./dictionary.txt"
+    }
+  ],
+  "dictionaries": ["tmall"],
+  "allowCompoundWords": true
+}

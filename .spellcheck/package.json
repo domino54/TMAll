@@ -1,0 +1,21 @@
+{
+  "name": "cspell-dict-maniascript",
+  "version": "0.0.0",
+  "description": "ManiaScript and ManiaLink dictionary.",
+  "exports": {
+    ".": "./cspell-ext.json",
+    "./cspell": "./cspell-ext.json",
+    "./cspell-ext.json": "./cspell-ext.json"
+  },
+  "keywords": [
+    "cspell",
+    "ManiaScript",
+    "ManiaLink",
+    "dictionary",
+    "spelling"
+  ],
+  "files": [
+    "dict/**/*.txt",
+    "cspell-ext.json"
+  ]
+}
