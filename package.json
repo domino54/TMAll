@@ -17,9 +17,12 @@
     "url": "git+https://github.com/domino54/TMAll.git"
   },
   "scripts": {
-    "lint": "mslint --config mslint.json"
+    "lint": "mslint --config mslint.json",
+    "spellcheck": "cspell"
   },
   "devDependencies": {
-    "@maniascript/mslint": "^4.2.0"
+    "@maniascript/mslint": "^4.3.0",
+    "cspell": "^8.19.2",
+    "cspell-dict-maniascript": "file:.spellcheck"
   }
 }

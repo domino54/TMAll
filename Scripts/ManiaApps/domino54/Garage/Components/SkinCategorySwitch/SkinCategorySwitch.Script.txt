@@ -1,0 +1,49 @@
+/**
+ * @name SkinCategorySwitch.Script.txt
+ * @author domino54
+ * @version 2025-04-22
+ */
+
+#Const Version      "2025-04-22"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinCategorySwitch/SkinCategorySwitch.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/SkinCategorySwitch/LB_SkinCategorySwitch.Script.txt" as LB
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_SkinCategorySwitch"
+
+#Const LB::C_CustomEventType_UpdateCategories as C_CustomEventType_UpdateCategories
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load(Text[] _CategoryNames, Integer _ActiveIndex) {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB::Build(_CategoryNames.count));
+
+  declare Layer <=> Layers::Get(C_ManialinkLayerId);
+
+  declare Text[] CategoryNames for Layer.LocalPage;
+  declare Integer ActiveIndex for Layer.LocalPage;
+
+  CategoryNames = _CategoryNames;
+  ActiveIndex = _ActiveIndex;
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}

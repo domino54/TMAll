@@ -196,7 +196,7 @@
         },
         "IsHidden": {
           "type": "boolean",
-          "title": "If set to true, the implementation of the skin selection interface can conisder this skin to be hidden."
+          "title": "If set to true, the implementation of the skin selection interface can consider this skin to be hidden."
         },
         "SortIndex": {
           "type": "integer",

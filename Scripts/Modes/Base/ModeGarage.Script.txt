@@ -3,13 +3,12 @@
  *
  * @name ModeGarage.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  */
 
-#Const MB_Version     "2025-03-13"
+#Const MB_Version     "2025-04-22"
 #Const MB_ScriptName  "Modes/TrackMania/Base/ModeGarage.Script.txt"
 
-#Include "Libs/domino54/CommonPlayground.Script.txt" as Playground
 #Include "Libs/domino54/Garage/ServerComm.Script.txt" as Garage
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PlayerModels_Data
 #Include "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt" as PlayerModels_Server
@@ -79,6 +78,7 @@ HideOpponents = True;
 Replay_AutoStart = False;
 
 declare Text PrevPreviewModelId;
+declare Text PrevPreviewSkinCategoryId;
 declare Text PrevPreviewSkinId;
 declare Integer LastUnspawnTime;
 
@@ -123,11 +123,13 @@ foreach (Event in PendingEvents) {
 
 // This will be changed by the UI layer.
 declare PreviewModelId = Garage::GetPreviewModelId(LocalUser);
+declare PreviewSkinCategoryId = Garage::GetPreviewSkinCategoryId(LocalUser);
 declare PreviewSkinId = Garage::GetPreviewSkinId(LocalUser);
 
 // Why like this instead of events? Because it's more reliable.
-if ((PrevPreviewModelId != PreviewModelId || PrevPreviewSkinId != PreviewSkinId) && Now >= LastUnspawnTime + C_RespawnCooldown) {
+if ((PrevPreviewModelId != PreviewModelId || PrevPreviewSkinCategoryId != PreviewSkinCategoryId || PrevPreviewSkinId != PreviewSkinId) && Now >= LastUnspawnTime + C_RespawnCooldown) {
   PrevPreviewModelId = PreviewModelId;
+  PrevPreviewSkinCategoryId = PreviewSkinCategoryId;
   PrevPreviewSkinId = PreviewSkinId;
   LastUnspawnTime = Now;
 
@@ -135,11 +137,14 @@ if ((PrevPreviewModelId != PreviewModelId || PrevPreviewSkinId != PreviewSkinId)
 }
 
 // Spawn player with the target model.
-if (!Playground::IsSpawned(Player)) {
-  declare PreviewModelId = Garage::GetPreviewModelId(LocalUser);
-  declare PreviewSkinId = Garage::GetPreviewSkinId(LocalUser);
+if (!MB_IsSpawned(Player)) {
+  declare SkinId = PreviewSkinId;
 
-  PlayerModels_Server::AssignModel(Player, PreviewModelId, PreviewSkinId, True);
+  if (SkinId == "") {
+    SkinId = PreviewSkinCategoryId;
+  }
+
+  PlayerModels_Server::AssignModel(Player, PreviewModelId, SkinId, True);
 
   +++SpawnPlayer+++
 }
@@ -159,6 +164,18 @@ Env::Unload();
 // ---------------------------------- //
 // Functions
 // ---------------------------------- //
+
+Boolean MB_IsSpawned(CPlayer _Player) {
+  switchtype (_Player) {
+    case CTmPlayer: {
+      return (_Player as CTmPlayer).IsSpawned;
+    }
+    case CSmPlayer: {
+      return (_Player as CSmPlayer).SpawnStatus == CSmPlayer::ESpawnStatus::Spawned;
+    }
+  }
+  return False;
+}
 
 Void MB_SetDefaultUIVisibility(Boolean _Visible) {
   UIManager.UIAll.OverlayHideNotices = !_Visible;

@@ -1,15 +1,14 @@
 /**
  * @name PlayerModels_Server.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  */
 
-#Const Version      "2025-03-13"
+#Const Version      "2025-04-22"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Server.Script.txt"
 
 #Include "TextLib" as TL
 #Include "Libs/Nadeo/Log.Script.txt" as Log
-#Include "Libs/domino54/CommonPlayground.Script.txt" as Playground
 #Include "Libs/domino54/CustomSkins/CustomSkins_Server.Script.txt" as CustomSkins
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PMData
 
@@ -437,7 +436,17 @@ Void Private_AssignModel(CPlayer _Player, Text _ModelId, Text _SkinId, Boolean _
   Net_LibPlayerModels_SkinId = _SkinId;
   Net_LibPlayerModels_PreferCustom = _PreferCustom;
 
-  Playground::AssignModelIdent(_Player, ModelIdent);
+  switchtype (_Player) {
+    case CSmPlayer: {
+      (_Player as CSmPlayer).ForceModelId = ModelIdent;
+    }
+    case CTmPlayer: {
+      (_Player as CTmPlayer).ForceModelId = ModelIdent;
+    }
+    default: {
+      assert(False, "Attempted to assign player model to unsupported player class instance.");
+    }
+  }
 }
 
 // ---------------------------------- //

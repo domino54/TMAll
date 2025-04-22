@@ -4,12 +4,12 @@
 /**
  * @name Garage.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  */
 
 #Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
 
-#Const Version    "2025-03-13"
+#Const Version    "2025-04-22"
 #Const ScriptName "ManiaApps/Garage.Script.txt"
 
 #Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
@@ -37,6 +37,7 @@ if (GaragePlaygroundAPI::IsPlayground()) {
 GarageAPI::Load();
 GarageController::Init();
 GarageAPI::SetModelId(GarageAPI::GetInitialModelId());
+GarageAPI::SetSkinCategoryId(GarageAPI::GetInitialSkinCategoryId());
 GarageController::Load();
 
 while (GaragePlaygroundAPI::IsPlayground() && !GaragePlaygroundAPI::HasSpawnedOnce()) {

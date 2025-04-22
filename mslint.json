@@ -10,9 +10,8 @@
   "linter": [
     "mslint:recommended",
     {
-      "ignores": ["**/Nadeo/**"]
-    },
-    {
+      "msApiGame": "maniaplanet",
+      "ignores": ["**/Nadeo/**"],
       "rules": {
         "format-real": [
           "error",
@@ -23,6 +22,10 @@
         "max-depth": ["error", { "maximum": 3 }],
         "no-now-class-member": "off",
         "no-sleep": "error",
+        "no-unused-variables": [
+          "error",
+          { "exceptions": ["Added", "Copied", "Passed", "Removed"] }
+        ],
         "type-declaration": "off"
       }
     }

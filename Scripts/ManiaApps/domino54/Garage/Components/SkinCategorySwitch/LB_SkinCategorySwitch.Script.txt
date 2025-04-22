@@ -1,0 +1,76 @@
+/**
+ * @name LB_SkinCategorySwitch.Script.txt
+ * @author domino54
+ * @version 2025-04-22
+ */
+
+#Const Version      "2025-04-22"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinCategorySwitch/LB_SkinCategorySwitch.Script.txt"
+
+#Include "ManiaApps/domino54/Common/ButtonToggle.Script.txt" as ButtonToggle
+
+#Const C_CustomEventType_UpdateCategories "category_switch:set_category"
+
+Text Build(Integer _Budget) {
+  return """
+<manialink version="3" name="L_SkinCategorySwitch">
+
+{{{ButtonToggle::CreateModel("FrameModel_CategoryToggle", _Budget)}}}
+
+<frame pos="-150 -52.5">
+  <frameinstance modelid="FrameModel_CategoryToggle" id="Frame_CategoryToggle" />
+</frame>
+
+<script><!--
+
+#Include "TextLib" as TL
+
+{{{ButtonToggle::InjectFunctions()}}}
+
+main() {
+  declare Frame_CategoryToggle <=> (Page.GetFirstChild("Frame_CategoryToggle") as CMlFrame);
+
+  declare Text[] CategoryNames for Page;
+  declare Integer ActiveIndex for Page;
+
+  ButtonToggle_SetOptions(Frame_CategoryToggle, CategoryNames, -3.0);
+  ButtonToggle_SetIndex(Frame_CategoryToggle, ActiveIndex);
+
+  while (True) {
+    if (!PageIsVisible) {
+      yield;
+      continue;
+    }
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type != CMlScriptEvent::Type::MouseClick) continue;
+      if (Event.ControlId != "Quad_ButtonToggleTrigger") continue;
+
+      declare Index = Event.Control.Parent.Parent.Controls.keyof(Event.Control.Parent);
+
+      ButtonToggle_SetIndex(Frame_CategoryToggle, Index);
+
+      SendCustomEvent("{{{C_CustomEventType_UpdateCategories}}}", [TL::ToText(Index)]);
+    }
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+        if (Event.Control.HasClass("Focus")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+        }
+      }
+      else if (Event.Type == CMlScriptEvent::Type::MouseOver) {
+        if (Event.Control.HasClass("Focus")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+        }
+      }
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

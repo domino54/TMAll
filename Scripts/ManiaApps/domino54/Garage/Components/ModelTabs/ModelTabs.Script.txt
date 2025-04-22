@@ -1,14 +1,14 @@
 /**
  * @name ModelTabs.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2025-04-22
  */
 
-#Const Version      "2024-10-30"
+#Const Version      "2025-04-22"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/ModelTabs/ModelTabs.Script.txt"
 
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
-#Include "ManiaApps/domino54/Garage/Components/ModelTabs/LB_ModelTabs.Script.txt" as LB_ModelTabs
+#Include "ManiaApps/domino54/Garage/Components/ModelTabs/LB_ModelTabs.Script.txt" as LB
 
 // ---------------------------------- //
 // Constants
@@ -16,11 +16,11 @@
 
 #Const C_ManialinkLayerId "L_ModelTabs"
 
-#Const C_CustomEventType_ActiveTab    "menu_tabs:active_tab"
-#Const C_CustomEventType_SetHeader    "menu_tabs:set_header"
-#Const C_CustomEventType_SetColor     "menu_tabs:set_color"
-#Const C_CustomEventType_UpdateTabs   "menu_tabs:update_tabs"
-#Const C_CustomEventType_SetTabId     "menu_tabs:set_tab_id"
+#Const LB::C_CustomEventType_ActiveTab    as C_CustomEventType_ActiveTab
+#Const LB::C_CustomEventType_SetHeader    as C_CustomEventType_SetHeader
+#Const LB::C_CustomEventType_SetColor     as C_CustomEventType_SetColor
+#Const LB::C_CustomEventType_UpdateTabs   as C_CustomEventType_UpdateTabs
+#Const LB::C_CustomEventType_SetTabId     as C_CustomEventType_SetTabId
 
 // ---------------------------------- //
 // Structs
@@ -79,7 +79,7 @@ Void Unload() {
 Void Load() {
   Unload();
 
-  Layers::Create(C_ManialinkLayerId, LB_ModelTabs::Build());
+  Layers::Create(C_ManialinkLayerId, LB::Build());
   Layers::SetVisibility(C_ManialinkLayerId, False);
 }
 

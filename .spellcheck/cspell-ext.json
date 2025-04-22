@@ -1,0 +1,37 @@
+{
+  "id": "maniascript",
+  "version": "0.2",
+  "name": "ManiaScript and ManiaLink dictionary.",
+  "readonly": true,
+  "dictionaryDefinitions": [
+    {
+      "name": "maniascript",
+      "path": "./dict/maniascript.txt",
+      "description": "ManiaScript keywords and primitive types."
+    },
+    {
+      "name": "manialink",
+      "path": "./dict/manialink.txt",
+      "description": "ManiaLink markup keywords."
+    },
+    {
+      "name": "mania-terms",
+      "path": "./dict/mania-terms.txt",
+      "description": "Trackmania and ManiaPlanet-related terms."
+    }
+  ],
+  "languageSettings": [
+    {
+      "languageId": "maniascript,xml",
+      "dictionaries": ["maniascript", "manialink"],
+      "ignoreRegExpList": ["manialink-hex-color"],
+      "patterns": [
+        {
+          "name": "manialink-hex-color",
+          "pattern": "/\"(([0-9A-F]){8}|([0-9A-F]){6}|([0-9A-F]){4}|([0-9A-F]){3})\"/gi"
+        }
+      ]
+    }
+  ],
+  "dictionaries": ["mania-terms"]
+}

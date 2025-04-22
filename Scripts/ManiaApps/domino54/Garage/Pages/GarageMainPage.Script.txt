@@ -1,15 +1,17 @@
 /**
  * @name GarageMainPage.Script.txt
  * @author domino54
- * @version 2024-12-25
+ * @version 2025-04-22
  */
 
-#Const Version      "2024-12-25"
+#Const Version      "2025-04-22"
 #Const ScriptName   "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt"
 
 #Include "ColorLib" as CL
+#Include "TextLib" as TL
 #Include "ManiaApps/domino54/Garage/Components/ModelTabs/ModelTabs.Script.txt" as ModelTabs
 #Include "ManiaApps/domino54/Garage/Components/SkinAuthorName/SkinAuthorName.Script.txt" as SkinAuthorName
+#Include "ManiaApps/domino54/Garage/Components/SkinCategorySwitch/SkinCategorySwitch.Script.txt" as SkinCategorySwitch
 #Include "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/SkinFallbackInfo.Script.txt" as SkinFallbackInfo
 #Include "ManiaApps/domino54/Garage/Components/SkinList/SkinList.Script.txt" as SkinList
 #Include "ManiaApps/domino54/Garage/Components/TitleLogoControls/TitleLogoControls.Script.txt" as TitleLogoControls
@@ -76,14 +78,26 @@ K_SkinOption[] Private_CreateSkinOptions(Text _ModelId, Text _SkinCategoryId) {
 Void Private_UpdateCurrentSkins() {
   declare ModelId = GarageAPI::GetModelId();
   declare SkinCategoryId = GarageAPI::GetSkinCategoryId();
+  declare SkinCategoryIsCustom = SkinCategoryId != GarageAPI::GetDefaultSkinCategoryId();
   declare SkinId = GarageAPI::GetSkinId();
+  declare IsFallbackSupported = GarageAPI::GetUsesArchetype(ModelId) && !SkinCategoryIsCustom;
 
   SkinList::SetSkinsData(Private_CreateSkinOptions(ModelId, SkinCategoryId));
   SkinList::SetPreviewSkinId(SkinId);
   SkinList::SetAppliedSkinId(GarageAPI::GetSelectedSkinId(ModelId, SkinCategoryId));
   SkinAuthorName::SetAuthorName(GarageAPI::GetSkinAuthorName(SkinId));
-  SkinFallbackInfo::SetButtonVisibility(GarageAPI::GetUsesArchetype(ModelId));
+  SkinFallbackInfo::SetButtonVisibility(IsFallbackSupported);
   SkinFallbackInfo::SetPreferCustom(GarageAPI::GetPreferCustom(ModelId));
+}
+
+Void Private_SetDisplayedSkinCategoryByIndex(Integer _Index) {
+  declare ModelId = GarageAPI::GetModelId();
+  declare SkinCategoryId =  GarageAPI::GetSelectableSkinCategoryIds()[_Index];
+
+  GarageAPI::SetSkinCategoryId(SkinCategoryId);
+  GarageAPI::SetSkinId(GarageAPI::GetSelectedSkinId(ModelId, SkinCategoryId));
+
+  Private_UpdateCurrentSkins();
 }
 
 Void Private_TogglePreferCustom(Text _ModelId) {
@@ -100,6 +114,7 @@ Void Private_TogglePreferCustom(Text _ModelId) {
 Void Unload() {
   ModelTabs::Unload();
   SkinAuthorName::Unload();
+  SkinCategorySwitch::Unload();
   SkinFallbackInfo::Unload();
   SkinList::Unload();
   TitleLogoControls::Unload();
@@ -109,15 +124,27 @@ Void Load() {
   Unload();
 
   TitleLogoControls::Load();
+
+  // Tabs
   ModelTabs::Load();
   ModelTabs::SetHeaderText(Private_GetTitleText());
   ModelTabs::SetColor(CL::HexToRgb(C_GarageColor));
+  ModelTabs::SetTabsData(Private_CreateModelTabs());
+  ModelTabs::SetActiveTabId(GarageAPI::GetModelId());
+
+  // Skin selector
   SkinAuthorName::Load();
   SkinFallbackInfo::Load();
   SkinList::Load();
 
-  ModelTabs::SetTabsData(Private_CreateModelTabs());
-  ModelTabs::SetActiveTabId(GarageAPI::GetModelId());
+  // Optional skin category switch
+  declare SkinCategoryIds = GarageAPI::GetSelectableSkinCategoryIds();
+
+  if (SkinCategoryIds.count > 1) {
+    declare SkinCategoryIndex = SkinCategoryIds.keyof(GarageAPI::GetSkinCategoryId());
+
+    SkinCategorySwitch::Load(GarageAPI::GetSelectableSkinCategoryNames(), SkinCategoryIndex);
+  }
 
   Private_UpdateCurrentSkins();
 }
@@ -126,16 +153,18 @@ Void Show() {
   TitleLogoControls::Show();
   ModelTabs::Show();
   SkinAuthorName::Show();
+  SkinCategorySwitch::Show();
   SkinFallbackInfo::Show();
   SkinList::Show();
 }
 
 Void Hide() {
-  TitleLogoControls::Show();
+  TitleLogoControls::Hide();
   ModelTabs::Hide();
-  SkinAuthorName::Show();
-  SkinFallbackInfo::Show();
-  SkinList::Show();
+  SkinAuthorName::Hide();
+  SkinCategorySwitch::Hide();
+  SkinFallbackInfo::Hide();
+  SkinList::Hide();
 }
 
 Void Loop() {
@@ -158,6 +187,9 @@ Void Loop() {
       }
       case SkinFallbackInfo::C_CustomEventType_TogglePreferCustom: {
         Private_TogglePreferCustom(GarageAPI::GetModelId());
+      }
+      case SkinCategorySwitch::C_CustomEventType_UpdateCategories: {
+        Private_SetDisplayedSkinCategoryByIndex(TL::ToInteger(Event.CustomEventData[0]));
       }
     }
 

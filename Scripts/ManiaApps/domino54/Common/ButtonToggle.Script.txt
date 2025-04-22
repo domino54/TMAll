@@ -1,0 +1,186 @@
+/**
+ * @name ButtonToggle.Script.txt
+ * @author domino54
+ * @version 2025-04-22
+ */
+
+#Const Version    "2025-04-22"
+#Const ScriptName "ManiaApps/domino54/Common/ButtonToggle.Script.txt"
+
+#Include "MathLib" as ML
+#Include "Libs/domino54/TextLibExt.Script.txt" as TLX
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ButtonFillColor      "FFFFFF"
+#Const C_ButtonTextColor      "444444"
+#Const C_DefaultHeight        6.0
+#Const C_DefaultOutline       0.375
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_Options {
+  Real Height;
+  Real Outline;
+  Real TextSize;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text CreateModel(Text _Id, Integer _Budget, K_Options _Options) {
+  declare SubFont = Font::GetFontName("SubTitle");
+
+  declare Text ActiveButtons;
+  declare Text InactiveButtons;
+
+  for (I, 1, _Budget) {
+    ActiveButtons ^= """<frameinstance modelid="FrameModel_ActiveButton" />""";
+    InactiveButtons ^= """<frameinstance modelid="FrameModel_InactiveButton" />""";
+  }
+
+  declare Height = _Options.Height;
+  declare Outline = _Options.Outline;
+  declare TextSize = _Options.TextSize;
+
+  if (Height <= 0) {
+    Height = C_DefaultHeight;
+  }
+
+  if (Outline <= 0) {
+    Outline = C_DefaultOutline;
+  }
+
+  if (TextSize <= 0) {
+    TextSize = ML::NearestInteger(Height * 0.75 - 1) / 2.0;
+  }
+
+  return """
+<framemodel id="{{{_Id}}}" size="10 {{{Height}}}">
+  <framemodel id="FrameModel_ActiveButton">
+    <label id="Label_ButtonToggleText" pos="0 {{{Height / -2}}}" halign="center" valign="center2" textcolor="{{{C_ButtonTextColor}}}" textsize="{{{TextSize}}}" textfont="{{{SubFont}}}" textprefix="$t" />
+    <quad id="Quad_ButtonToggleTrigger" pos="0 0" size="0 {{{Height}}}" bgcolor="FFFFFF" />
+  </framemodel>
+
+  <framemodel id="FrameModel_InactiveButton">
+    <label id="Label_ButtonToggleText" pos="0 {{{Height / -2}}}" halign="center" valign="center2" textcolor="{{{C_ButtonFillColor}}}" textsize="{{{TextSize}}}" textfont="{{{SubFont}}}" textprefix="$t" />
+    <quad id="Quad_ButtonToggleTrigger" pos="0 0" size="0 {{{Height}}}" bgcolor="00000000" bgcolorfocus="FFFFFF44" class="Focus" scriptevents="1" />
+  </framemodel>
+
+  <frame id="Frame_ActiveButtons" size="0 {{{Height}}}">
+    <frame id="Frame_ActiveButtonsOffset">
+      {{{ActiveButtons}}}
+    </frame>
+  </frame>
+
+  <frame id="Frame_InactiveButtons">
+    {{{InactiveButtons}}}
+  </frame>
+
+  <quad id="Quad_EdgeT" pos="0 0" halign="left" valign="top" size="0 {{{Outline}}}" bgcolor="FFF" />
+  <quad id="Quad_EdgeL" pos="0 0" halign="left" valign="top" size="{{{Outline}}} {{{Height}}}" bgcolor="FFF" autoscale="0" />
+  <quad id="Quad_EdgeB" pos="0 {{{-Height}}}" halign="left" valign="bottom" size="0 {{{Outline}}}" bgcolor="FFF" />
+  <quad id="Quad_EdgeR" pos="0 0" halign="right" valign="top" size="{{{Outline}}} {{{Height}}}" bgcolor="FFF" autoscale="0" />
+</framemodel>
+  """;
+}
+
+Text CreateModel(Text _Id, Integer _Budget) {
+  return CreateModel(_Id, _Budget, K_Options{});
+}
+
+Text InjectFunctions() {
+  return TLX::Script("""<script><!--
+
+Void ButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index, Integer _Duration) {
+  declare Frame_ActiveButtons <=> (_Frame.GetFirstChild("Frame_ActiveButtons") as CMlFrame);
+  declare Frame_ActiveButtonsOffset <=> (_Frame.GetFirstChild("Frame_ActiveButtonsOffset") as CMlFrame);
+
+  if (!Frame_ActiveButtonsOffset.Controls.existskey(_Index)) {
+    return;
+  }
+
+  declare Control = Frame_ActiveButtonsOffset.Controls[_Index];
+  declare Pos = <Control.RelativePosition_V3.X, Frame_ActiveButtons.RelativePosition_V3.Y>;
+  declare Size = <Control.Size.X, Frame_ActiveButtons.Size.Y>;
+
+  AnimMgr.Flush(Frame_ActiveButtons);
+  AnimMgr.Flush(Frame_ActiveButtonsOffset);
+
+  if (_Duration > 0) {
+    AnimMgr.Add(Frame_ActiveButtons, "<control pos='"^Pos.X^" "^Pos.Y^"' size='"^Size.X^" "^Size.Y^"' />", _Duration, CAnimManager::EAnimManagerEasing::QuadOut);
+    AnimMgr.Add(Frame_ActiveButtonsOffset, "<control pos='"^-Pos.X^" 0' />", _Duration, CAnimManager::EAnimManagerEasing::QuadOut);
+  } else {
+    Frame_ActiveButtons.RelativePosition_V3 = Pos;
+    Frame_ActiveButtons.Size = Size;
+    Frame_ActiveButtonsOffset.RelativePosition_V3 = <-Pos.X, 0.0>;
+  }
+}
+
+Void ButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index) {
+  ButtonToggle_SetIndex(_Frame, _Index, 200);
+}
+
+Void ButtonToggle_SetOptions(CMlFrame _Frame, Text[] _Options, Real _Width) {
+  declare Frame_ActiveButtonsOffset <=> (_Frame.GetFirstChild("Frame_ActiveButtonsOffset") as CMlFrame);
+  declare Frame_InactiveButtons <=> (_Frame.GetFirstChild("Frame_InactiveButtons") as CMlFrame);
+
+  declare TotalWidth = 0.0;
+  declare Margin = -_Width;
+
+  for (ButtonIndex, 0, Frame_ActiveButtonsOffset.Controls.count - 1) {
+    declare ActiveFrame = (Frame_ActiveButtonsOffset.Controls[ButtonIndex] as CMlFrame);
+    declare InactiveFrame = (Frame_InactiveButtons.Controls[ButtonIndex] as CMlFrame);
+
+    foreach (I => Frame in [ActiveFrame, InactiveFrame]) {
+      Frame.Visible = _Options.existskey(ButtonIndex);
+
+      if (!Frame.Visible) {
+        continue;
+      }
+
+      Frame.RelativePosition_V3.X = TotalWidth;
+
+      declare Label_ButtonToggleText <=> (Frame.GetFirstChild("Label_ButtonToggleText") as CMlLabel);
+      declare Quad_ButtonToggleTrigger <=> (Frame.GetFirstChild("Quad_ButtonToggleTrigger") as CMlQuad);
+      declare LabelWidth = _Width;
+
+      Label_ButtonToggleText.Value = _Options[ButtonIndex];
+
+      if (Margin >= 0) {
+        LabelWidth = Margin + Label_ButtonToggleText.ComputeWidth(Label_ButtonToggleText.Value) + Margin;
+      } else {
+        LabelWidth -= 4.0;
+      }
+
+      Label_ButtonToggleText.RelativePosition_V3.X = LabelWidth / 2;
+      Label_ButtonToggleText.Size.X = LabelWidth;
+      Quad_ButtonToggleTrigger.Size.X = LabelWidth;
+      Frame.Size.X = LabelWidth; // Used to easily animate active option
+
+      if (I != 0) {
+        TotalWidth += LabelWidth;
+      }
+    }
+  }
+
+  declare Quad_EdgeT <=> (_Frame.GetFirstChild("Quad_EdgeT") as CMlQuad);
+  declare Quad_EdgeB <=> (_Frame.GetFirstChild("Quad_EdgeB") as CMlQuad);
+  declare Quad_EdgeR <=> (_Frame.GetFirstChild("Quad_EdgeR") as CMlQuad);
+
+  _Frame.Size.X = TotalWidth;
+  Quad_EdgeT.Size.X = TotalWidth;
+  Quad_EdgeB.Size.X = TotalWidth;
+  Quad_EdgeR.RelativePosition_V3.X = TotalWidth;
+
+  ButtonToggle_SetIndex(_Frame, 0, 0);
+}
+
+--></script>""");
+}
