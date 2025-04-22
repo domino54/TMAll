@@ -16,7 +16,6 @@ Text Build() {
   declare Text ImgLogo for LocalUser;
 
   declare QuadSize = <5.0, 5.0>;
-  declare MainFont = Font::GetFontName("Main");
   declare SubFont = Font::GetFontName("SubTitle");
 
   return """
@@ -62,7 +61,7 @@ Void FocusButton(CMlControl _Control) {
   }
 }
 
-Void UnfocusButton(CMlControl _Control) {
+Void BlurButton(CMlControl _Control) {
   foreach (Control in _Control.Parent.Controls) {
     if (!(Control is CMlLabel)) {
       continue;
@@ -105,7 +104,7 @@ main() {
           FocusButton(Event.Control);
         }
         case CMlScriptEvent::Type::MouseOut: {
-          UnfocusButton(Event.Control);
+          BlurButton(Event.Control);
         }
       }
     }

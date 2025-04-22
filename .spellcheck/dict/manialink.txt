@@ -4,6 +4,7 @@ autoscale
 autoscalefixedwidth
 basic
 bgcolor
+bgcolorfocus
 bottom
 center
 centered

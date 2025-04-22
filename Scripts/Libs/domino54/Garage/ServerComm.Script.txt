@@ -29,6 +29,18 @@ Text GetPreviewModelId(CUser _User) {
   return LibGarage_CurrentPreviewModelId;
 }
 
+Void SetPreviewSkinCategoryId(CUser _User, Text _SkinCategoryId) {
+  declare Text LibGarage_CurrentPreviewSkinCategoryId for _User;
+
+  LibGarage_CurrentPreviewSkinCategoryId = _SkinCategoryId;
+}
+
+Text GetPreviewSkinCategoryId(CUser _User) {
+  declare Text LibGarage_CurrentPreviewSkinCategoryId for _User;
+
+  return LibGarage_CurrentPreviewSkinCategoryId;
+}
+
 Void SetPreviewSkinId(CUser _User, Text _SkinId) {
   declare Text LibGarage_CurrentPreviewSkinId for _User;
 

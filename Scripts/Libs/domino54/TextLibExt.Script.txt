@@ -1,10 +1,10 @@
 /**
  * @name TextLibExt.Script.txt
  * @author domino54
- * @version 2024-10-04
+ * @version 2025-04-22
  */
 
-#Const Version      "2024-10-04"
+#Const Version      "2025-04-22"
 #Const ScriptName   "Libs/domino54/TextLibExt.Script.txt"
 
 #Include "TextLib" as TL
@@ -14,10 +14,22 @@
 // ---------------------------------- //
 
 /**
+ * Removes the <script> tags from the start and end of a string.
+ * This allows writing strings, which MSLang highlights as ManiaScript code,
+ * but removing them in runrime.
+ *
+ * @param _Script The script to strip of the <script> tags.
+ * @return Formatted string.
+ */
+Text Script(Text _Script) {
+  return TL::RegexReplace("(^<script>(<!--)?)|((-->)?<\\/script>$)", _Script, "g", "");
+}
+
+/**
  * Formats a time integer to string with leading minutes and milliseconds.
  *
- * @param _Time - Value to format to text.
- * @returns Time as string in format `0:00.000`.
+ * @param _Time Value to format to text.
+ * @return Time as string in format `0:00.000`.
  */
 Text TimeToText(Integer _Time) {
   if (_Time == 0) {
@@ -43,7 +55,8 @@ Text TimeToText(Integer _Time) {
 }
 
 Text InjectTimeToText(Text _TL) {
-  return """
+  return Script("""<script><!--
+
 Text TimeToText(Integer _Time) {
   if (_Time == 0) {
     return "0:00.000";
@@ -66,7 +79,8 @@ Text TimeToText(Integer _Time) {
 
   return Minutes ^ ":" ^ SecondsMs;
 }
-  """;
+
+--></script>""");
 }
 
 Text InjectTimeToText() {

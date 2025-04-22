@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Data.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  */
 
-#Const Version      "2025-03-13"
+#Const Version      "2025-04-22"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt"
 
 #Include "MathLib" as ML
@@ -559,7 +559,7 @@ Text Private_FetchFile(Text _Url) {
  */
 K_IndexFile Private_FetchIndexFile(Text _Url) {
   declare K_IndexFile IndexFile;
-  declare Copied = IndexFile.fromjson(Private_FetchFile(_Url)); // @mslint-disable-line no-unused-variables
+  declare Copied = IndexFile.fromjson(Private_FetchFile(_Url));
 
   return IndexFile;
 }
@@ -569,7 +569,7 @@ K_IndexFile Private_FetchIndexFile(Text _Url) {
  */
 K_SourceFile Private_FetchSourceFile(Text _Url) {
   declare K_SourceFile SourceFile;
-  declare Copied = SourceFile.fromjson(Private_FetchFile(_Url)); // @mslint-disable-line no-unused-variables
+  declare Copied = SourceFile.fromjson(Private_FetchFile(_Url));
 
   SourceFile.BaseUrl = Private_GetBaseUrl(_Url);
 

@@ -3,12 +3,12 @@
  *
  * @name Race.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  */
 
 #Extends "MapTypes/Base/MapTypeTMAll.Script.txt"
 
-#Const Version    "2025-03-13"
+#Const Version    "2025-04-22"
 #Const ScriptName "MapTypes/TrackMania/Race.Script.txt"
 
 #Include "Libs/Nadeo/Common/Ingame/MapType.Script.txt" as MapType
@@ -162,7 +162,7 @@ if (Player.RaceStartTime <= 0 && Game::IsWaiting(Player)) {
 
 // Events
 foreach (Event in Mode.PendingEvents) {
-  declare Passed = Mode.PassOn(Event); // @mslint-disable-line no-unused-variables
+  declare Passed = Mode.PassOn(Event);
 
   if (Event.Type != CTmModeEvent::EType::WayPoint || !Event.IsEndRace) {
     continue;

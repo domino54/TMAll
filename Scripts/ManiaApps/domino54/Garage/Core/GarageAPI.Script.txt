@@ -1,10 +1,10 @@
 /**
  * @name GarageAPI.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  */
 
-#Const Version      "2025-03-13"
+#Const Version      "2025-04-22"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt"
 
 #Include "TextLib" as TL
@@ -174,6 +174,38 @@ Text[] GetSelectableModelIds() {
   return Result;
 }
 
+Text[] GetSelectableSkinCategoryIds() {
+  declare Text[] Result;
+
+  foreach (SkinCategory in PMData::GetAllSkinCategories()) {
+    Result.add(SkinCategory.Id);
+  }
+
+  return Result;
+}
+
+Text[] GetSelectableSkinCategoryNames() {
+  declare Text[] Result;
+
+  foreach (SkinCategory in PMData::GetAllSkinCategories()) {
+    Result.add(SkinCategory.Name);
+  }
+
+  return Result;
+}
+
+Text GetDefaultSkinCategoryId() {
+  return PMData::C_DefaultSkinCategoryId;
+}
+
+Text GetInitialSkinCategoryId() {
+  foreach (SkinCategory in PMData::GetAllSkinCategories()) {
+    return SkinCategory.Id;
+  }
+
+  return GetDefaultSkinCategoryId();
+}
+
 Text[] GetSelectableSkinIds(Text _ModelId, Text _SkinCategoryId) {
   declare Text[] Result;
 
@@ -204,6 +236,8 @@ Text GetSkinCategoryId() {
 
 Void SetSkinCategoryId(Text _SkinCategoryId) {
   G_PreviewSkinCategoryId = _SkinCategoryId;
+
+  GarageServer::SetPreviewSkinCategoryId(LocalUser, _SkinCategoryId);
 }
 
 Text GetLastModelId() {

@@ -21,8 +21,8 @@
     "spellcheck": "cspell"
   },
   "devDependencies": {
-    "@maniascript/mslint": "^4.2.0",
-    "cspell": "^8.17.5",
+    "@maniascript/mslint": "^4.3.0",
+    "cspell": "^8.19.2",
     "cspell-dict-maniascript": "file:.spellcheck"
   }
 }

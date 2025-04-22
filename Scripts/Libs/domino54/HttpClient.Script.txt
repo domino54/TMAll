@@ -1,7 +1,7 @@
 /**
  * @name HttpClient.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  *
  * @example ```ts
  * Void Load() {
@@ -28,7 +28,7 @@
  * ```
  */
 
-#Const Version      "2025-03-13"
+#Const Version      "2025-04-22"
 #Const ScriptName   "Libs/domino54/HttpClient.Script.txt"
 
 #Include "TextLib" as TL
@@ -117,7 +117,7 @@ Void Private_HttpCreate(K_HttpRequestOptions _Options) {
       ResponseBody = Request.Result
     });
 
-    declare Removed = G_LibHttpClient_PendingNamespaces.remove(_Options.Namespace); // @mslint-disable-line no-unused-variables
+    declare Removed = G_LibHttpClient_PendingNamespaces.remove(_Options.Namespace);
 
     Http.Destroy(Request);
 
@@ -186,7 +186,7 @@ Void Yield() {
   // Enqueue requests that originally have exceeded the available slots.
   while (G_LibHttpClient_RequestsQueue.count > 0 && Http.SlotsAvailable > 0) {
     declare Request = G_LibHttpClient_RequestsQueue[0];
-    declare Removed = G_LibHttpClient_RequestsQueue.removekey(0); // @mslint-disable-line no-unused-variables
+    declare Removed = G_LibHttpClient_RequestsQueue.removekey(0);
 
     Private_HttpCreate(Request);
   }
@@ -213,7 +213,7 @@ Void Yield() {
       ResponseBody = Event.Request.Result
     });
 
-    declare Removed = G_LibHttpClient_PendingNamespaces.remove(LibHttpClient_Namespace); // @mslint-disable-line no-unused-variables
+    declare Removed = G_LibHttpClient_PendingNamespaces.remove(LibHttpClient_Namespace);
 
     Http.Destroy(Event.Request);
   }
@@ -239,7 +239,7 @@ Void Yield() {
         StatusCode = C_LibHttpClient_TimeoutStatusCode
       });
 
-      declare Removed = G_LibHttpClient_PendingNamespaces.remove(LibHttpClient_Namespace); // @mslint-disable-line no-unused-variables
+      declare Removed = G_LibHttpClient_PendingNamespaces.remove(LibHttpClient_Namespace);
 
       RequestsToDestroy.add(Request.Id);
     }
@@ -285,7 +285,7 @@ K_HttpClientEvent GetFirstEvent(Text _Namespace) {
   }
 
   if (Index >= 0) {
-    declare Removed = G_LibHttpClient_PendingEvents.removekey(Index); // @mslint-disable-line no-unused-variables
+    declare Removed = G_LibHttpClient_PendingEvents.removekey(Index);
   }
 
   return FirstEvent;

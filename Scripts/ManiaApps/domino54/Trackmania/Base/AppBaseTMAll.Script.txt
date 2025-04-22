@@ -9,8 +9,8 @@
  */
 #Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
 
-#Const TMAll_Version      "2025-03-13"
-#Const TMAll_ScriptName   "ManiaApps/domino54/TrackMania/Base/AppBaseTMAll.Script.txt"
+#Const Version      "2025-03-13"
+#Const ScriptName   "ManiaApps/domino54/TrackMania/Base/AppBaseTMAll.Script.txt"
 
 #Include "Libs/domino54/CustomSkins/CustomSkins_ClientPlayground.Script.txt" as CustomSkins
 #Include "Libs/domino54/Openplanet/Openplanet_Client.Script.txt" as Openplanet
@@ -38,6 +38,7 @@ Openplanet::Load();
 // ---------------------------------- //
 ***AB_LogVersions***
 ***
+Log::RegisterScript(ScriptName, Version);
 Log::RegisterScript(UI::ScriptName, UI::Version);
 Log::RegisterScript(CustomSkins::ScriptName, CustomSkins::Version);
 Log::RegisterScript(MenuOnline::ScriptName, MenuOnline::Version);

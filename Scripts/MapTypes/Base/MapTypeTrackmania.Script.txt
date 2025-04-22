@@ -3,14 +3,14 @@
  *
  * @name MapTypeTrackmania.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  */
 
 #RequireContext CTmMapType
 
 #Extends "MapTypes/Base/MapTypeBase.Script.txt"
 
-#Const TM_Version     "2025-03-13"
+#Const TM_Version     "2025-04-22"
 #Const TM_ScriptName  "MapTypes/Base/MapTypeTrackmania.Script.txt"
 
 #Include "Libs/Trackmania/Ingame/UI/UI.Script.txt" as GameUI
@@ -128,7 +128,7 @@ if (MTB_Setting_UseDefaultTest) {
     if (Event.Type == CTmModeEvent::EType::WayPoint && Event.IsEndRace) {
       Mode.Discard(Event);
     } else {
-      declare Passed = Mode.PassOn(Event); // @mslint-disable-line no-unused-variables
+      declare Passed = Mode.PassOn(Event);
     }
   }
 
@@ -222,7 +222,7 @@ Void TM_StartRace(CTmPlayer _Player, Integer _StartTime) {
   Mode.RaceGhost_RemoveAll();
 
   if (MTB_Private_PersonalBestGhost != Null) {
-    declare GhostInstId = Mode.RaceGhost_Add(MTB_Private_PersonalBestGhost, True, MTB_Private_PBGhostModelId); // @mslint-disable-line no-unused-variables
+    declare Added = Mode.RaceGhost_Add(MTB_Private_PersonalBestGhost, True, MTB_Private_PBGhostModelId);
   }
 
   +++TMPlayground_RaceGhosts+++

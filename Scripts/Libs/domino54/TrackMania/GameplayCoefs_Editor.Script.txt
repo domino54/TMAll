@@ -1,10 +1,10 @@
 /**
  * @name GameplayCoefs_Editor.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-04-22
  */
 
-#Const Version      "2025-03-13"
+#Const Version      "2025-04-22"
 #Const ScriptName   "Libs/domino54/TrackMania/GameplayCoefs_Editor.Script.txt"
 
 #Include "MathLib" as ML
@@ -406,9 +406,6 @@ Void NormalizeCoefsIfUninitialized(Real _AccelCoef, Real _ControlCoef, Real _Gra
 }
 
 Void Unload() {
-  G_LibGameplayCoefs_MapPlayerModelAccelCoef = 1.0;
-  G_LibGameplayCoefs_MapPlayerModelControlCoef = 1.0;
-  G_LibGameplayCoefs_MapPlayerModelGravityCoef = 1.0;
   G_LibGameplayCoefs_RequestOpenDialog = False;
 
   Layers::Destroy(C_LibGameplayCoefs_ButtonManialinkLayerId);

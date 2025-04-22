@@ -1,10 +1,10 @@
 /**
  * @name CustomSkins_ClientCommon.Script.txt
  * @author domino54
- * @version 2024-12-22
+ * @version 2025-03-13
  */
 
-#Const Version      "2024-12-22"
+#Const Version      "2025-03-13"
 #Const ScriptName   "Libs/domino54/CustomSkins/CustomSkins_ClientCommon.Script.txt"
 
 #Include "Libs/domino54/CustomSkins/CustomSkins_Common.Script.txt" as Common
@@ -27,7 +27,7 @@ Void SetPlayerSkinId(Text _ModelId, Text _SkinCategoryId, Text _SkinId) {
   declare Index = Common::GetIndex(_ModelId, _SkinCategoryId);
 
   if (_SkinId == "" && Persistent_LibCustomSkins_ModelIdToSkinId.existskey(Index)) {
-    declare Removed = Persistent_LibCustomSkins_ModelIdToSkinId.removekey(Index); // @mslint-disable-line no-unused-variables
+    declare Removed = Persistent_LibCustomSkins_ModelIdToSkinId.removekey(Index);
 
     Persistent_LibCustomSkins_LastUpdate = Now;
   }
@@ -93,7 +93,7 @@ Void SetPlayerUseCustomOverArchetype(Text _ModelId, Boolean _PreferCustom) {
   }
 
   else if (!_PreferCustom && Persistent_LibCustomSkins_UseCustomOverArchetype.exists(_ModelId)) {
-    declare Removed = Persistent_LibCustomSkins_UseCustomOverArchetype.remove(_ModelId); // @mslint-disable-line no-unused-variables
+    declare Removed = Persistent_LibCustomSkins_UseCustomOverArchetype.remove(_ModelId);
 
     Persistent_LibCustomSkins_LastUpdate = Now;
   }
