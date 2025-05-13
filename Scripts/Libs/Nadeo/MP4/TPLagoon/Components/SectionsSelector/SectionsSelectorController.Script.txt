@@ -123,8 +123,7 @@ Void UpdateRanking()
 
 Void LaunchGarage()
 {
-	//declare Text GarageMapName = XMLController::GetGarageMapPath();
-	declare Text GarageMapName = "TMAllMaker/Garage/TMAllMaker_Garage.Map.Gbx";
+	declare Text GarageMapName = XMLController::GetGarageMapPath();
 
 	if (GarageMapName == "") {
 		OpenLink("file://Media/ManiaApps/Garage.Script.txt", CManiaApp::ELinkType::ManialinkBrowser);
@@ -259,6 +258,11 @@ Void Loop() {
 				}
 				declare Text[] Sections_Name         = SectionsManager::GetSections_Name();
 				declare Integer SectionId = TextLib::ToInteger(Event.CustomEventData[0]);
+
+				if (Sections_Name[SectionId] == "Garage") {
+					LaunchGarage();
+					continue;
+				}
 
 				SectionsManager::SetActualSection(SectionId);
 				declare Text NewPage = SectionsManager::GetSection_FirstPageById(SectionId);

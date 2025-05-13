@@ -1,0 +1,20 @@
+#Include "TextLib" as TL
+#Include "Libs/Nadeo/Common/Core/SectionsManager.Script.txt" as SectionsManager
+#Include "Libs/Nadeo/MP4/TPLagoon/XMLController.Script.txt" as XMLController
+
+Vec3 GetColor() {
+  declare Colors = XMLController::Get_Color_Sections();
+
+  if (!Colors.existskey("Garage")) {
+    return <0.45, 0.42, 0.90>;
+  }
+
+  return TL::ToColor(Colors["Garage"]);
+}
+
+Void Load() {
+  SectionsManager::AddSection("Garage", "GarageMain", "Garage", GetColor());
+}
+
+Void Loop() {
+}

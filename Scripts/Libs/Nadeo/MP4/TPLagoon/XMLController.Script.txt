@@ -286,6 +286,7 @@ Void GetXML()
 	G_Sections["Multiplayer"] = False;
 	G_Sections["LocalPlay"]   = False;
 	G_Sections["Editors"]     = False;
+	G_Sections["Garage"]     = False;
 	G_Sections["Profile"]     = False;
 	G_Gameplay_Acceleration		= 1.;
 	G_Gameplay_Control			= 1.;
@@ -413,7 +414,7 @@ Void GetXML()
 		} else if (MapNode.Name == "Resources") {
 			G_FlashUrl					= MapNode.GetAttributeText("flashurl", LoadedTitle.TitleId ^ "");
 		} else if (MapNode.Name == "Garage") {
-			G_GarageMapPath					= MapNode.GetAttributeText("path", "");
+			G_GarageMapPath					= MapNode.GetAttributeText("mappath", "");
 		}
 
 		if(G_Sections.existskey(MapNode.Name))
