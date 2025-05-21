@@ -1,13 +1,14 @@
 /**
- * @name DesignButtons.Script.txt
+ * @name HorizonButton.Script.txt
  * @author domino54
- * @version 2024-12-25
+ * @version 2025-05-13
  */
 
-#Const Version      "2024-12-25"
-#Const ScriptName   "ManiaApps/domino54/Common/DesignButtons.Script.txt"
+#Const Version      "2025-05-13"
+#Const ScriptName   "ManiaApps/domino54/Common/HorizonElements/HorizonButton.Script.txt"
 
 #Include "MathLib" as ML
+#Include "Libs/domino54/TextLibExt.Script.txt" as TLX
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
 
 // ---------------------------------- //
@@ -40,16 +41,14 @@ Text Private_CreateButton(Text _Id, Vec2 _Size, Real _Outline, Boolean _Filled, 
 
   if (_Filled) {
     TextColor = C_ButtonTextColor;
-  }
-  else {
     HoverSize = _Size + <2.0, 2.0>;
     HoverPos = <-1.0, 1.0>;
   }
 
   declare Controls = """
     <quad id="Quad_ButtonHover" class="Hover" pos="{{{HoverPos.X}}} {{{HoverPos.Y}}}" size="{{{HoverSize.X}}} {{{HoverSize.Y}}}" bgcolor="{{{C_ButtonFillColor}}}44" opacity="0" />
-    <label id="Label_ButtonText" pos="{{{Y + (X - Y - 2) / 2}}} {{{Y / -2 - 0.2}}}" halign="center" valign="center2" size="{{{X - Y - 2}}}" textsize="2.5" textcolor="{{{TextColor}}}" textfont="{{{SubFont}}}" textprefix="$t" text="{{{_Text}}}" />
-    <quad id="Quad_{{{_Id}}}" class="Focus" pos="0 0" size="{{{X}}} {{{Y}}}" scriptevents="1" />
+    <label id="Label_ButtonText" pos="{{{Y + (X - Y - 2) / 2}}} {{{Y / -2 - 0.2}}}" halign="center" valign="center2" size="{{{X - Y - 2}}}" textsize="{{{TextSize}}}" textcolor="{{{TextColor}}}" textfont="{{{SubFont}}}" textprefix="$t" text="{{{_Text}}}" />
+    <quad id="Quad_{{{_Id}}}" class="HorizonButton" pos="0 0" size="{{{X}}} {{{Y}}}" scriptevents="1" />
   """;
 
   // Add outline if specified
@@ -66,8 +65,8 @@ Text Private_CreateButton(Text _Id, Vec2 _Size, Real _Outline, Boolean _Filled, 
   // Add fill if specified
   if (_Filled) {
     Controls ^= """
-      <quad class="Contour" size="{{{Y}}} {{{Y}}}" image="{{{C_ImgBase}}}EmptyContour.dds" opacity="0" />
-      <quad class="Contour" pos="{{{Y}}} 0" size="{{{X - Y}}} {{{Y}}}" bgcolor="{{{C_ButtonFillColor}}}" opacity="0" />
+      <quad class="Contour" size="{{{Y}}} {{{Y}}}" image="{{{C_ImgBase}}}EmptyContour.dds" opacity="1" />
+      <quad class="Contour" pos="{{{Y}}} 0" size="{{{X - Y}}} {{{Y}}}" bgcolor="{{{C_ButtonFillColor}}}" opacity="1" />
     """;
   }
 
@@ -123,8 +122,9 @@ Text CreateFilledButton(Text _Id, Vec2 _Size, Text _Text) {
 }
 
 Text InjectFunctions() {
-  return """
-Void Button_SetFilled(CMlFrame _Frame, Boolean _IsFilled, Integer _Duration) {
+  return TLX::Script("""<script><!--
+
+Void HorizonButton_SetFilled(CMlFrame _Frame, Boolean _IsFilled, Integer _Duration) {
   declare Label_ButtonText <=> (_Frame.GetFirstChild("Label_ButtonText") as CMlLabel);
   declare Quad_ButtonHover <=> (_Frame.GetFirstChild("Quad_ButtonHover") as CMlQuad);
   declare Quad_Focus <=> (_Frame.Controls[2] as CMlQuad);
@@ -154,8 +154,53 @@ Void Button_SetFilled(CMlFrame _Frame, Boolean _IsFilled, Integer _Duration) {
   }
 }
 
-Void Button_SetFilled(CMlFrame _Frame, Boolean _IsFilled) {
-  Button_SetFilled(_Frame, _IsFilled, {{{C_DefaultAnimDuration}}});
+Void HorizonButton_SetFilled(CMlFrame _Frame, Boolean _IsFilled) {
+  HorizonButton_SetFilled(_Frame, _IsFilled, {{{C_DefaultAnimDuration}}});
 }
-  """;
+
+Void HorizonButton_SetHover(CMlFrame _Frame, Boolean _IsHovered) {
+  Page.GetClassChildren("Hover", _Frame, True);
+
+  declare Opacity = 0.0;
+
+  if (_IsHovered) {
+    Opacity = 1.0;
+  }
+
+  foreach (Control in Page.GetClassChildren_Result) {
+    AnimMgr.Flush(Control);
+    AnimMgr.Add(Control, "<quad opacity='"^Opacity^"' />", 125, CAnimManager::EAnimManagerEasing::CircOut);
+  }
+}
+
+Void HorizonButton_Loop() {
+  foreach (Event in PendingEvents) {
+    // Class condition would be there, but game throws a warning for other event types.
+
+    switch (Event.Type) {
+      case CMlScriptEvent::Type::MouseClick: {
+        if (Event.Control.HasClass("HorizonButton")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 3, 0.0);
+        }
+      }
+      case CMlScriptEvent::Type::MouseOver: {
+        if (Event.Control.HasClass("HorizonButton")) {
+          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 3, 0.0);
+          HorizonButton_SetHover(Event.Control.Parent, True);
+        }
+      }
+      case CMlScriptEvent::Type::MouseOut: {
+        if (Event.Control.HasClass("HorizonButton")) {
+          HorizonButton_SetHover(Event.Control.Parent, False);
+        }
+      }
+    }
+  }
+}
+
+--></script>""");
+}
+
+Text InjectLoop() {
+  return """HorizonButton_Loop();""";
 }

@@ -1,15 +1,15 @@
 /**
  * @name LB_SkinFallbackInfo.Script.txt
  * @author domino54
- * @version 2025-01-04
+ * @version 2025-05-21
  */
 
-#Const Version      "2025-01-04"
+#Const Version      "2025-05-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/LB_SkinFallbackInfo.Script.txt"
 
 #Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
-#Include "ManiaApps/domino54/Common/DesignButtons.Script.txt" as DesignButtons
+#Include "ManiaApps/domino54/Common/HorizonElements/HorizonButton.Script.txt" as HorizonButton
 
 #Const C_LabelTitle         _("Fallback Skin")
 #Const C_LabelDescription   _("This skin will only be used in special circumstances, where the profile skin cannot normally work.\nYou can also opt in to use this skin everywhere instead, which will override your profile skin.")
@@ -51,7 +51,7 @@ Text Build() {
     <label id="Label_IconEnabled" pos="{{{ButtonSize.Y / 2}}} {{{ButtonSize.Y / -2}}}" halign="center" valign="center2" textsize="1.75" textcolor="FFF" text="" />
     <label id="Label_IconDisabled" pos="{{{ButtonSize.Y / 2}}} {{{ButtonSize.Y / -2}}}" halign="center" valign="center2" textsize="1.75" textcolor="FFF" text="" />
 
-    {{{DesignButtons::CreateButton("ButtonOverride", ButtonSize, C_LabelButton)}}}
+    {{{HorizonButton::CreateButton("ButtonOverride", ButtonSize, C_LabelButton)}}}
   </frame>
 
   <frame id="Frame_BottomDecorLine" pos="{{{HideOffset}}}">
@@ -63,22 +63,7 @@ Text Build() {
 <script><!--
 
 {{{MouseExt::InjectDeclares()}}}
-{{{DesignButtons::InjectFunctions()}}}
-
-Void SetButtonHover(CMlFrame _Frame, Boolean _IsHovered) {
-  Page.GetClassChildren("Hover", _Frame, True);
-
-  declare Opacity = 0.0;
-
-  if (_IsHovered) {
-    Opacity = 1.0;
-  }
-
-  foreach (Control in Page.GetClassChildren_Result) {
-    AnimMgr.Flush(Control);
-    AnimMgr.Add(Control, "<quad opacity='"^Opacity^"' />", 125, CAnimManager::EAnimManagerEasing::CircOut);
-  }
-}
+{{{HorizonButton::InjectFunctions()}}}
 
 Void SetVisibility(Boolean _IsVisible) {
   declare Frame_ClipContainer <=> (Page.GetFirstChild("Frame_ClipContainer") as CMlFrame);
@@ -143,30 +128,28 @@ main() {
   SetVisibility(IsVisible);
 
   while (True) {
+    {{{HorizonButton::InjectLoop()}}}
+
     foreach (Event in PendingEvents) {
-      if (Event.Type == CMlScriptEvent::Type::PluginCustomEvent) {
-        switch (Event.CustomEventType) {
-          case "{{{C_CustomEventType_SetIsVisible}}}": {
-            if (Event.CustomEventData.count < 1) continue;
-
-            IsVisible = Event.CustomEventData[0] == "True";
-          }
-
-          case "{{{C_CustomEventType_SetPreferCustom}}}": {
-            if (!IsVisible || Event.CustomEventData.count < 1) continue;
-
-            declare PrefersCustom = Event.CustomEventData[0] == "True";
-
-            Button_SetFilled(Frame_ButtonOverride, PrefersCustom);
-            SetIconEnabled(PrefersCustom);
-          }
-        }
+      if (Event.Type != CMlScriptEvent::Type::PluginCustomEvent) {
+        continue;
       }
 
-      else if (Event.Type == CMlScriptEvent::Type::MouseOut) {
-        if (Event.ControlId != "Quad_ButtonOverride") continue;
+      switch (Event.CustomEventType) {
+        case "{{{C_CustomEventType_SetIsVisible}}}": {
+          if (Event.CustomEventData.count < 1) continue;
 
-        SetButtonHover(Event.Control.Parent, False);
+          IsVisible = Event.CustomEventData[0] == "True";
+        }
+
+        case "{{{C_CustomEventType_SetPreferCustom}}}": {
+          if (!IsVisible || Event.CustomEventData.count < 1) continue;
+
+          declare PrefersCustom = Event.CustomEventData[0] == "True";
+
+          HorizonButton_SetFilled(Frame_ButtonOverride, PrefersCustom);
+          SetIconEnabled(PrefersCustom);
+        }
       }
     }
 
@@ -190,24 +173,6 @@ main() {
         }
       """
     })}}}
-
-    foreach (Event in PendingEvents) {
-      if (Event.Type == CMlScriptEvent::Type::MouseClick) {
-        if (Event.Control.HasClass("Focus")) {
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
-        }
-      }
-
-      else if (Event.Type == CMlScriptEvent::Type::MouseOver) {
-        if (Event.Control.HasClass("Focus")) {
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
-        }
-
-        if (Event.ControlId != "Quad_ButtonOverride") continue;
-
-        SetButtonHover(Event.Control.Parent, True);
-      }
-    }
 
     yield;
   }

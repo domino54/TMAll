@@ -1,10 +1,10 @@
 /**
  * @name GarageController.Script.txt
  * @author domino54
- * @version 2025-01-04
+ * @version 2025-05-21
  */
 
-#Const Version      "2025-01-04"
+#Const Version      "2025-05-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageController.Script.txt"
 
 #Include "ManiaApps/domino54/Garage/Components/GarageBackground/GarageBackground.Script.txt" as GarageBg
@@ -12,6 +12,7 @@
 #Include "ManiaApps/domino54/Garage/Components/SkinPreview/SkinPreview.Script.txt" as SkinPreview
 #Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
 #Include "ManiaApps/domino54/Garage/Core/GaragePlaygroundAPI.Script.txt" as GaragePlaygroundAPI
+#Include "ManiaApps/domino54/Garage/Core/GarageRouter.Script.txt" as GarageRouter
 #Include "ManiaApps/domino54/Garage/Pages/GarageIntroPage.Script.txt" as GarageIntroPage
 #Include "ManiaApps/domino54/Garage/Pages/GarageMainPage.Script.txt" as GarageMainPage
 #Include "ManiaApps/domino54/Garage/Pages/GarageTutorialPage.Script.txt" as GarageTutorialPage
@@ -20,7 +21,7 @@
 // Global variables
 // ---------------------------------- //
 
-declare Text G_CurrentPage;
+declare Text G_PrevRoute;
 
 // ---------------------------------- //
 // Private functions
@@ -50,10 +51,17 @@ Void Private_PageLoop(Text _PageName) {
   }
 }
 
-Void Private_SetActivePage(Text _PageName) {
-  Private_HidePage(G_CurrentPage);
-  G_CurrentPage = _PageName;
-  Private_ShowPage(G_CurrentPage);
+Void Private_RoutingLoop() {
+  declare CurrentRoute = GarageRouter::GetCurrentRoute();
+
+  if (G_PrevRoute != CurrentRoute) {
+    Private_HidePage(G_PrevRoute);
+    Private_ShowPage(CurrentRoute);
+
+    G_PrevRoute = CurrentRoute;
+  }
+
+  Private_PageLoop(CurrentRoute);
 }
 
 // ---------------------------------- //
@@ -85,11 +93,11 @@ Void Show() {
     InitialPageName = GarageMainPage::C_PageName;
   }
 
-  Private_SetActivePage(InitialPageName);
+  GarageRouter::SetCurrentRoute(InitialPageName);
 }
 
 Void Loop() {
-  Private_PageLoop(G_CurrentPage);
+  Private_RoutingLoop();
   SkinPreview::Loop();
 }
 

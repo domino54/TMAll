@@ -143,7 +143,7 @@ if (!MB_IsSpawned(Player)) {
     SkinId = PreviewSkinCategoryId;
   }
 
-  PlayerModels_Server::AssignModel(Player, PreviewModelId, SkinId, True);
+  PlayerModels_Server::AssignModel(Player, PreviewModelId, SkinId);
 
   +++SpawnPlayer+++
 }

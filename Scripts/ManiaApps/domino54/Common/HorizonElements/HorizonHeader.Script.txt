@@ -1,0 +1,117 @@
+/**
+ * @name HorizonHeader.Script.txt
+ * @author domino54
+ * @version 2025-05-21
+ */
+
+#Const Version      "2025-05-21"
+#Const ScriptName   "ManiaApps/domino54/Common/HorizonElements/HorizonHeader.Script.txt"
+
+#Include "Libs/domino54/TextLibExt.Script.txt" as TLX
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_HeaderFixedHeight        16.0
+#Const C_HeaderLineWidth          1.0
+#Const C_HeaderLabelMargin        4.0
+#Const C_HeaderTextSizeTitle      12.0
+#Const C_HeaderTextSizeSubtitle   6.0
+#Const C_HeaderAnimDuration       400
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text CreateHeader(Text _Id, Real _MaxWidth, Text _Title, Text _Subtitle) {
+  declare MainFont = Font::GetFontName("Main");
+  declare LabelMaxWidth = _MaxWidth - C_HeaderLineWidth - C_HeaderLabelMargin;
+  declare LabelStyles = """ valign="center2" size="{{{LabelMaxWidth}}}" textemboss="1" textcolor="FFFFFF" textfont="{{{MainFont}}}" """;
+
+  return """
+<frame id="{{{_Id}}}">
+  <quad id="Quad_HeaderDecorLine" pos="0 {{{C_HeaderFixedHeight / -2}}}" valign="center" size="{{{C_HeaderLineWidth}}} {{{C_HeaderFixedHeight}}}" bgcolor="FFFFFF" />
+
+  <frame pos="{{{C_HeaderLineWidth}}} {{{C_HeaderFixedHeight / -2}}}" valign="center" size="{{{_MaxWidth - C_HeaderLineWidth}}} 90">
+    <label id="Label_HeaderTitleText" pos="{{{C_HeaderLabelMargin}}} 2.25" {{{LabelStyles}}} textsize="{{{C_HeaderTextSizeTitle}}}" text="{{{_Title}}}" />
+    <label id="Label_HeaderSubtitleText" pos="{{{C_HeaderLabelMargin}}} -5.75" {{{LabelStyles}}} textsize="{{{C_HeaderTextSizeSubtitle}}}" text="{{{_Subtitle}}}" />
+  </frame>
+</frame>
+  """;
+}
+
+Text CreateHeader(Text _Id, Real _MaxWidth, Text _Title) {
+  return CreateHeader(_Id, _MaxWidth, _Title, "");
+}
+
+Text CreateHeader(Text _Id, Real _MaxWidth) {
+  return CreateHeader(_Id, _MaxWidth, "");
+}
+
+Text InjectFunctions() {
+  return TLX::Script("""<script><!--
+
+Void HorizonHeader_LaunchAnimation(CMlFrame _Frame, Boolean _IsVisible, Integer _Duration) {
+  declare Quad_HeaderDecorLine <=> (_Frame.GetFirstChild("Quad_HeaderDecorLine") as CMlQuad);
+  declare Label_HeaderTitleText <=> (_Frame.GetFirstChild("Label_HeaderTitleText") as CMlLabel);
+  declare Label_HeaderSubtitleText <=> (_Frame.GetFirstChild("Label_HeaderSubtitleText") as CMlLabel);
+
+  AnimMgr.Flush(Quad_HeaderDecorLine);
+  AnimMgr.Flush(Label_HeaderTitleText);
+  AnimMgr.Flush(Label_HeaderSubtitleText);
+
+  declare Easing = CAnimManager::EAnimManagerEasing::QuintIn;
+  declare PosTitle = {{{C_HeaderLabelMargin}}};
+  declare PosSubtitle = {{{C_HeaderLabelMargin}}};
+  declare LineHeight = {{{C_HeaderFixedHeight}}};
+  declare WidthTitle = ML::Min(Label_HeaderTitleText.Size.X, Label_HeaderTitleText.ComputeWidth(Label_HeaderTitleText.Value));
+  declare WidthSubtitle = ML::Min(Label_HeaderSubtitleText.Size.X, Label_HeaderSubtitleText.ComputeWidth(Label_HeaderSubtitleText.Value));
+
+  if (_IsVisible) {
+    Easing = CAnimManager::EAnimManagerEasing::QuintOut;
+    Quad_HeaderDecorLine.Size.Y = 0.0;
+    Label_HeaderTitleText.RelativePosition_V3.X = -WidthTitle;
+    Label_HeaderSubtitleText.RelativePosition_V3.X = -WidthSubtitle;
+  } else {
+    PosTitle = -WidthTitle;
+    PosSubtitle = -WidthSubtitle;
+    LineHeight = 0.0;
+  }
+
+  AnimMgr.Add(Quad_HeaderDecorLine, "<control size='"^Quad_HeaderDecorLine.Size.X^" "^LineHeight^"' />", _Duration, Easing);
+  AnimMgr.Add(Label_HeaderTitleText, "<control pos='"^PosTitle^" "^Label_HeaderTitleText.RelativePosition_V3.Y^"' />", _Duration, Easing);
+  AnimMgr.Add(Label_HeaderSubtitleText, "<control pos='"^PosSubtitle^" "^Label_HeaderSubtitleText.RelativePosition_V3.Y^"' />", _Duration, Easing);
+}
+
+Void HorizonHeader_Show(CMlFrame _Frame, Integer _Duration) {
+  HorizonHeader_LaunchAnimation(_Frame, True, _Duration);
+}
+
+Void HorizonHeader_Show(CMlFrame _Frame) {
+  HorizonHeader_Show(_Frame, {{{C_HeaderAnimDuration}}});
+}
+
+Void HorizonHeader_Hide(CMlFrame _Frame, Integer _Duration) {
+  HorizonHeader_LaunchAnimation(_Frame, False,_Duration);
+}
+
+Void HorizonHeader_Hide(CMlFrame _Frame) {
+  HorizonHeader_Hide(_Frame, {{{C_HeaderAnimDuration}}});
+}
+
+Void HorizonHeader_SetTitle(CMlFrame _Frame, Text _Title) {
+  declare Label_HeaderTitleText <=> (_Frame.GetFirstChild("Label_HeaderTitleText") as CMlLabel);
+
+  Label_HeaderTitleText.SetText(_Title);
+}
+
+Void HorizonHeader_SetSubtitle(CMlFrame _Frame, Text _Subtitle) {
+  declare Label_HeaderSubtitleText <=> (_Frame.GetFirstChild("Label_HeaderSubtitleText") as CMlLabel);
+
+  Label_HeaderSubtitleText.SetText(_Subtitle);
+}
+
+  --></script>""");
+}

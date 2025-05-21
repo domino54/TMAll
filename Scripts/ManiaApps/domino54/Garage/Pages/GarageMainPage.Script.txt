@@ -12,10 +12,12 @@
 #Include "ManiaApps/domino54/Garage/Components/ModelTabs/ModelTabs.Script.txt" as ModelTabs
 #Include "ManiaApps/domino54/Garage/Components/SkinAuthorName/SkinAuthorName.Script.txt" as SkinAuthorName
 #Include "ManiaApps/domino54/Garage/Components/SkinCategorySwitch/SkinCategorySwitch.Script.txt" as SkinCategorySwitch
+#Include "ManiaApps/domino54/Garage/Components/SkinDebugMenu/SkinDebugMenu.Script.txt" as SkinDebugMenu
 #Include "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/SkinFallbackInfo.Script.txt" as SkinFallbackInfo
 #Include "ManiaApps/domino54/Garage/Components/SkinList/SkinList.Script.txt" as SkinList
 #Include "ManiaApps/domino54/Garage/Components/TitleLogoControls/TitleLogoControls.Script.txt" as TitleLogoControls
 #Include "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt" as GarageAPI
+#Include "ManiaApps/domino54/Garage/Core/GarageRouter.Script.txt" as GarageRouter
 
 // ---------------------------------- //
 // Constants
@@ -115,6 +117,7 @@ Void Unload() {
   ModelTabs::Unload();
   SkinAuthorName::Unload();
   SkinCategorySwitch::Unload();
+  SkinDebugMenu::Unload();
   SkinFallbackInfo::Unload();
   SkinList::Unload();
   TitleLogoControls::Unload();
@@ -134,6 +137,7 @@ Void Load() {
 
   // Skin selector
   SkinAuthorName::Load();
+  SkinDebugMenu::Load();
   SkinFallbackInfo::Load();
   SkinList::Load();
 
@@ -154,6 +158,7 @@ Void Show() {
   ModelTabs::Show();
   SkinAuthorName::Show();
   SkinCategorySwitch::Show();
+  SkinDebugMenu::Show();
   SkinFallbackInfo::Show();
   SkinList::Show();
 }
@@ -163,6 +168,7 @@ Void Hide() {
   ModelTabs::Hide();
   SkinAuthorName::Hide();
   SkinCategorySwitch::Hide();
+  SkinDebugMenu::Hide();
   SkinFallbackInfo::Hide();
   SkinList::Hide();
 }
@@ -195,6 +201,9 @@ Void Loop() {
 
     if (Event.CustomEventType == "GlobalB_Back") {
       GarageAPI::Close();
+    }
+    if (Event.CustomEventType == "Tutorial") {
+      GarageRouter::SetCurrentRoute("GarageTutorialPage");
     }
   }
 }

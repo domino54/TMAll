@@ -1,10 +1,10 @@
 /**
  * @name SkinCategorySwitch.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-05-21
  */
 
-#Const Version      "2025-04-22"
+#Const Version      "2025-05-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinCategorySwitch/SkinCategorySwitch.Script.txt"
 
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
@@ -30,6 +30,7 @@ Void Load(Text[] _CategoryNames, Integer _ActiveIndex) {
   Unload();
 
   Layers::Create(C_ManialinkLayerId, LB::Build(_CategoryNames.count));
+  Layers::SetVisibility(C_ManialinkLayerId, False);
 
   declare Layer <=> Layers::Get(C_ManialinkLayerId);
 

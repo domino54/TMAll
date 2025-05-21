@@ -1,13 +1,14 @@
 /**
  * @name LB_SkinCategorySwitch.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-05-21
  */
 
-#Const Version      "2025-04-22"
+#Const Version      "2025-05-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinCategorySwitch/LB_SkinCategorySwitch.Script.txt"
 
-#Include "ManiaApps/domino54/Common/ButtonToggle.Script.txt" as ButtonToggle
+#Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
+#Include "ManiaApps/domino54/Common/HorizonElements/HorizonButtonToggle.Script.txt" as HorizonButtonToggle
 
 #Const C_CustomEventType_UpdateCategories "category_switch:set_category"
 
@@ -15,7 +16,7 @@ Text Build(Integer _Budget) {
   return """
 <manialink version="3" name="L_SkinCategorySwitch">
 
-{{{ButtonToggle::CreateModel("FrameModel_CategoryToggle", _Budget)}}}
+{{{HorizonButtonToggle::CreateModel("FrameModel_CategoryToggle", _Budget)}}}
 
 <frame pos="-150 -52.5">
   <frameinstance modelid="FrameModel_CategoryToggle" id="Frame_CategoryToggle" />
@@ -25,7 +26,8 @@ Text Build(Integer _Budget) {
 
 #Include "TextLib" as TL
 
-{{{ButtonToggle::InjectFunctions()}}}
+{{{MouseExt::InjectDeclares()}}}
+{{{HorizonButtonToggle::InjectFunctions()}}}
 
 main() {
   declare Frame_CategoryToggle <=> (Page.GetFirstChild("Frame_CategoryToggle") as CMlFrame);
@@ -33,8 +35,8 @@ main() {
   declare Text[] CategoryNames for Page;
   declare Integer ActiveIndex for Page;
 
-  ButtonToggle_SetOptions(Frame_CategoryToggle, CategoryNames, -3.0);
-  ButtonToggle_SetIndex(Frame_CategoryToggle, ActiveIndex);
+  HorizonButtonToggle_SetOptions(Frame_CategoryToggle, CategoryNames, -3.0);
+  HorizonButtonToggle_SetIndex(Frame_CategoryToggle, ActiveIndex);
 
   while (True) {
     if (!PageIsVisible) {
@@ -42,16 +44,17 @@ main() {
       continue;
     }
 
-    foreach (Event in PendingEvents) {
-      if (Event.Type != CMlScriptEvent::Type::MouseClick) continue;
-      if (Event.ControlId != "Quad_ButtonToggleTrigger") continue;
+    {{{MouseExt::InjectEvents(MouseExt::K_Options {
+      MouseUp = """
+        if (EventControl.ControlId == "Quad_ButtonToggleTrigger") {
+          declare Index = EventControl.Parent.Parent.Controls.keyof(EventControl.Parent);
 
-      declare Index = Event.Control.Parent.Parent.Controls.keyof(Event.Control.Parent);
+          HorizonButtonToggle_SetIndex(Frame_CategoryToggle, Index);
 
-      ButtonToggle_SetIndex(Frame_CategoryToggle, Index);
-
-      SendCustomEvent("{{{C_CustomEventType_UpdateCategories}}}", [TL::ToText(Index)]);
-    }
+          SendCustomEvent("{{{C_CustomEventType_UpdateCategories}}}", [TL::ToText(Index)]);
+        }
+      """
+    })}}}
 
     foreach (Event in PendingEvents) {
       if (Event.Type == CMlScriptEvent::Type::MouseClick) {

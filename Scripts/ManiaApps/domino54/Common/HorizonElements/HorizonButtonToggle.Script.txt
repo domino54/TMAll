@@ -1,11 +1,11 @@
 /**
- * @name ButtonToggle.Script.txt
+ * @name HorizonButtonToggle.Script.txt
  * @author domino54
  * @version 2025-04-22
  */
 
 #Const Version    "2025-04-22"
-#Const ScriptName "ManiaApps/domino54/Common/ButtonToggle.Script.txt"
+#Const ScriptName "ManiaApps/domino54/Common/HorizonElements/HorizonButtonToggle.Script.txt"
 
 #Include "MathLib" as ML
 #Include "Libs/domino54/TextLibExt.Script.txt" as TLX
@@ -98,7 +98,7 @@ Text CreateModel(Text _Id, Integer _Budget) {
 Text InjectFunctions() {
   return TLX::Script("""<script><!--
 
-Void ButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index, Integer _Duration) {
+Void HorizonButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index, Integer _Duration) {
   declare Frame_ActiveButtons <=> (_Frame.GetFirstChild("Frame_ActiveButtons") as CMlFrame);
   declare Frame_ActiveButtonsOffset <=> (_Frame.GetFirstChild("Frame_ActiveButtonsOffset") as CMlFrame);
 
@@ -123,11 +123,11 @@ Void ButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index, Integer _Duration) {
   }
 }
 
-Void ButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index) {
-  ButtonToggle_SetIndex(_Frame, _Index, 200);
+Void HorizonButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index) {
+  HorizonButtonToggle_SetIndex(_Frame, _Index, 200);
 }
 
-Void ButtonToggle_SetOptions(CMlFrame _Frame, Text[] _Options, Real _Width) {
+Void HorizonButtonToggle_SetOptions(CMlFrame _Frame, Text[] _Options, Real _Width) {
   declare Frame_ActiveButtonsOffset <=> (_Frame.GetFirstChild("Frame_ActiveButtonsOffset") as CMlFrame);
   declare Frame_InactiveButtons <=> (_Frame.GetFirstChild("Frame_InactiveButtons") as CMlFrame);
 
@@ -179,7 +179,7 @@ Void ButtonToggle_SetOptions(CMlFrame _Frame, Text[] _Options, Real _Width) {
   Quad_EdgeB.Size.X = TotalWidth;
   Quad_EdgeR.RelativePosition_V3.X = TotalWidth;
 
-  ButtonToggle_SetIndex(_Frame, 0, 0);
+  HorizonButtonToggle_SetIndex(_Frame, 0, 0);
 }
 
 --></script>""");
