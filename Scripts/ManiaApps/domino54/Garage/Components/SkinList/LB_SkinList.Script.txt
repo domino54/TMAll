@@ -1,10 +1,10 @@
 /**
  * @name LB_SkinList.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-05-21
  */
 
-#Const Version      "2025-04-22"
+#Const Version      "2025-05-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinList/LB_SkinList.Script.txt"
 
 #Include "ManiaApps/domino54/Common/VirtualScroll.Script.txt" as VirtualScroll
@@ -105,7 +105,7 @@ Text Build() {
     </frame>
   </frame>
 
-  <frame id="Frame_ScrollBar" pos="{{{PaddingX}}} {{{PaddingY}}}" hidden="1" z-index="1">
+  <frame id="Frame_ScrollBar" pos="{{{PaddingX}}} {{{PaddingY}}}" size="{{{C_ButtonsTotalWidth}}} 10" valign="center" hidden="1" z-index="1">
     <quad id="Quad_ScrollBarHandle" pos="0 0" halign="left" valign="center" size="0 1" bgcolor="FFF" />
     <quad id="Quad_ScrollBarTrack" pos="0 0" halign="left" valign="center" size="{{{C_ButtonsTotalWidth}}} 0.25" bgcolor="FFF" opacity="0.25" />
   </frame>

@@ -1,0 +1,26 @@
+/**
+ * @name GarageRouter.Script.txt
+ * @author domino54
+ * @version 2025-05-21
+ */
+
+#Const Version      "2025-05-21"
+#Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageRouter.Script.txt"
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Text G_CurrentRoute;
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetCurrentRoute() {
+  return G_CurrentRoute;
+}
+
+Void SetCurrentRoute(Text _Route) {
+  G_CurrentRoute = _Route;
+}

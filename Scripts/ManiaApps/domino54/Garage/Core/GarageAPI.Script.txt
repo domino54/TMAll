@@ -1,10 +1,10 @@
 /**
  * @name GarageAPI.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-05-21
  */
 
-#Const Version      "2025-04-22"
+#Const Version      "2025-05-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt"
 
 #Include "TextLib" as TL
@@ -194,13 +194,26 @@ Text[] GetSelectableSkinCategoryNames() {
   return Result;
 }
 
+Text GetLastSkinCategoryId() {
+  declare persistent Text Persistent_Garage_LastSkinCategoryId for LocalUser;
+
+  return Persistent_Garage_LastSkinCategoryId;
+}
+
 Text GetDefaultSkinCategoryId() {
   return PMData::C_DefaultSkinCategoryId;
 }
 
 Text GetInitialSkinCategoryId() {
-  foreach (SkinCategory in PMData::GetAllSkinCategories()) {
-    return SkinCategory.Id;
+  declare SkinCategoryIds = GetSelectableSkinCategoryIds();
+  declare LastSkinCategoryId = GetLastSkinCategoryId();
+
+  if (SkinCategoryIds.exists(LastSkinCategoryId)) {
+    return LastSkinCategoryId;
+  }
+
+  if (SkinCategoryIds.count > 0) {
+    return SkinCategoryIds[0];
   }
 
   return GetDefaultSkinCategoryId();
@@ -236,6 +249,10 @@ Text GetSkinCategoryId() {
 
 Void SetSkinCategoryId(Text _SkinCategoryId) {
   G_PreviewSkinCategoryId = _SkinCategoryId;
+
+  declare persistent Text Persistent_Garage_LastSkinCategoryId for LocalUser;
+
+  Persistent_Garage_LastSkinCategoryId = _SkinCategoryId;
 
   GarageServer::SetPreviewSkinCategoryId(LocalUser, _SkinCategoryId);
 }

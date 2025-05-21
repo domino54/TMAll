@@ -1,10 +1,10 @@
 /**
  * @name LB_TitleLogoControls.Script.txt
  * @author domino54
- * @version 2024-10-30
+ * @version 2025-05-21
  */
 
-#Const Version      "2024-10-30"
+#Const Version      "2025-05-21"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/TitleLogoControls/LB_TitleLogoControls.Script.txt"
 
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
@@ -24,7 +24,7 @@ Text Build() {
   <quad halign="left" valign="top" size="75 20" pos="-21 9" z-index="2" image="{{{ImgLogo}}}" keepratio="Fit" />
 </frame>
 
-<quad id="Quad_Icon" pos="-60 72" size="14 14" halign="center" valign="center" image="{{{C_ImgBase}}}/Logo_GarageBig.dds" colorize="FFF" />
+<quad id="Quad_Icon" pos="-60 72" size="14 14" halign="center" valign="center" image="{{{C_ImgBase}}}/Logo_Garage.dds" colorize="FFF" />
 
 <frame id="Frame_BackButton" pos="-145 65">
   <quad id="Quad_BackButton" pos="0 0" halign="left" valign="top" size="26 10" scriptevents="1" />
@@ -97,6 +97,9 @@ main() {
         case CMlScriptEvent::Type::MouseClick: {
           if (Event.ControlId == "Quad_BackButton") {
             SendCustomEvent("GlobalB_Back", []);
+          }
+          if (Event.ControlId == "Quad_HelpButton") {
+            SendCustomEvent("Tutorial", []);
           }
         }
         case CMlScriptEvent::Type::MouseOver: {

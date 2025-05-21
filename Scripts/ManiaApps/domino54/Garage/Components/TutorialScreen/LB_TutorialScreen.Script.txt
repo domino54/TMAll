@@ -1,0 +1,454 @@
+/**
+ * @name LB_TutorialScreen.Script.txt
+ * @author domino54
+ * @version 2025-05-21
+ */
+
+#Const Version      "2025-05-21"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/TutorialScreen/LB_TutorialScreen.Script.txt"
+
+#Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "ManiaApps/domino54/Common/ButtonSounds.Script.txt" as ButtonSounds
+#Include "ManiaApps/domino54/Common/HorizonElements/HorizonButton.Script.txt" as HorizonButton
+#Include "ManiaApps/domino54/Common/HorizonElements/HorizonHeader.Script.txt" as HorizonHeader
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
+
+#Const C_WindowSize         <260.0, 100.0>
+#Const C_ButtonSize         <60.0, 10.0>
+#Const C_PageSwitchMargin   24.0
+#Const C_OpacityDisabled    0.3333
+
+Text Build() {
+  declare TitleText = _("Tutorial");
+  declare SubtitleText = _("Garage");
+
+  declare MainFont = Font::GetFontName("Main");
+  declare SubFont = Font::GetFontName("SubTitle");
+
+  declare RadioButtons = "";
+
+  for (I, 0, 9) {
+    RadioButtons ^= """<quad id="Quad_PageRadio" class="Focus1" pos="{{{I * 5}}}" halign="left" valign="center" size="3.5 3.5" image="{{{C_ImgBase}}}Radio_Inactive.dds" keepratio="fit" autoscale="0" scriptevents="1" />""";
+  }
+
+  return """
+<manialink version="3" name="L_TutorialScreen">
+<stylesheet>
+  <style class="TitleStyle" halign="left" valign="center2" textcolor="fff" textemboss="1" textfont="{{{MainFont}}}" />
+</stylesheet>
+
+<frame pos="{{{C_WindowSize.X / -2 + C_PageSwitchMargin}}} 0" z-index="1">
+  <quad id="Quad_PrevSlideArea" class="Focus3" halign="right" valign="center" size="200 200" scriptevents="1" />
+</frame>
+
+<frame pos="{{{C_WindowSize.X / 2 - C_PageSwitchMargin}}} 0" z-index="1">
+  <quad id="Quad_NextSlideArea" class="Focus3" halign="left" valign="center" size="200 200" scriptevents="1" />
+</frame>
+
+<frame pos="{{{C_WindowSize.X / -2}}} 0" valign="center" size="{{{C_WindowSize.X}}} 180">
+  <frame id="Frame_WindowVerticalOffset" pos="0 {{{C_WindowSize.Y / 2}}}">
+    <frame pos="0 20">
+      {{{HorizonHeader::CreateHeader("Frame_TutorialHeader", C_WindowSize.X, TitleText, SubtitleText)}}}
+    </frame>
+
+    <frame id="Frame_WindowHorizontalSlide" pos="0 0">
+      <frame id="Frame_WindowTopLine" pos="0 0">
+        <quad pos="0 0" valign="bottom" size="{{{C_WindowSize.X}}} 0.25" bgcolor="FFF" />
+        <quad pos="{{{C_WindowSize.X}}} 0" halign="right" valign="bottom" size="{{{C_PageSwitchMargin}}} 0.75" bgcolor="FFF" />
+      </frame>
+
+      <frame id="Frame_WindowVerticalClip" pos="0 0" size="{{{C_WindowSize.X}}} {{{C_WindowSize.Y}}}">
+        <frame id="Frame_TutorialSlideFrame" pos="0 0">
+          <!-- 122x63 -->
+          <quad id="Quad_TutorialImage" pos="{{{C_WindowSize.X / 2}}} -5" halign="center" size="{{{C_WindowSize.X}}} 63" image="{{{C_ImgBase}}}EmptyContour.dds" keepratio="fit" />
+
+          <frame id="Frame_TutorialTextClip" pos="{{{C_WindowSize.X / 2}}} -74" halign="center" size="180 15" scroll="1" scrollgrid="0 5" scrollmin="0 0" scrollmax="0 15">
+            <label id="Label_TutorialText" halign="center" size="160" autonewline="1" textfont="{{{SubFont}}}" textcolor="FFF" textsize="3" text="Tutorial slide text." />
+            <quad id="Quad_TutorialTextArea" halign="center" size="160 15" scriptevents="1" />
+          </frame>
+        </frame>
+
+        <frame pos="{{{C_WindowSize.X / 2}}} -94">
+          <frame id="Frame_RadioButtons" pos="-25">
+            {{{RadioButtons}}}
+          </frame>
+        </frame>
+
+        <frame pos="0 0">
+          <quad id="Quad_PrevSlideArrow" pos="{{{C_PageSwitchMargin / 2}}} -50" halign="center" valign="center" rot="180" size="12 12" image="{{{C_ImgBase}}}SmallArrowRight.dds" />
+          <quad id="Quad_PrevSlideHover" size="{{{C_PageSwitchMargin}}} {{{C_WindowSize.Y}}}" bgcolor="FFFFFF44" scriptevents="1" hidden="1" />
+        </frame>
+
+        <frame pos="{{{C_WindowSize.X}}} 0">
+          <quad id="Quad_NextSlideArrow" pos="{{{C_PageSwitchMargin / -2}}} -50" halign="center" valign="center" rot="0" size="12 12" image="{{{C_ImgBase}}}SmallArrowRight.dds" />
+          <quad id="Quad_NextSlideHover" size="{{{C_PageSwitchMargin}}} {{{C_WindowSize.Y}}}" halign="right" bgcolor="FFFFFF44" scriptevents="1" hidden="1" />
+        </frame>
+
+        <quad size="{{{C_WindowSize.X}}} {{{C_WindowSize.Y}}}" style="Bgs1" substyle="BgDialogBlur" opacity="0.9" bluramount="0" />
+      </frame>
+
+      <frame id="Frame_WindowBottomLine" pos="0 {{{-C_WindowSize.Y}}}">
+        <quad valign="top" size="{{{C_WindowSize.X}}} 0.25" bgcolor="FFF" />
+        <quad pos="{{{C_WindowSize.X}}} 0" halign="right" valign="top" size="{{{C_PageSwitchMargin}}} 0.75" bgcolor="FFF" />
+      </frame>
+
+      <frame pos="{{{C_WindowSize.X / 2 + C_ButtonSize.X / -2}}} {{{-C_WindowSize.Y - 5}}}">
+        <quad image="{{{C_ImgBase}}}AddLogo.dds" pos="{{{C_ButtonSize.Y / 2}}} {{{C_ButtonSize.Y / -2}}}" rot="45" halign="center" valign="center" size="{{{C_ButtonSize.Y}}} {{{C_ButtonSize.Y}}}" />
+        {{{HorizonButton::CreateFilledButton("CloseWindow", C_ButtonSize, "Close")}}}
+      </frame>
+    </frame>
+  </frame>
+</frame>
+
+<quad halign="center" valign="center" size="320 180" style="Bgs1" substyle="BgDialogBlur" opacity="0" scriptevents="1" />
+
+<script><!--
+
+#Include "MathLib" as ML
+
+#Const C_DurationEnter1   400
+#Const C_DurationEnter2   300
+#Const C_DurationLeave    200
+#Const C_DurationSlide    200
+
+{{{MouseExt::InjectDeclares()}}}
+{{{HorizonHeader::InjectFunctions()}}}
+{{{HorizonButton::InjectFunctions()}}}
+
+declare Boolean G_PrevPageIsVisible;
+declare Integer G_HidePageAt;
+declare Integer G_UpdatePageContentAt;
+declare Boolean G_AnimIsNextSlide;
+declare Integer G_CurrentSlideIndex;
+
+Void LaunchShowAnimation() {
+  declare Frame_TutorialHeader <=> (Page.GetFirstChild("Frame_TutorialHeader") as CMlFrame);
+  declare Frame_WindowHorizontalSlide <=> (Page.GetFirstChild("Frame_WindowHorizontalSlide") as CMlFrame);
+  declare Frame_WindowVerticalOffset <=> (Page.GetFirstChild("Frame_WindowVerticalOffset") as CMlFrame);
+  declare Frame_WindowVerticalClip <=> (Page.GetFirstChild("Frame_WindowVerticalClip") as CMlFrame);
+  declare Frame_WindowBottomLine <=> (Page.GetFirstChild("Frame_WindowBottomLine") as CMlFrame);
+
+  AnimMgr.Flush(Frame_WindowHorizontalSlide);
+  AnimMgr.Flush(Frame_WindowVerticalOffset);
+  AnimMgr.Flush(Frame_WindowVerticalClip);
+  AnimMgr.Flush(Frame_WindowBottomLine);
+
+  declare SizeX = Frame_WindowVerticalClip.Size.X;
+  declare EntryY = 0.0;
+
+  Frame_WindowHorizontalSlide.RelativePosition_V3.X = {{{-C_WindowSize.X}}};
+  Frame_WindowVerticalOffset.RelativePosition_V3 = <0.0, EntryY / 2>;
+  Frame_WindowVerticalClip.Size.Y = EntryY;
+  Frame_WindowBottomLine.RelativePosition_V3.Y = -EntryY;
+
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 0, 0.0);
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::ShowDialog, 0, 0.0, C_DurationEnter1);
+
+  declare Easing = CAnimManager::EAnimManagerEasing::CubicOut;
+
+  AnimMgr.Add(Frame_WindowHorizontalSlide, "<control pos='0 0' />", C_DurationEnter1, Easing);
+  AnimMgr.Add(Frame_WindowVerticalOffset, "<control pos='0 {{{C_WindowSize.Y / 2}}}' />", Now + C_DurationEnter1, C_DurationEnter2, Easing);
+  AnimMgr.Add(Frame_WindowVerticalClip, "<control size='"^SizeX^" {{{C_WindowSize.Y}}}' />", Now + C_DurationEnter1, C_DurationEnter2, Easing);
+  AnimMgr.Add(Frame_WindowBottomLine, "<control pos='0 {{{-C_WindowSize.Y}}}' />", Now + C_DurationEnter1, C_DurationEnter2, Easing);
+
+  HorizonHeader_Show(Frame_TutorialHeader, C_DurationEnter1);
+}
+
+Void LaunchHideAnimation() {
+  declare Frame_TutorialHeader <=> (Page.GetFirstChild("Frame_TutorialHeader") as CMlFrame);
+  declare Frame_WindowHorizontalSlide <=> (Page.GetFirstChild("Frame_WindowHorizontalSlide") as CMlFrame);
+
+  AnimMgr.Flush(Frame_WindowHorizontalSlide);
+
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::HideDialog, 0, 0.0);
+
+  declare Easing = CAnimManager::EAnimManagerEasing::CubicIn;
+
+  AnimMgr.Add(Frame_WindowHorizontalSlide, "<control pos='{{{-C_WindowSize.X}}} 0' />", C_DurationLeave, Easing);
+
+  HorizonHeader_Hide(Frame_TutorialHeader, C_DurationLeave);
+}
+
+Void LaunchSlideAnimation(Boolean _IsEnterAnimation, Boolean _IsNextSlide) {
+  declare Frame_TutorialSlideFrame <=> (Page.GetFirstChild("Frame_TutorialSlideFrame") as CMlFrame);
+  declare Quad_TutorialImage <=> (Page.GetFirstChild("Quad_TutorialImage") as CMlQuad);
+  declare Label_TutorialText <=> (Page.GetFirstChild("Label_TutorialText") as CMlLabel);
+
+  AnimMgr.Flush(Frame_TutorialSlideFrame);
+  AnimMgr.Flush(Quad_TutorialImage);
+  AnimMgr.Flush(Label_TutorialText);
+
+  declare Easing = CAnimManager::EAnimManagerEasing::CubicIn;
+  declare PosX = {{{C_WindowSize.X / 8}}};
+  declare Opacity = 0.0;
+  declare Duration = C_DurationSlide / 2;
+
+  if (_IsNextSlide) {
+    PosX *= -1;
+  }
+
+  if (_IsEnterAnimation) {
+    Frame_TutorialSlideFrame.RelativePosition_V3.X = -PosX;
+    Easing = CAnimManager::EAnimManagerEasing::CubicOut;
+    PosX = 0.0;
+    Opacity = 1.0;
+  }
+
+  AnimMgr.Add(Frame_TutorialSlideFrame, "<control pos='"^PosX^" 0' />", Duration, Easing);
+  AnimMgr.Add(Quad_TutorialImage, "<control opacity='"^Opacity^"' />", Duration, Easing);
+  AnimMgr.Add(Label_TutorialText, "<control opacity='"^Opacity^"' />", Duration, Easing);
+}
+
+Void SetAvailableSlidesCount(Integer _Count) {
+  declare Frame_RadioButtons <=> (Page.GetFirstChild("Frame_RadioButtons") as CMlFrame);
+  declare Quad_PrevSlideArrow <=> (Page.GetFirstChild("Quad_PrevSlideArrow") as CMlQuad);
+  declare Quad_NextSlideArrow <=> (Page.GetFirstChild("Quad_NextSlideArrow") as CMlQuad);
+
+  Frame_RadioButtons.Visible = _Count > 1;
+  Quad_PrevSlideArrow.Visible = Frame_RadioButtons.Visible;
+  Quad_NextSlideArrow.Visible = Frame_RadioButtons.Visible;
+
+  if (!Frame_RadioButtons.Visible) {
+    return;
+  }
+
+  foreach (I => Control in Frame_RadioButtons.Controls) {
+    declare Quad_PageRadio = (Control as CMlQuad);
+
+    Quad_PageRadio.Visible = I < _Count;
+  }
+
+  Frame_RadioButtons.RelativePosition_V3.X = (_Count - 1) * 5.0 / -2;
+}
+
+Void SetRadioButtonsActiveIndex(Integer _ActiveIndex) {
+  declare Frame_RadioButtons <=> (Page.GetFirstChild("Frame_RadioButtons") as CMlFrame);
+
+  foreach (I => Control in Frame_RadioButtons.Controls) {
+    declare Quad_PageRadio = (Control as CMlQuad);
+
+    if (I == _ActiveIndex) {
+      Quad_PageRadio.ImageUrl = "{{{C_ImgBase}}}Radio_Active.dds";
+      Quad_PageRadio.ImageUrlFocus = "{{{C_ImgBase}}}Radio_Active_Hover.dds";
+    } else {
+      Quad_PageRadio.ImageUrl = "{{{C_ImgBase}}}Radio_Inactive.dds";
+      Quad_PageRadio.ImageUrlFocus = "{{{C_ImgBase}}}Radio_Inactive_Hover.dds";
+    }
+  }
+}
+
+Void SetSlideSwitchArrowsOpacity(Boolean _IsPrevEnabled, Boolean _IsNextEnabled) {
+  declare Quad_PrevSlideArrow <=> (Page.GetFirstChild("Quad_PrevSlideArrow") as CMlQuad);
+  declare Quad_PrevSlideHover <=> (Page.GetFirstChild("Quad_PrevSlideHover") as CMlQuad);
+  declare Quad_PrevSlideArea <=> (Page.GetFirstChild("Quad_PrevSlideArea") as CMlQuad);
+
+  declare Quad_NextSlideArrow <=> (Page.GetFirstChild("Quad_NextSlideArrow") as CMlQuad);
+  declare Quad_NextSlideHover <=> (Page.GetFirstChild("Quad_NextSlideHover") as CMlQuad);
+  declare Quad_NextSlideArea <=> (Page.GetFirstChild("Quad_NextSlideArea") as CMlQuad);
+
+  Quad_PrevSlideArea.Visible = _IsPrevEnabled;
+  Quad_NextSlideArea.Visible = _IsNextEnabled;
+
+  if (_IsPrevEnabled) {
+    Quad_PrevSlideArrow.Opacity = 1.0;
+  } else {
+    Quad_PrevSlideArrow.Opacity = {{{C_OpacityDisabled}}};
+    Quad_PrevSlideHover.Visible = False;
+  }
+
+  if (_IsNextEnabled) {
+    Quad_NextSlideArrow.Opacity = 1.0;
+  } else {
+    Quad_NextSlideArrow.Opacity = {{{C_OpacityDisabled}}};
+    Quad_NextSlideHover.Visible = False;
+  }
+}
+
+Void SetSlideContent(Integer _TargetIndex) {
+  declare Text[] SlideImageUrls for Page;
+  declare Text[] SlideDescriptions for Page;
+
+  declare ImageUrl = "";
+  declare Description = "";
+
+  if (SlideImageUrls.existskey(G_CurrentSlideIndex)) {
+    ImageUrl = SlideImageUrls[G_CurrentSlideIndex];
+  }
+
+  if (SlideDescriptions.existskey(G_CurrentSlideIndex)) {
+    Description = SlideDescriptions[G_CurrentSlideIndex];
+  }
+
+  declare Quad_TutorialImage <=> (Page.GetFirstChild("Quad_TutorialImage") as CMlQuad);
+  declare Frame_TutorialTextClip <=> (Page.GetFirstChild("Frame_TutorialTextClip") as CMlFrame);
+  declare Label_TutorialText <=> (Page.GetFirstChild("Label_TutorialText") as CMlLabel);
+  declare Quad_TutorialTextArea <=> (Page.GetFirstChild("Quad_TutorialTextArea") as CMlQuad);
+
+  Quad_TutorialImage.ChangeImageUrl(ImageUrl);
+  Label_TutorialText.SetText(Description);
+  Quad_TutorialTextArea.Size.Y = Label_TutorialText.ComputeHeight(Label_TutorialText.Value);
+  Frame_TutorialTextClip.ScrollMax.Y = ML::Max(0.0, Quad_TutorialTextArea.Size.Y - Frame_TutorialTextClip.Size.Y);
+}
+
+Void ChangeSlide(Integer _TargetIndex) {
+  if (G_CurrentSlideIndex == _TargetIndex || _TargetIndex < 0) {
+    return;
+  }
+
+  declare Text[] SlideDescriptions for Page;
+
+  if (_TargetIndex >= SlideDescriptions.count) {
+    return;
+  }
+
+  declare IsNextSlide = _TargetIndex >= G_CurrentSlideIndex;
+
+  if (G_UpdatePageContentAt <= 0) {
+    LaunchSlideAnimation(False, IsNextSlide);
+  }
+
+  G_UpdatePageContentAt = Now + C_DurationSlide / 2;
+  G_AnimIsNextSlide = IsNextSlide;
+  G_CurrentSlideIndex = _TargetIndex;
+
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::HideMenu, 0, 0.0);
+
+  SetRadioButtonsActiveIndex(G_CurrentSlideIndex);
+  SetSlideSwitchArrowsOpacity(G_CurrentSlideIndex > 0, G_CurrentSlideIndex < SlideDescriptions.count - 1);
+}
+
+Void OpenTutorial() {
+  declare Text[] SlideDescriptions for Page;
+
+  G_CurrentSlideIndex = 0;
+
+  SetAvailableSlidesCount(SlideDescriptions.count);
+  SetRadioButtonsActiveIndex(G_CurrentSlideIndex);
+  SetSlideSwitchArrowsOpacity(G_CurrentSlideIndex > 0, G_CurrentSlideIndex < SlideDescriptions.count - 1);
+  SetSlideContent(G_CurrentSlideIndex);
+  LaunchShowAnimation();
+  EnableMenuNavigation(True, False, Null, 0);
+}
+
+Void CloseTutorial() {
+  G_HidePageAt = Now + C_DurationLeave;
+  Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 2, 0.0);
+  LaunchHideAnimation();
+}
+
+main() {
+  declare Quad_PrevSlideHover <=> (Page.GetFirstChild("Quad_PrevSlideHover") as CMlQuad);
+  declare Quad_NextSlideHover <=> (Page.GetFirstChild("Quad_NextSlideHover") as CMlQuad);
+
+  declare Text[] SlideDescriptions for Page;
+
+  while (True) {
+    {{{HorizonButton::InjectLoop()}}}
+
+    if (G_PrevPageIsVisible != PageIsVisible) {
+      G_PrevPageIsVisible = PageIsVisible;
+
+      if (PageIsVisible) {
+        OpenTutorial();
+      }
+    }
+
+    if (!PageIsVisible) {
+      yield;
+      continue;
+    }
+
+    if (G_HidePageAt > 0) {
+      if (Now >= G_HidePageAt) {
+        G_HidePageAt = -1;
+        SendCustomEvent("CloseTutorial", []);
+      }
+
+      yield;
+      continue;
+    }
+
+    {{{ButtonSounds::InjectLoop()}}}
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type != CMlScriptEvent::Type::MouseOut) {
+        continue;
+      }
+
+      switch (Event.ControlId) {
+        case "Quad_PrevSlideArea": {
+          Quad_PrevSlideHover.Visible = False;
+        }
+        case "Quad_NextSlideArea": {
+          Quad_NextSlideHover.Visible = False;
+        }
+      }
+    }
+
+    {{{MouseExt::InjectEvents(MouseExt::K_Options {
+      MouseUp = """
+        switch (EventControl.ControlId) {
+          case "Quad_PrevSlideArea": {
+            ChangeSlide(G_CurrentSlideIndex - 1);
+          }
+          case "Quad_NextSlideArea": {
+            ChangeSlide(G_CurrentSlideIndex + 1);
+          }
+          case "Quad_PageRadio": {
+            ChangeSlide(EventControl.Parent.Controls.keyof(EventControl));
+          }
+          case "Quad_CloseWindow": {
+            CloseTutorial();
+          }
+        }
+      """
+    })}}}
+
+    if (G_UpdatePageContentAt > 0 && Now >= G_UpdatePageContentAt) {
+      G_UpdatePageContentAt = -1;
+
+      LaunchSlideAnimation(True, G_AnimIsNextSlide);
+      SetSlideContent(G_CurrentSlideIndex);
+    }
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type == CMlScriptEvent::Type::MouseOver) {
+        switch (Event.ControlId) {
+          case "Quad_PrevSlideArea": {
+            Quad_PrevSlideHover.Visible = G_CurrentSlideIndex > 0;
+          }
+          case "Quad_NextSlideArea": {
+            Quad_NextSlideHover.Visible = G_CurrentSlideIndex < SlideDescriptions.count - 1;
+          }
+        }
+      }
+
+      if (Event.Type != CMlScriptEvent::Type::MenuNavigation) {
+        continue;
+      }
+
+      switch (Event.MenuNavAction) {
+        case CMlScriptEvent::EMenuNavAction::Select, CMlScriptEvent::EMenuNavAction::Cancel: {
+          CloseTutorial();
+        }
+
+        case CMlScriptEvent::EMenuNavAction::Left, CMlScriptEvent::EMenuNavAction::PageUp: {
+          ChangeSlide(G_CurrentSlideIndex - 1);
+        }
+
+        case CMlScriptEvent::EMenuNavAction::Right, CMlScriptEvent::EMenuNavAction::PageDown: {
+          ChangeSlide(G_CurrentSlideIndex + 1);
+        }
+      }
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

@@ -1,0 +1,59 @@
+/**
+ * @name TutorialScreen.Script.txt
+ * @author domino54
+ * @version 2025-05-21
+ */
+
+#Const Version      "2025-05-21"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/TutorialScreen/TutorialScreen.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/TutorialScreen/LB_TutorialScreen.Script.txt" as LB
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_TutorialScreen"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB::Build());
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+
+  declare Layer = Layers::Get(C_ManialinkLayerId);
+
+  declare Text[] SlideImageUrls for Layer.LocalPage;
+  declare Text[] SlideDescriptions for Layer.LocalPage;
+
+  SlideImageUrls = [
+    "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Enviro/Canyon.jpg",
+    "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Enviro/Stadium.jpg",
+    "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Enviro/Valley.jpg",
+    "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Editors/Enviro/Lagoon.jpg"
+  ];
+
+  SlideDescriptions = [
+    "Garage is used for cars and whatnot. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+  ];
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}

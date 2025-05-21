@@ -5,16 +5,17 @@
  *
  * @name MapTypeTMAll.Script.txt
  * @author domino54
- * @version 2025-03-13
+ * @version 2025-05-21
  */
 #Extends "ManiaApps/domino54/Base/AppBase.Script.txt"
 
-#Const Version      "2025-03-13"
-#Const ScriptName   "ManiaApps/domino54/TrackMania/Base/AppBaseTMAll.Script.txt"
+#Const TMAll_Version      "2025-05-21"
+#Const TMAll_ScriptName   "ManiaApps/domino54/TrackMania/Base/AppBaseTMAll.Script.txt"
 
 #Include "Libs/domino54/CustomSkins/CustomSkins_ClientPlayground.Script.txt" as CustomSkins
 #Include "Libs/domino54/Openplanet/Openplanet_Client.Script.txt" as Openplanet
 #Include "ManiaApps/domino54/Ingame/Countdown321Go/Countdown321Go_Client.Script.txt" as Countdown321Go
+#Include "ManiaApps/domino54/Ingame/GarageIngameMetadata/GarageIngameMetadata.Script.txt" as GarageIngameMetadata
 #Include "ManiaApps/domino54/Ingame/MenuOnline/MenuOnline_Client.Script.txt" as MenuOnline
 #Include "ManiaApps/Nadeo/TrackMania/UI_Client.Script.txt" as UI
 
@@ -26,8 +27,12 @@
 UI::Load();
 Countdown321Go::Load();
 CustomSkins::Load();
+GarageIngameMetadata::Load();
 MenuOnline::Load("");
 Openplanet::Load();
+
+// Let's be honest, the chat background is objectively ugly, and is removed in TM2020.
+ClientUI.OverlayHideBackground = True;
 
 // Chase compatibility.
 +++LoadLibraries+++
@@ -39,9 +44,11 @@ Openplanet::Load();
 ***AB_LogVersions***
 ***
 Log::RegisterScript(ScriptName, Version);
-Log::RegisterScript(UI::ScriptName, UI::Version);
+Log::RegisterScript(Countdown321Go::ScriptName, Countdown321Go::Version);
 Log::RegisterScript(CustomSkins::ScriptName, CustomSkins::Version);
+Log::RegisterScript(GarageIngameMetadata::ScriptName, GarageIngameMetadata::Version);
 Log::RegisterScript(MenuOnline::ScriptName, MenuOnline::Version);
+Log::RegisterScript(UI::ScriptName, UI::Version);
 ***
 
 // ---------------------------------- //
@@ -62,6 +69,7 @@ CustomSkins::Loop();
 UI::Unload();
 Countdown321Go::Unload();
 CustomSkins::Unload();
+GarageIngameMetadata::Unload();
 MenuOnline::Unload();
 
 // Chase compatibility.

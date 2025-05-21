@@ -7,6 +7,9 @@
 #Const Version      "2024-12-22"
 #Const ScriptName   "ManiaApps/domino54/Garage/Pages/GarageTutorialPage.Script.txt"
 
+#Include "ManiaApps/domino54/Garage/Components/TutorialScreen/TutorialScreen.Script.txt" as TutorialScreen
+#Include "ManiaApps/domino54/Garage/Core/GarageRouter.Script.txt" as GarageRouter
+
 // ---------------------------------- //
 // Constants
 // ---------------------------------- //
@@ -19,18 +22,29 @@
 // ---------------------------------- //
 
 Void Unload() {
+  TutorialScreen::Unload();
 }
 
 Void Load() {
   Unload();
+
+  TutorialScreen::Load();
 }
 
 Void Show() {
+  TutorialScreen::Show();
 }
 
 Void Hide() {
+  TutorialScreen::Hide();
 }
 
 Void Loop() {
-  // TODO: Handle the tutorial page switch buttons
+  foreach (Event in PendingEvents) {
+    if (Event.Type != CManiaAppEvent::EType::LayerCustomEvent) continue;
+
+    if (Event.CustomEventType == "CloseTutorial") {
+      GarageRouter::SetCurrentRoute("GarageMainPage");
+    }
+  }
 }

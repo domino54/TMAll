@@ -32,6 +32,7 @@
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/Multiplayer/MultiplayerController.Script.txt"				as MultiplayerController
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/LocalPlay/LocalPlayController.Script.txt"					as LocalPlayController
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/Editor/EditorController.Script.txt"						as EditorController
+#Include "Libs/Nadeo/MP4/TPLagoon/Components/Garage/GarageController.Script.txt"						as GarageController
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/Profil/ProfilController.Script.txt"						as ProfilController
 #Include "Libs/Nadeo/MP4/TPLagoon/Components/ManiaCredits/ManiaCreditsController.Script.txt"			as ManiaCreditsController
 #Include "Libs/Nadeo/MP4/TPLagoon/XMLController.Script.txt"												as XMLController
@@ -131,10 +132,11 @@ Void LoadAll() {
 	ProfilController::Load();
 	TokenManager::Init();
 
-	if(G_Sections["Solo"]) SoloController::Load();
+	if(G_Sections["Solo"])         SoloController::Load();
 	if(G_Sections["Multiplayer"])  MultiplayerController::Load();
 	if(G_Sections["LocalPlay"])    LocalPlayController::Load();
 	if(G_Sections["Editors"])      EditorController::Load();
+	if(G_Sections["Garage"])       GarageController::Load();
 	declare Text NewsColor = XMLController::Get_NewsColor();
 	ManiaCreditsController::Load();
 
@@ -268,6 +270,7 @@ Void LoopAll() {
 		case "Multiplayer"      : MultiplayerController::Loop();
 		case "LocalPlay"        : LocalPlayController::Loop();
 		case "Editors"          : EditorController::Loop();
+		case "Garage"           : GarageController::Loop();
 		case "Profil"           : ProfilController::Loop();
 	}
 	

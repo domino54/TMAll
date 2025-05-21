@@ -1,0 +1,43 @@
+/**
+ * @name ButtonSounds.Script.txt
+ * @author domino54
+ * @version 2025-05-13
+ */
+
+#Const Version      "2025-05-13"
+#Const ScriptName   "ManiaApps/domino54/Common/ButtonSounds.Script.txt"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text InjectLoop() {
+  return """
+foreach (Event in PendingEvents) {
+  switch (Event.Type) {
+    case CMlScriptEvent::Type::MouseClick: {
+      if (Event.Control.HasClass("Focus1")) {
+        Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 1, 0.0);
+      }
+      else if (Event.Control.HasClass("Focus2")) {
+        Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 2, 0.0);
+      }
+      else if (Event.Control.HasClass("Focus3")) {
+        Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 3, 0.0);
+      }
+    }
+    case CMlScriptEvent::Type::MouseOver: {
+      if (Event.Control.HasClass("Focus1")) {
+        Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 1, 0.0);
+      }
+      else if (Event.Control.HasClass("Focus2")) {
+        Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 2, 0.0);
+      }
+      else if (Event.Control.HasClass("Focus3")) {
+        Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 3, 0.0);
+      }
+    }
+  }
+}
+  """;
+}

@@ -1,4 +1,4 @@
-#RequireContext CManiaApp // @mslint-disable-line require-context-valid-class
+#RequireContext CManiaApp
 // ^ Must be the first line for the browser to load the maniaapp.
 
 /**
