@@ -33,8 +33,10 @@
 		<asset id="TitleTools" isdefault="yes" titlename="" />
 	</Editors>
 
+	<Garage logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_Garage.dds" activated="True" color="736ae6" mappath="TMAllMaker/Garage/TMAllMaker_Garage.Map.Gbx">
+	</Garage>
+
 	<Resources flashurl="domino54" />
 	<Ingame accelcoef="1." controlcoef="1." gravitycoef="1." />
-	<Garage path="" />
 	<Profile />
 </titlePackXML>

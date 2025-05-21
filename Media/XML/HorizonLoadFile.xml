@@ -185,6 +185,8 @@
 	<asset id="" isdefault="yes" titlename="TitleTools" isactivated="True"/>
 
 	</Editors>
+	<Garage logo="file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/Logo_Garage.dds" activated="True" color="736ae6">
+	</Garage>
 <Resources flashurlcustom="domino54" flashurlfocus="1"/>
 	<Ingame accelcoef="1." controlcoef="1." gravitycoef="1.">
 	</Ingame>
