@@ -1,0 +1,66 @@
+/**
+ * @name LB_GarageIngameMetadata.Script.txt
+ * @author domino54
+ * @version 2025-05-21
+ */
+
+#Const Version    "2025-05-21"
+#Const ScriptName "ManiaApps/domino54/Ingame/GarageIngameMetadata/LB_GarageIngameMetadata.Script.txt"
+
+Text Build() {
+  declare Descriptions = "LastUpdate\nModelId\nSkinCategoryId\nSkinId\nPreferCustom";
+
+  return """
+<manialink version="3" name="L_GarageIngameMetadata">
+<frame pos="-160 60" z-index="20">
+  <label pos="0 0" size="28 15" valign="top" style="StyleTextScriptEditor" textsize="1" textcolor="FFF" text="{{{Descriptions}}}" />
+  <label pos="28 0" size="56 15" valign="top" id="Label_Debug" style="StyleTextScriptEditor" textsize="1" textcolor="FFF" />
+  <quad pos="0 0" size="28 15" bgcolor="222" opacity="0.75" />
+  <quad pos="28 0" size="56 15" bgcolor="111" opacity="0.75" />
+  <quad size="84 15" style="Bgs1" substyle="BgDialogBlur" opacity="0" />
+</frame>
+
+<script><!--
+
+main() {
+  wait(InputPlayer != Null && SplitScreenNum == 0);
+
+  declare Label_Debug <=> (Page.GetFirstChild("Label_Debug") as CMlLabel);
+
+  declare netread Integer Net_LibPlayerModels_LastUpdate for InputPlayer;
+  declare netread Text Net_LibPlayerModels_ModelId for InputPlayer;
+  declare netread Text Net_LibPlayerModels_SkinCategoryId for InputPlayer;
+  declare netread Text Net_LibPlayerModels_SkinId for InputPlayer;
+  declare netread Boolean Net_LibPlayerModels_PreferCustom for InputPlayer;
+
+  declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
+  declare persistent Text Persistent_Garage_LastSkinCategoryId for LocalUser;
+
+  declare PrevUpdate = -1;
+
+  while (True) {
+    wait(PrevUpdate != Net_LibPlayerModels_LastUpdate);
+
+    PrevUpdate = Net_LibPlayerModels_LastUpdate;
+
+    Label_Debug.Value = "";
+    Label_Debug.Value ^= Net_LibPlayerModels_LastUpdate^"\n";
+    Label_Debug.Value ^= Net_LibPlayerModels_ModelId^"\n";
+    Label_Debug.Value ^= Net_LibPlayerModels_SkinCategoryId^"\n";
+    Label_Debug.Value ^= Net_LibPlayerModels_SkinId^"\n";
+    Label_Debug.Value ^= Net_LibPlayerModels_PreferCustom^"\n";
+
+    // Update the displayed model in the Garage.
+    if (Net_LibPlayerModels_ModelId != "" && Net_LibPlayerModels_SkinCategoryId != "") {
+      Persistent_Garage_LastPlayerModelId = Net_LibPlayerModels_ModelId;
+      Persistent_Garage_LastSkinCategoryId = Net_LibPlayerModels_SkinCategoryId;
+    }
+
+    yield;
+  }
+}
+
+--></script>
+</manialink>
+  """;
+}

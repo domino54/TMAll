@@ -3,10 +3,10 @@
  *
  * @name ModeGarage.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-05-21
  */
 
-#Const MB_Version     "2025-04-22"
+#Const MB_Version     "2025-05-21"
 #Const MB_ScriptName  "Modes/TrackMania/Base/ModeGarage.Script.txt"
 
 #Include "Libs/domino54/Garage/ServerComm.Script.txt" as Garage
@@ -81,10 +81,6 @@ declare Text PrevPreviewModelId;
 declare Text PrevPreviewSkinCategoryId;
 declare Text PrevPreviewSkinId;
 declare Integer LastUnspawnTime;
-
-// Spectating oneself prevents controlling the player.
-UIManager.UIAll.ForceSpectator = True;
-UIManager.UIAll.SpectatorForcedTarget = Player.Id;
 ***
 
 // ---------------------------------- //
@@ -92,6 +88,9 @@ UIManager.UIAll.SpectatorForcedTarget = Player.Id;
 // ---------------------------------- //
 ***MB_InitMap***
 ***
+// Spectating oneself prevents controlling the player.
+UIManager.UIAll.ForceSpectator = True;
+UIManager.UIAll.SpectatorForcedTarget = Player.Id;
 UIManager.UIAll.UISequence = CUIConfig::EUISequence::CustomMTClip_WithUIInteraction;
 UIManager.UIAll.UISequence_CustomMTClip = "HLoff_C_RFX";
 UIManager.UIAll.UISequence_CustomMTRefTime = Now - 2500 + 250 - 75; // Fade delay
@@ -244,11 +243,6 @@ Void MB_Private_ItemList() {
 main() {
   MB_Private_RunServer = True;
 
-  wait(Players.count >= 1);
-
-  declare Player = Players[0];
-  declare LocalUser = Users[0];
-
   while (MB_Private_ServerIsRunning()) {
     +++MB_LoadLibraries+++
     +++MB_LogVersions+++
@@ -264,6 +258,12 @@ main() {
     while (!Synchro_BarrierReached(BarrierId)) {
       MB_Yield();
     }
+
+    // Player sometimes exists only once the map is loaded.
+    wait(Players.count >= 1);
+
+    declare Player = Players[0];
+    declare LocalUser = Users[0];
 
     +++MB_InitMap+++
     +++MB_StartMap+++
