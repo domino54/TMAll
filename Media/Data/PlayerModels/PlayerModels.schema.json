@@ -1,7 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "title": "Definition of player models. The definitions in these files are loaded one after another in order as defined per the `index.json` file. If an object uses an id that has already been declared, non-empty properties of the object will replace previously loaded data. This can be useful for renaming models, appending extra assets or replacing entire skin files.",
+  "title": "A \"source file\" containing definitions for player models objects metadata (models, skins, skin categories, overlays).",
+  "description": "The metadata defined in this files will be loaded only if the relative path to this file is added to the `SourceUrls` array in the `Media/Data/PlayerModels/index.json` file. If an object uses an id that has already been declared, non-empty properties of the object will replace previously loaded data. This can be useful for renaming models, appending extra assets or replacing the file paths within the object.",
   "allOf": [{ "$ref": "#/$defs/base_object" }],
   "properties": {
     "$schema": {
@@ -9,33 +10,31 @@
     },
     "Version": {
       "type": "integer",
-      "title": "Version of the player models sheet file.",
+      "title": "Version of the source file schema.",
       "const": 1
     },
     "Description": {
       "type": "string",
-      "title": "Additional description of the contents of this player models sheet."
+      "title": "Optional description of the source file contents."
     },
     "Models": {
       "type": "array",
-      "title": "A list of player models to load upon the server start.",
-      "minItems": 1,
+      "title": "A list of base models defined by this source file, which define the base gameplay in the title pack.",
       "items": {
         "$ref": "#/$defs/player_model"
       }
     },
     "Overlays": {
       "type": "array",
-      "title": "A list of overlay models - models, which share a base skin with a parent defined in the `Models` field.",
-      "minItems": 1,
+      "title": "A list of overlay models. Overlays are models, which share a base 3D skin with a base base model defined in the `Models` field.",
       "items": {
         "$ref": "#/$defs/overlay"
       }
     },
     "SkinCategories": {
       "type": "array",
-      "title": "A list of skin categories. Skin categories are used to provide separate skin selection for the same model, but different use cases. For example: separate Blue and Red team skins.",
-      "minItems": 1,
+      "title": "Defines all \"skin categories\" in this file.",
+      "description": "Skin categories are used to provide separately saved skin selections within a model. Separate selections serve different use cases in-game. For example: separate skins for the Blue and Red teams, or a specialized skin when playing as the Police role.",
       "items": {
         "$ref": "#/$defs/skin_category"
       }
@@ -43,7 +42,6 @@
     "Skins": {
       "type": "array",
       "title": "A list of skins applicable to the base player models and the overlays that extend them.",
-      "minItems": 1,
       "items": {
         "$ref": "#/$defs/skin"
       }
@@ -54,22 +52,22 @@
   "$defs": {
     "id": {
       "type": "string",
-      "title": "Unique and namespaced, alphanumeric identifier. If the identifier already exists, properties will merge and replace into the originally defined object.",
+      "title": "Well-formed identifier of the object. Must be alphanumeric and prefixed with the namespace. All objects in the file should be prefixed with the same namespace.",
+      "description": "If an object of the same type with the same identifier has already been defined before (in this or another file), instead of defining a new object, the non-empty properties will be merged into the original object.",
       "pattern": "^[a-z0-9_]+:[a-z0-9_]+$"
     },
     "id_extends": {
       "type": "string",
-      "title": "Identifier of the parent object this object applies to. If the parent object with the specified identifier is not found, this object will be ignored and will not load.",
       "pattern": "^[a-z0-9_]+:[a-z0-9_]+$"
     },
     "name": {
       "type": "string",
-      "title": "Name of the object, used for display purposes."
+      "title": "Name of the object, used only for display purposes within the UI."
     },
     "assets": {
       "type": "object",
-      "title": "A dictionary of optional assets tied to the object, used for display purposes. The keys and value types depend on their implementation inside the title pack. It can contain paths to images, custom displayed text or anything else.",
-      "minProperties": 1,
+      "title": "An optional dictionary of assets tied to the object. Can be text, number, boolean, or file path.",
+      "description": "Assets are not used by the Player Models system directly, but can be used to specify additional information about the object. The keys and value types depend on their implementation inside the title pack. It can contain paths to images, sounds, custom displayed text, or anything else that is useful for the consuming scripts. It is recommended to group the file assets into subdirectories within the folder containing this source file, and reference them via a relative path by starting with `./`.",
       "additionalProperties": {
         "anyOf": [
           { "type": "string" },
@@ -80,7 +78,8 @@
     },
     "archetype": {
       "type": "string",
-      "title": "Regardless of what a player model tries to be, it must extend an already existing archetype.",
+      "title": "The item used by the model must extend an already existing archetype.",
+      "description": "Archetype must be one of the predefined values, which represent the models available inside ManiaPlanet.",
       "enum": [
         "ArenaPlayer",
         "Minion",
@@ -99,12 +98,11 @@
     },
     "item_path": {
       "type": "string",
-      "title": "Path to the player model item file to load. The item must use the same base skin (or utilize the same UV maps) as the parent model.",
       "pattern": ".+\\.[Ii][Tt][Ee][Mm]\\.[Gg][Bb][Xx]$"
     },
     "author": {
       "type": "string",
-      "title": "Author of a 3D model or 2D skin."
+      "title": "Author name of a 3D model or 2D skin."
     },
     "rarity": {
       "type": "integer",
@@ -123,19 +121,24 @@
     },
     "player_model": {
       "type": "object",
-      "title": "Defines a usable player model. If the model only extends an archetype with minor gameplay tweaks, without changing the visuals, prefer using an overlay instead to preserve the custom skin selection.",
+      "title": "Defines a base player model. Model is the fundamental object of the Player Models system. Model is an `.Item.Gbx` file, which defines a base vehicle or character, which the player can spawn as in the title pack.",
+      "description": "A models can define one of 11 possible vehicles in TrackMania or 2 characters in ShootMania using the existing archetypes. Model can also mimic a new gameplay type, provided that it extends from an existing archetype and provides own 3D model. The Player Models system automatically detects which model the player should spawn as, according the currently loaded map. If the `.Item.Gbx` file only changes the handling values of an existing vehicle or character, it is recommended to define an overlay instead.",
       "allOf": [{ "$ref": "#/$defs/base_object" }],
       "properties": {
         "Archetype": { "$ref": "#/$defs/archetype" },
-        "ItemPath": { "$ref": "#/$defs/item_path" },
+        "ItemPath": {
+          "$ref": "#/$defs/item_path",
+          "title": "Mandatory path to the `.Item.Gbx` file used by this model to spawn the player as. This path is relative to the `Items` directory."
+        },
         "LoadAs": {
           "type": "string",
-          "title": "Describes in what ways the model will be loaded. For `ItemAndArchetype`, applied model will depend on the player's Stadium unlock status and the model overlay to preserve player's regular skins.",
+          "title": "Describes how the model will be loaded by the server.",
+          "description": "For `ItemAndArchetype`, the item assigned to the player will depend on the current environment to preserve the player's regular skin, independent of the Player Models system. Applying an archetype is preferred if the model is based on the primary archetype of the title pack. If the title is based on `TMAll`, models based on `StadiumCar` will always load as an archetype, while other models will be loaded as items if the currently loaded map is a Stadium map. If the map is not a Stadium map, the model will be loaded as an archetype. For custom models and TrackMania United vehicles, the `Item` option is recommended, as it will always load the model as an item to directly utilize the skins supplied by Player Models.",
           "enum": ["Item", "ItemAndArchetype", "Archetype"]
         },
         "SkinDirectories": {
           "type": "array",
-          "title": "Defines a subdirectory of Models or Vehicles folder, from which the user's own skins will be fetched.",
+          "title": "Subdirectories from which the user's custom skins will be loaded. Relative to both `Skins/Models` and `Skins/Vehicles` directories.",
           "items": {
             "type": "string"
           },
@@ -148,18 +151,28 @@
     },
     "overlay": {
       "type": "object",
-      "title": "Defined usable overlay. It is treated on the same level as a model in terms of selection and gameplay, while using the skins of its base model.",
+      "title": "Defines an overlay. Overlays are `.Item.Gbx` files, which only change the handling values of a vehicle or character. Overlays are automatically detected from the currently loaded map, just like regular models, can be referred to by an identifier in the same manner, and otherwise behave the same as regular models.",
+      "description": "Defining an overlay is preferred if the `.Item.Gbx` file uses the same archetype and 3D model as an already existing base model, but only changes the handling values. This allows the Player Models system to reuse the skins and player preferences, while still changing the handling values of the vehicle or character.",
       "allOf": [{ "$ref": "#/$defs/base_object" }],
       "properties": {
-        "Extends": { "$ref": "#/$defs/id_extends" },
-        "ItemPath": { "$ref": "#/$defs/item_path" },
+        "Extends": {
+          "$ref": "#/$defs/id_extends",
+          "title": "Identifier of the base model this overlay extends.",
+          "description": "The overlay will inherit the skins list and player's skin preferences from the base model. If the base model with the specified identifier is not found, this overlay will be ignored and will not be loaded."
+        },
+        "ItemPath": {
+          "$ref": "#/$defs/item_path",
+          "title": "Mandatory path to the `.Item.Gbx` file used by this overlay to spawn the player as. This path is relative to the `Items` directory.",
+          "description": "This item should adjust the handling parameters of the base model. The item must use the same base skin (or utilize the same UV maps) as the base model."
+        },
         "Gameplay": { "$ref": "#/$defs/gameplay" }
       },
       "unevaluatedProperties": false
     },
     "skin": {
       "type": "object",
-      "title": "Defines a model skin, which will be applied to a player model.",
+      "title": "Defines a skin applicable to a model.",
+      "description": "A skin changes the appearance of a model the player spawns as. Skin must be applicable to a previously defined model, and can work with that model's overlays.",
       "allOf": [{ "$ref": "#/$defs/base_object" }],
       "properties": {
         "AppliesTo": {
@@ -167,26 +180,30 @@
             { "$ref": "#/$defs/id_extends" },
             {
               "type": "string",
-              "title": "Using the wildcard identifier `*` will consider this skin to be applicable to all player models. This can be used if the skin has a custom model and is supposed to work like inside the CarCommon folder.",
+              "title": "Using the wildcard identifier `*` will consider this skin to be applicable to all loaded models. This can be used if the skin has a custom 3D model and is supposed to mimic the behavior of regular skins in the `CarCommon` folder.",
               "const": "*"
             }
-          ]
+          ],
+          "title": "Identifier of the model this skin applies to.",
+          "description": "If the skin has 3D geometry and is therefore applicable to all models, this field can contain `*`. If the identifier points to a model that is not defined in any file, the skin will not be loaded."
         },
         "SkinPath": {
           "type": "string",
-          "title": "Path to the skin file to load. Its diffuse texture must use the same UV maps as the base skin in the parent model."
+          "title": "Path to the `.zip` file this skin will use. This path must start with `Skins\\` or `file://Skins/`.",
+          "Description": "If the skin does not contain a 3D model, the skin diffuse texture must use the same UV maps as the base skin of the base model. Note: Script does not work with `.Skin.Pack.Gbx` and other `.Gbx` formats for skins, only `.zip` is supported. This is a game limitation and cannot be fixed."
         },
         "Author": { "$ref": "#/$defs/author" },
         "Rarity": { "$ref": "#/$defs/rarity" },
         "Categories": {
           "type": "array",
-          "title": "A list of categories, in which this skin can be used. If omitted, assumes `[\"default\"]` as the value.",
+          "title": "A list of identifiers of skin categories, in which this skin can be used.",
+          "description": "If omitted, assumes `[\"default\"]` as the value and will be selectable only in the Default skin category.",
           "items": {
             "oneOf": [
               { "$ref": "#/$defs/id_extends" },
               {
                 "type": "string",
-                "title": "The skin will be applicable in the default selection.",
+                "title": "The skin will be available in the default category.",
                 "const": "default"
               }
             ]
@@ -196,11 +213,11 @@
         },
         "IsHidden": {
           "type": "boolean",
-          "title": "If set to true, the implementation of the skin selection interface can consider this skin to be hidden."
+          "title": "If set to true, the implementation of the skin selection UI can consider this skin to be hidden and not display it."
         },
         "SortIndex": {
           "type": "integer",
-          "title": "Defines the order in which the skins are displayed in the skin selection interface.",
+          "title": "Optional numeric index, which will determine where the skin is positioned in the skin selection UI.",
           "default": 0
         }
       },
@@ -208,13 +225,15 @@
     },
     "skin_category": {
       "type": "object",
-      "title": "Defined skin category",
+      "title": "Definition of a \"skin category\".",
+      "description": "Skin categories are used to provide separately saved skin selections within a model. Separate selections serve different use cases in-game, such as different skins for Blue and Red teams, or specialized skins for specific roles like Police. Categories allow the same model to have multiple selectable skins, each associated with a particular context or gameplay scenario.",
       "allOf": [{ "$ref": "#/$defs/base_object" }],
       "unevaluatedProperties": false
     },
     "gameplay": {
       "type": "object",
-      "title": "Defines read-only handling values of a TrackMania vehicle, for display purposes only.",
+      "title": "Read-only handling values of a TrackMania vehicle.",
+      "description": "Values **should** be specified if the overlay is an extension of a TrackMania vehicle. **Important!** These values are not used to modify vehicle handling directly, but only to display the handling values in the UI. They should be identical to the `AccelCoef`, `ControlCoef`, and `GravityCoef` properties of the vehicle item defined in the `ItemPath` field.",
       "properties": {
         "AccelCoef": { "type": "number" },
         "ControlCoef": { "type": "number" },
