@@ -1,0 +1,210 @@
+/**
+ * @name LB_UIValidation.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+
+#Const Version    "2025-08-01"
+#Const ScriptName "ManiaApps/domino54/Editor/UIValidation/LB_UIValidation.Script.txt"
+
+#Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
+#Include "ManiaApps/domino54/Horizon/Components/HorizonCurrentMap.Script.txt" as HorizonCurrentMap
+#Include "ManiaApps/domino54/Horizon/Components/HorizonDualFrame.Script.txt" as HorizonDualFrame
+#Include "ManiaApps/domino54/Horizon/Components/HorizonHeader.Script.txt" as HorizonHeader
+#Include "ManiaApps/domino54/Horizon/Components/HorizonLine.Script.txt" as HorizonLine
+#Include "ManiaApps/domino54/Horizon/Components/HorizonMenuOption.Script.txt" as HorizonMenuOption
+#Include "ManiaApps/domino54/Horizon/Components/HorizonScoreRows.Script.txt" as HorizonScoreRows
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+#Include "ManiaApps/domino54/Horizon/HorizonFocus.Script.txt" as HorizonFocus
+
+#Const C_UIAnswer_Improve       "IMPROVE"
+#Const C_UIAnswer_SaveAndExit   "SAVE"
+#Const C_UIAnswer_Discard       "DISCARD"
+
+Text Build() {
+  declare WindowWidth = HC::C_MenuOptionWidth;
+  declare LeftMenuInsert = HorizonScoreRows::CreateScoreRows("Frame_ScoreRows", 3);
+
+  return """
+<manialink version="3" name="L_UIValidation">
+<frame id="Frame_Menu" pos="0 0">
+  <frame id="Frame_MenuOnline" pos="{{{-WindowWidth}}} {{{HC::C_MenuVerticalOffset}}}">
+    {{{HorizonHeader::CreateHeader("Frame_MenuHeader", WindowWidth, _("Editor"), _("Validate the track"))}}}
+
+    <frame pos="0 -20">
+      {{{HorizonLine::CreateSubtleLine("bottom", WindowWidth)}}}
+    </frame>
+
+    <frame pos="0 -20">
+      {{{HorizonCurrentMap::CreateCurrentMap("Frame_MenuCurrentMap", LeftMenuInsert, "")}}}
+    </frame>
+
+    <frame pos="0 -60.5">
+      {{{HorizonMenuOption::CreateStack("Frame_MenuOptions", 3)}}}
+    </frame>
+
+    <frame pos="0 -97.5">
+      {{{HorizonLine::CreateSubtleLine("top", WindowWidth)}}}
+    </frame>
+  </frame>
+
+</frame>
+
+<quad pos="0 0" size="960 180" valign="center" halign="center" style="Bgs1" substyle="BgDialogBlur" opacity="0" bluramount="0" />
+
+<quad pos="0 0" size="320 180" valign="center" halign="center" image="file://Media/3lines.png" hidden="1" />
+
+<script><!--
+
+#Include "MathLib" as ML
+#Include "TextLib" as TL
+
+{{{TextLibExt::InjectTimeToText()}}}
+
+{{{HorizonCurrentMap::InjectFunctions()}}}
+{{{HorizonDualFrame::InjectFunctions()}}}
+{{{HorizonFocus::InjectFunctions()}}}
+{{{HorizonHeader::InjectFunctions()}}}
+{{{HorizonMenuOption::InjectFunctions()}}}
+{{{HorizonScoreRows::InjectFunctions()}}}
+
+{{{HorizonFocus::InjectFocusAPI([
+  HorizonMenuOption::GetFocusConfig()
+])}}}
+
+Integer GetFastestTime(Integer[] _Times) {
+  declare FastestTime = -1;
+
+  foreach (Time in _Times) {
+    if (Time > 0 && (FastestTime <= 0 || Time < FastestTime)) {
+      FastestTime = Time;
+    }
+  }
+
+  return FastestTime;
+}
+
+Void SetTime(Integer _BestTime, Integer _YourTime, Integer _AuthorTime) {
+  declare FastestTime = GetFastestTime([_BestTime, _YourTime, _AuthorTime]);
+  declare Frame_ScoreRows <=> (Page.GetFirstChild("Frame_ScoreRows") as CMlFrame);
+
+  declare PlayerNames = [_("Last Time"), _("Best Time"), _("Author Medal")];
+  declare PlayerTimes = ["-:--.---", "-:--.---", "-:--.---"];
+  declare PlayerMedals = [0, 0, 4];
+
+  declare PlayerHighlight = [
+    _YourTime > 0 && _YourTime <= FastestTime,
+    _BestTime > 0 && _BestTime <= FastestTime,
+    _AuthorTime > 0 && _AuthorTime <= FastestTime
+  ];
+
+  if (_YourTime > 0) {
+    PlayerTimes[0] = TimeToText(_YourTime);
+  }
+
+  if (_BestTime > 0) {
+    PlayerTimes[1] = TimeToText(_BestTime);
+  }
+
+  if (_AuthorTime > 0) {
+    PlayerTimes[2] = TimeToText(_AuthorTime);
+  }
+
+  HorizonScoreRows_SetScores(Frame_ScoreRows, PlayerNames, PlayerTimes, PlayerMedals, PlayerHighlight);
+}
+
+Void SubmitAnswer(Text _Answer) {
+  declare netwrite Net_LibUIValidation_AnswerUpdate for Teams[0] = -1;
+  declare netwrite Net_LibUIValidation_Answer for Teams[0] = "";
+  declare netwrite Net_LibUIValidation_Distance for Teams[0] = 0.0;
+
+  Net_LibUIValidation_Answer = _Answer;
+  Net_LibUIValidation_AnswerUpdate = Now;
+  Net_LibUIValidation_Distance = InputPlayer.Distance;
+}
+
+Void ShowPage() {
+  CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::Resume);
+  EnableMenuNavigation(True, False, Null, 2);
+
+  HorizonHeader_Show((Page.GetFirstChild("Frame_MenuHeader") as CMlFrame));
+  HorizonDualFrame_Show((Page.GetFirstChild("Frame_MenuCurrentMap") as CMlFrame));
+  HorizonMenuOption_Show((Page.GetFirstChild("Frame_MenuOptions") as CMlFrame));
+
+  HorizonFocus_FocusInitial();
+}
+
+Void HidePage() {
+  EnableMenuNavigation(False, False, Null, 0);
+}
+
+main() {
+  declare Frame_MenuCurrentMap <=> (Page.GetFirstChild("Frame_MenuCurrentMap") as CMlFrame);
+  declare Frame_MenuOptions <=> (Page.GetFirstChild("Frame_MenuOptions") as CMlFrame);
+
+  HorizonCurrentMap_SetMedal(Frame_MenuCurrentMap, 4);
+  HorizonCurrentMap_SetMapInfo(Frame_MenuCurrentMap, Map.MapName, Map.AuthorNickName, Map.AuthorZoneIconUrl);
+  HorizonMenuOption_SetText(Frame_MenuOptions, [_("Improve"), _("Validate & exit"), _("Discard changes and quit")]);
+
+  HorizonFocus_NavigationStackAddControls(Frame_MenuOptions, [
+    0 => {{{dump(C_UIAnswer_Improve)}}},
+    1 => {{{dump(C_UIAnswer_SaveAndExit)}}},
+    2 => {{{dump(C_UIAnswer_Discard)}}}
+  ]);
+  HorizonFocus_SetInitialControl(Frame_MenuOptions.Controls[0]);
+
+  declare Boolean PrevIsPageVisible;
+
+  declare netread Net_LibUIValidation_BestTime for Teams[0] = 0;
+  declare netread Net_LibUIValidation_YourTime for Teams[0] = 0;
+  declare netread Net_LibUIValidation_AuthorTime for Teams[0] = 0;
+
+  declare PrevBestTime = -1;
+  declare PrevYourTime = -1;
+  declare PrevAuthorTime = -1;
+
+  SetTime(Net_LibUIValidation_BestTime, Net_LibUIValidation_YourTime, Net_LibUIValidation_AuthorTime);
+
+  while (True) {
+    {{{HorizonFocus::InjectLoop("SubmitAnswer(Value);")}}}
+
+    if (PrevIsPageVisible != PageIsVisible) {
+      if (PageIsVisible) {
+        ShowPage();
+      } else {
+        HidePage();
+      }
+
+      PrevIsPageVisible = PageIsVisible;
+    }
+
+    if (!PageIsVisible) {
+      yield;
+      continue;
+    }
+
+    if (PrevBestTime != Net_LibUIValidation_BestTime || PrevYourTime != Net_LibUIValidation_YourTime || PrevAuthorTime != Net_LibUIValidation_AuthorTime) {
+      PrevBestTime = Net_LibUIValidation_BestTime;
+      PrevYourTime = Net_LibUIValidation_YourTime;
+      PrevAuthorTime = Net_LibUIValidation_AuthorTime;
+
+      SetTime(Net_LibUIValidation_BestTime, Net_LibUIValidation_YourTime, Net_LibUIValidation_AuthorTime);
+    }
+
+    foreach (Event in PendingEvents) {
+      if (Event.Type != CMlScriptEvent::Type::MenuNavigation) continue;
+
+      switch (Event.MenuNavAction) {
+        case CMlScriptEvent::EMenuNavAction::Cancel: {
+          SubmitAnswer({{{dump(C_UIAnswer_SaveAndExit)}}});
+        }
+      }
+    }
+
+    yield;
+  }
+}
+--></script>
+</manialink>
+  """;
+}

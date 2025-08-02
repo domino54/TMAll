@@ -1,80 +1,70 @@
 /**
  * @name HorizonButton.Script.txt
  * @author domino54
- * @version 2025-05-13
+ * @version 2025-08-01
  */
 
-#Const Version      "2025-05-13"
-#Const ScriptName   "ManiaApps/domino54/Common/HorizonElements/HorizonButton.Script.txt"
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/Components/HorizonButton.Script.txt"
 
-#Include "MathLib" as ML
-#Include "Libs/domino54/TextLibExt.Script.txt" as TLX
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+#Include "ManiaApps/domino54/Horizon/HorizonFocus.Script.txt" as HorizonFocus
+
+#Const C_FocusClass "Button"
 
 // ---------------------------------- //
-// Constants
-// ---------------------------------- //
-
-#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
-
-#Const C_ButtonFillColor      "FFFFFF"
-#Const C_ButtonTextColor      "444444"
-#Const C_DefaultAnimDuration  250
-#Const C_DefaultOutlineWidth  0.333333
-
-// ---------------------------------- //
-// Public functions
+// Private functions
 // ---------------------------------- //
 
 Text Private_CreateButton(Text _Id, Vec2 _Size, Real _Outline, Boolean _Filled, Text _Text, Real _TextSize) {
   declare SubFont = Font::GetFontName("SubTitle");
-  declare TextColor = C_ButtonFillColor;
+  declare TextColor = HC::C_ButtonOutlineColor;
   declare TextSize = _TextSize;
+
+  declare HoverMargin = HC::C_ButtonFilledHoverMargin;
   declare HoverSize = _Size;
   declare HoverPos = <0.0, 0.0>;
+
   declare X = _Size.X;
   declare Y = _Size.Y;
 
   if (TextSize <= 0) {
-    TextSize = ML::NearestInteger(Y * 0.75 - 1) / 2.0;
+    TextSize = HC::GetButtonAutoTextSize(Y);
   }
 
   if (_Filled) {
-    TextColor = C_ButtonTextColor;
-    HoverSize = _Size + <2.0, 2.0>;
-    HoverPos = <-1.0, 1.0>;
+    TextColor = HC::C_ButtonFilledTextColor;
+    HoverSize = _Size + <HoverMargin * 2, HoverMargin * 2>;
+    HoverPos = <-HoverMargin, HoverMargin>;
   }
 
   declare Controls = """
-    <quad id="Quad_ButtonHover" class="Hover" pos="{{{HoverPos.X}}} {{{HoverPos.Y}}}" size="{{{HoverSize.X}}} {{{HoverSize.Y}}}" bgcolor="{{{C_ButtonFillColor}}}44" opacity="0" />
+    <quad id="Quad_ButtonHover" class="Hover" pos="{{{HoverPos.X}}} {{{HoverPos.Y}}}" size="{{{HoverSize.X}}} {{{HoverSize.Y}}}" bgcolor="{{{HC::C_ButtonFilledHoverColor}}}" opacity="0" />
     <label id="Label_ButtonText" pos="{{{Y + (X - Y - 2) / 2}}} {{{Y / -2 - 0.2}}}" halign="center" valign="center2" size="{{{X - Y - 2}}}" textsize="{{{TextSize}}}" textcolor="{{{TextColor}}}" textfont="{{{SubFont}}}" textprefix="$t" text="{{{_Text}}}" />
-    <quad id="Quad_{{{_Id}}}" class="HorizonButton" pos="0 0" size="{{{X}}} {{{Y}}}" scriptevents="1" />
+    <quad id="Quad_{{{_Id}}}" class="HorizonButton" {{{HorizonFocus::SetClass(C_FocusClass)}}} pos="0 0" size="{{{X}}} {{{Y}}}" scriptevents="1" />
   """;
 
   // Add outline if specified
   if (_Outline > 0) {
     Controls ^= """
-      <quad size="{{{Y}}} {{{Y}}}" image="{{{C_ImgBase}}}EmptyCircle.dds" />
-      <quad pos="0 0" rot="90" halign="left" valign="bottom" size="{{{_Outline}}} {{{X}}}" bgcolor="FFF" />
-      <quad pos="0 0" halign="left" valign="top" size="{{{_Outline}}} {{{Y}}}" bgcolor="FFF" autoscale="0" />
-      <quad pos="0 {{{-Y}}}" rot="-90" halign="left" valign="top" size="{{{_Outline}}} {{{X}}}" bgcolor="FFF" />
-      <quad pos="{{{X}}} 0" rot="180" halign="left" valign="bottom" size="{{{_Outline}}} {{{Y}}}" bgcolor="FFF" autoscale="0" />
+      <quad class="Outline" size="{{{Y}}} {{{Y}}}" image="{{{HC::C_ImgBase}}}Menus/Buttons/EmptyCircle.dds" />
+      <quad class="Outline" pos="0 0" rot="90" halign="left" valign="bottom" size="{{{_Outline}}} {{{X}}}" bgcolor="{{{HC::C_ButtonOutlineColor}}}" />
+      <quad class="Outline" pos="0 0" halign="left" valign="top" size="{{{_Outline}}} {{{Y}}}" bgcolor="{{{HC::C_ButtonOutlineColor}}}" autoscale="0" />
+      <quad class="Outline" pos="0 {{{-Y}}}" rot="-90" halign="left" valign="top" size="{{{_Outline}}} {{{X}}}" bgcolor="{{{HC::C_ButtonOutlineColor}}}" />
+      <quad class="Outline" pos="{{{X}}} 0" rot="180" halign="left" valign="bottom" size="{{{_Outline}}} {{{Y}}}" bgcolor="{{{HC::C_ButtonOutlineColor}}}" autoscale="0" />
     """;
   }
 
   // Add fill if specified
   if (_Filled) {
     Controls ^= """
-      <quad class="Contour" size="{{{Y}}} {{{Y}}}" image="{{{C_ImgBase}}}EmptyContour.dds" opacity="1" />
-      <quad class="Contour" pos="{{{Y}}} 0" size="{{{X - Y}}} {{{Y}}}" bgcolor="{{{C_ButtonFillColor}}}" opacity="1" />
+      <quad class="Contour" size="{{{Y}}} {{{Y}}}" image="{{{HC::C_ImgBase}}}Menus/Buttons/EmptyContour.dds" opacity="1" />
+      <quad class="Contour" pos="{{{Y}}} 0" size="{{{X - Y}}} {{{Y}}}" bgcolor="{{{HC::C_ButtonFilledCardColor}}}" opacity="1" />
     """;
   }
 
-  return """
-<frame id="Frame_{{{_Id}}}">
-  {{{Controls}}}
-</frame>
-  """;
+  return """<frame id="Frame_{{{_Id}}}" {{{HorizonFocus::SetClass(C_FocusClass)}}}>{{{Controls}}}</frame>""";
 }
 
 // ---------------------------------- //
@@ -90,7 +80,7 @@ Text CreateButton(Text _Id, Vec2 _Size, Real _Outline, Text _Text) {
 }
 
 Text CreateButton(Text _Id, Vec2 _Size, Text _Text, Real _TextSize) {
-  return CreateButton(_Id, _Size, C_DefaultOutlineWidth, _Text, _TextSize);
+  return CreateButton(_Id, _Size, HC::C_ButtonOutlineWidth, _Text, _TextSize);
 }
 
 Text CreateButton(Text _Id, Vec2 _Size, Text _Text) {
@@ -106,7 +96,7 @@ Text CreateOutlineButton(Text _Id, Vec2 _Size, Real _Outline, Text _Text) {
 }
 
 Text CreateOutlineButton(Text _Id, Vec2 _Size, Text _Text, Real _TextSize) {
-  return CreateOutlineButton(_Id, _Size, C_DefaultOutlineWidth, _Text, _TextSize);
+  return CreateOutlineButton(_Id, _Size, HC::C_ButtonOutlineWidth, _Text, _TextSize);
 }
 
 Text CreateOutlineButton(Text _Id, Vec2 _Size, Text _Text) {
@@ -122,23 +112,21 @@ Text CreateFilledButton(Text _Id, Vec2 _Size, Text _Text) {
 }
 
 Text InjectFunctions() {
-  return TLX::Script("""<script><!--
+  return """// <script>
 
 Void HorizonButton_SetFilled(CMlFrame _Frame, Boolean _IsFilled, Integer _Duration) {
   declare Label_ButtonText <=> (_Frame.GetFirstChild("Label_ButtonText") as CMlLabel);
   declare Quad_ButtonHover <=> (_Frame.GetFirstChild("Quad_ButtonHover") as CMlQuad);
   declare Quad_Focus <=> (_Frame.Controls[2] as CMlQuad);
 
-  Page.GetClassChildren("Contour", _Frame, True);
-
   declare Opacity = 0.0;
-  declare TextColor = "{{{C_ButtonFillColor}}}";
+  declare TextColor = "{{{HC::C_ButtonOutlineColor}}}";
 
   if (_IsFilled) {
     Opacity = 1.0;
-    TextColor = "{{{C_ButtonTextColor}}}";
-    Quad_ButtonHover.RelativePosition_V3 = <-1.0, 1.0>;
-    Quad_ButtonHover.Size = Quad_Focus.Size + <2.0, 2.0>;
+    TextColor = "{{{HC::C_ButtonFilledTextColor}}}";
+    Quad_ButtonHover.RelativePosition_V3 = <-{{{HC::C_ButtonFilledHoverMargin}}}, {{{HC::C_ButtonFilledHoverMargin}}}>;
+    Quad_ButtonHover.Size = Quad_Focus.Size + <{{{HC::C_ButtonFilledHoverMargin * 2}}}, {{{HC::C_ButtonFilledHoverMargin * 2}}}>;
   }
   else {
     Quad_ButtonHover.RelativePosition_V3 = <0.0, 0.0>;
@@ -148,6 +136,8 @@ Void HorizonButton_SetFilled(CMlFrame _Frame, Boolean _IsFilled, Integer _Durati
   AnimMgr.Flush(Label_ButtonText);
   AnimMgr.Add(Label_ButtonText, "<label textcolor='"^TextColor^"' />", _Duration, CAnimManager::EAnimManagerEasing::CircOut);
 
+  Page.GetClassChildren("Contour", _Frame, True);
+
   foreach (Control in Page.GetClassChildren_Result) {
     AnimMgr.Flush(Control);
     AnimMgr.Add(Control, "<quad opacity='"^Opacity^"' />", _Duration, CAnimManager::EAnimManagerEasing::CircOut);
@@ -155,7 +145,7 @@ Void HorizonButton_SetFilled(CMlFrame _Frame, Boolean _IsFilled, Integer _Durati
 }
 
 Void HorizonButton_SetFilled(CMlFrame _Frame, Boolean _IsFilled) {
-  HorizonButton_SetFilled(_Frame, _IsFilled, {{{C_DefaultAnimDuration}}});
+  HorizonButton_SetFilled(_Frame, _IsFilled, {{{HC::C_ButtonAnimDuration}}});
 }
 
 Void HorizonButton_SetHover(CMlFrame _Frame, Boolean _IsHovered) {
@@ -164,6 +154,7 @@ Void HorizonButton_SetHover(CMlFrame _Frame, Boolean _IsHovered) {
   declare Opacity = 0.0;
 
   if (_IsHovered) {
+    Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 3, 0.0);
     Opacity = 1.0;
   }
 
@@ -185,7 +176,6 @@ Void HorizonButton_Loop() {
       }
       case CMlScriptEvent::Type::MouseOver: {
         if (Event.Control.HasClass("HorizonButton")) {
-          Audio.PlaySoundEvent(CAudioManager::ELibSound::Focus, 3, 0.0);
           HorizonButton_SetHover(Event.Control.Parent, True);
         }
       }
@@ -198,9 +188,18 @@ Void HorizonButton_Loop() {
   }
 }
 
---></script>""");
+  """;
 }
 
 Text InjectLoop() {
   return """HorizonButton_Loop();""";
+}
+
+HorizonFocus::K_FocusConfig GetFocusConfig() {
+  return HorizonFocus::K_FocusConfig {
+    ClassName = C_FocusClass,
+    ParentSelector = "return Event.Control.Parent;",
+    FocusCallback = "HorizonButton_SetHover((Control as CMlFrame), True);",
+    BlurCallback = "HorizonButton_SetHover((Control as CMlFrame), False);"
+  };
 }

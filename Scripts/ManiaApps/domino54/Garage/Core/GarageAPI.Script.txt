@@ -1,10 +1,10 @@
 /**
  * @name GarageAPI.Script.txt
  * @author domino54
- * @version 2025-05-21
+ * @version 2025-08-01
  */
 
-#Const Version      "2025-05-21"
+#Const Version      "2025-08-01"
 #Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageAPI.Script.txt"
 
 #Include "TextLib" as TL
@@ -12,22 +12,10 @@
 #Include "Libs/domino54/Garage/ServerComm.Script.txt" as GarageServer
 #Include "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt" as PMData
 #Include "Libs/domino54/PlayerModels/PlayerModels_Structs.Script.txt" as PMStructs
+#Include "ManiaApps/domino54/Garage/Core/GarageConstants.Script.txt" as GC
+#Include "ManiaApps/domino54/Garage/Core/GaragePersistentAPI.Script.txt" as GaragePersistentAPI
 #Include "ManiaApps/domino54/Garage/Core/GaragePlaygroundAPI.Script.txt" as GaragePlaygroundAPI
-
-// ---------------------------------- //
-// Constants
-// ---------------------------------- //
-
-#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Garage/"
-
-#Const C_GarageAssetId_ModelAliasName   "garage:name"
-#Const C_GarageAssetId_ModelTabIcon     "garage:tab_icon"
-#Const C_GarageAssetId_SkinCardIcon     "garage:card"
-#Const C_GarageAssetId_SkinPreview      "garage:preview"
-
-#Const C_GarageDefaultModelTabIcon      "TabIcon_Default.webp"
-#Const C_GarageDefaultSkinCardIcon      "SkinCard_Default.webp"
-#Const C_GarageDefaultSkinPreview       "Preview_Default.webp"
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
 
 // ---------------------------------- //
 // Structs
@@ -194,19 +182,13 @@ Text[] GetSelectableSkinCategoryNames() {
   return Result;
 }
 
-Text GetLastSkinCategoryId() {
-  declare persistent Text Persistent_Garage_LastSkinCategoryId for LocalUser;
-
-  return Persistent_Garage_LastSkinCategoryId;
-}
-
 Text GetDefaultSkinCategoryId() {
   return PMData::C_DefaultSkinCategoryId;
 }
 
 Text GetInitialSkinCategoryId() {
   declare SkinCategoryIds = GetSelectableSkinCategoryIds();
-  declare LastSkinCategoryId = GetLastSkinCategoryId();
+  declare LastSkinCategoryId = GaragePersistentAPI::GetLastSkinCategoryId();
 
   if (SkinCategoryIds.exists(LastSkinCategoryId)) {
     return LastSkinCategoryId;
@@ -250,22 +232,13 @@ Text GetSkinCategoryId() {
 Void SetSkinCategoryId(Text _SkinCategoryId) {
   G_PreviewSkinCategoryId = _SkinCategoryId;
 
-  declare persistent Text Persistent_Garage_LastSkinCategoryId for LocalUser;
-
-  Persistent_Garage_LastSkinCategoryId = _SkinCategoryId;
-
+  GaragePersistentAPI::SetLastSkinCategoryId(_SkinCategoryId);
   GarageServer::SetPreviewSkinCategoryId(LocalUser, _SkinCategoryId);
-}
-
-Text GetLastModelId() {
-  declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
-
-  return Persistent_Garage_LastPlayerModelId;
 }
 
 Text GetInitialModelId() {
   declare ModelIds = GetSelectableModelIds();
-  declare LastModelId = GetLastModelId();
+  declare LastModelId = GaragePersistentAPI::GetLastModelId();
 
   if (ModelIds.exists(LastModelId)) {
     return LastModelId;
@@ -285,14 +258,11 @@ Text GetModelId() {
 Void SetModelId(Text _ModelId) {
   G_PreviewModelId = _ModelId;
 
-  declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
-
-  Persistent_Garage_LastPlayerModelId = _ModelId;
-
   declare SkinCategoryId = GetSkinCategoryId();
   declare PlayerSkinId = GetSelectedSkinId(_ModelId, SkinCategoryId);
   declare SkinIds = GetSelectableSkinIds(_ModelId, SkinCategoryId);
 
+  GaragePersistentAPI::SetLastModelId(_ModelId);
   GarageServer::SetPreviewModelId(LocalUser, _ModelId);
 
   if (SkinIds.exists(PlayerSkinId)) {
@@ -307,32 +277,32 @@ Void SetModelId(Text _ModelId) {
 }
 
 Text GetModelName(Text _ModelId, Text _Fallback) {
-  return PMData::GetModelAsset(_ModelId, C_GarageAssetId_ModelAliasName, _Fallback);
+  return PMData::GetModelAsset(_ModelId, GC::C_GarageAssetId_ModelAliasName, _Fallback);
 }
 
 Text GetModelIconUrl(Text _ModelId) {
-  return PMData::GetModelAsset(_ModelId, C_GarageAssetId_ModelTabIcon, C_ImgBase^C_GarageDefaultModelTabIcon);
+  return PMData::GetModelAsset(_ModelId, GC::C_GarageAssetId_ModelTabIcon, HC::C_ImgBase^GC::C_DefaultModelTabIconUrl);
 }
 
 Text GetSkinCardUrl(K_Skin _Skin) {
-  declare Result = PMData::GetSkinAsset(_Skin.Id, C_GarageAssetId_SkinCardIcon, "");
+  declare Result = PMData::GetSkinAsset(_Skin.Id, GC::C_GarageAssetId_SkinCardIcon, "");
 
   if (Result == "") {
-    Result = PMData::GetModelAsset(_Skin.AppliesTo, C_GarageAssetId_SkinCardIcon, C_ImgBase^C_GarageDefaultSkinCardIcon);
+    Result = PMData::GetModelAsset(_Skin.AppliesTo, GC::C_GarageAssetId_SkinCardIcon, HC::C_ImgBase^GC::C_DefaultSkinCardIconUrl);
   }
 
   return Result;
 }
 
 Text GetSkinCardUrl(Text _SkinId) {
-  return PMData::GetSkinAsset(_SkinId, C_GarageAssetId_SkinCardIcon, C_ImgBase^C_GarageDefaultSkinCardIcon);
+  return PMData::GetSkinAsset(_SkinId, GC::C_GarageAssetId_SkinCardIcon, HC::C_ImgBase^GC::C_DefaultSkinCardIconUrl);
 }
 
 Text GetSkinPreviewUrl(Text _ModelId, Text _SkinId) {
-  declare Result = PMData::GetSkinAsset(_SkinId, C_GarageAssetId_SkinPreview, "");
+  declare Result = PMData::GetSkinAsset(_SkinId, GC::C_GarageAssetId_SkinPreview, "");
 
   if (Result == "") {
-    Result = PMData::GetModelAsset(_ModelId, C_GarageAssetId_SkinPreview, C_ImgBase^C_GarageDefaultSkinPreview);
+    Result = PMData::GetModelAsset(_ModelId, GC::C_GarageAssetId_SkinPreview, HC::C_ImgBase^GC::C_DefaultSkinPreviewUrl);
   }
 
   return Result;

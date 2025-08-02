@@ -1,0 +1,192 @@
+/**
+ * @name HorizonMenuOption.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ *
+ * Buttons for options inside an ingame menu.
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/Components/HorizonMenuOption.Script.txt"
+
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+#Include "ManiaApps/domino54/Horizon/HorizonFocus.Script.txt" as HorizonFocus
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_FocusClass "MenuOption"
+
+// ---------------------------------- //
+// Global variables
+// ---------------------------------- //
+
+declare Integer G_ModelIdCounter;
+
+/**
+ * Creates a frame model for a menu option.
+ *
+ * @param _ModelId - Identifier for the model.
+ * @param _Size - The size of the menu option.
+ * @param _AdditionalContent - Additional XML to be inserted inside the menu option.
+ * @return - The XML string containing the menu option frame model.
+ */
+Text CreateModel(Text _ModelId, Vec2 _Size, Text _AdditionalContent) {
+  declare HalfMX = HC::C_MenuOptionMargin / 2;
+  declare HalfY = _Size.Y / -2;
+  declare AX = HC::C_MenuOptionArrowSize;
+  declare SubFont = Font::GetFontName("SubTitle");
+
+  return """
+<framemodel id="{{{_ModelId}}}" size="{{{_Size.X}}} {{{_Size.Y}}}" {{{HorizonFocus::SetClass(C_FocusClass)}}}>
+  {{{_AdditionalContent}}}
+
+  <quad id="Quad_Arrow" class="HF FG Colorize" halign="center" valign="center" pos="{{{HalfMX}}} {{{HalfY}}}" size="{{{AX}}} {{{AX}}}" image="{{{HC::C_ImgBase}}}Ingame/Arrow_v.dds" keepratio="fit" colorize="{{{HC::C_MenuOptionArrowColor}}}" />
+  <label id="Label_ButtonText" class="HF FG" halign="left" valign="center2" pos="{{{HC::C_MenuOptionMargin}}} {{{HalfY - 0.2}}}" textsize="3" textcolor="{{{HC::C_MenuOptionTextColor}}}" textfont="{{{SubFont}}}" textprefix="$t" text="Button Option Text" />
+
+  <quad id="Quad_MenuOption" class="HF BG" {{{HorizonFocus::SetClass(C_FocusClass)}}} size="{{{_Size.X}}} {{{_Size.Y}}}" opacity="{{{HC::C_MenuOptionCardOpacity}}}" bgcolor="{{{HC::C_MenuOptionCardBgColor}}}" scriptevents="1" />
+  <quad size="{{{_Size.X}}} {{{_Size.Y}}}" opacity="0" style="Bgs1" substyle="BgDialogBlur" bluramount="0.1" />
+</framemodel>
+  """;
+}
+
+Text CreateModel(Text _Id, Vec2 _Size) {
+  return CreateModel(_Id, _Size, "");
+}
+
+Text CreateModel(Text _Id, Real _Width, Text _AdditionalContent) {
+  return CreateModel(_Id, <_Width, HC::C_MenuOptionHeight>, _AdditionalContent);
+}
+
+Text CreateModel(Text _Id, Real _Width) {
+  return CreateModel(_Id, _Width, "");
+}
+
+Text CreateModel(Text _Id, Text _AdditionalContent) {
+  return CreateModel(_Id, HC::C_MenuOptionWidth, _AdditionalContent);
+}
+
+Text CreateModel(Text _Id) {
+  return CreateModel(_Id, "");
+}
+
+/**
+ * Creates a stack of menu options using a specific model.
+ *
+ * @param _Id - The identifier for the parent frame.
+ * @param _ModelId - The identifier of the menu option frame model.
+ * @param _NbInstances - The number of menu options to create in the stack.
+ * @param _Size - The size of each menu option in the stack.
+ * @param _Spacing - The vertical spacing between each menu option.
+ * @return - The XML string containing menu options stacked within a parent frame.
+ */
+Text CreateStack(Text _Id, Text _ModelId, Integer _NbInstances, Vec2 _Size, Real _Spacing) {
+  declare Text Stack;
+  declare VerticalOffset = _Size.Y + _Spacing;
+  declare TotalHeight = _Size.Y * _NbInstances + _Spacing * (_NbInstances - 1);
+
+  for (I, 0, _NbInstances - 1) {
+    Stack ^= """<frameinstance modelid="{{{_ModelId}}}" pos="0 {{{I * -VerticalOffset}}}" />""";
+  }
+
+  return """<frame id="{{{_Id}}}" size="{{{_Size.X}}} {{{TotalHeight}}}">{{{Stack}}}</frame>""";
+}
+
+/**
+ * Creates a frame model for a menu option and a stack of menu options with that model.
+ *
+ * @param _Id - The identifier for the parent frame.
+ * @param _NbInstances - The number of menu options to create in the stack.
+ * @param _Size - The size of each menu option in the stack.
+ * @param _Spacing - The vertical spacing between each menu option.
+ * @param _AdditionalContent Additional XML content to be inserted inside the menu option model.
+ * @return - The XML string containing the menu option model and the stacked instances.
+ */
+Text CreateStack(Text _Id, Integer _NbInstances, Vec2 _Size, Real _Spacing, Text _AdditionalContent) {
+  declare ModelId = "FrameModel_MenuOption"^G_ModelIdCounter;
+  declare ModelText = CreateModel(ModelId, _Size, _AdditionalContent);
+  declare StackText = CreateStack(_Id, ModelId, _NbInstances, _Size, _Spacing);
+
+  G_ModelIdCounter += 1;
+
+  return """{{{ModelText}}}{{{StackText}}}""";
+}
+
+Text CreateStack(Text _Id, Integer _NbInstances, Vec2 _Size, Real _Spacing) {
+  return CreateStack(_Id, _NbInstances, _Size, _Spacing, "");
+}
+
+Text CreateStack(Text _Id, Integer _NbInstances, Real _Width, Text _AdditionalContent) {
+  return CreateStack(_Id, _NbInstances, <_Width, HC::C_MenuOptionHeight>, HC::C_MenuOptionSpacing, _AdditionalContent);
+}
+
+Text CreateStack(Text _Id, Integer _NbInstances, Real _Width) {
+  return CreateStack(_Id, _NbInstances, _Width, "");
+}
+
+Text CreateStack(Text _Id, Integer _NbInstances, Text _AdditionalContent) {
+  return CreateStack(_Id, _NbInstances, HC::C_MenuOptionWidth, _AdditionalContent);
+}
+
+Text CreateStack(Text _Id, Integer _NbInstances) {
+  return CreateStack(_Id, _NbInstances, "");
+}
+
+/**
+ * Inject function for handling the component via manialinks.
+ */
+Text InjectFunctions() {
+  return """// <script>
+
+Void HorizonMenuOption_SetText(CMlFrame _Frame, Text _Text) {
+  declare Label_ButtonText <=> (_Frame.GetFirstChild("Label_ButtonText") as CMlLabel);
+
+  Label_ButtonText.Value = _Text;
+}
+
+Void HorizonMenuOption_SetText(CMlFrame _Frame, Text[] _Text) {
+  foreach (I => Control in _Frame.Controls) {
+    declare Text ControlText;
+
+    if (_Text.existskey(I)) {
+      ControlText = _Text[I];
+    }
+
+    HorizonMenuOption_SetText((Control as CMlFrame), ControlText);
+  }
+}
+
+Void HorizonMenuOption_Show(CMlFrame _Frame, Integer _Duration, Integer _DelayPerOption) {
+  foreach (I => Control in _Frame.Controls) {
+    AnimMgr.Flush(Control);
+
+    declare Y = Control.RelativePosition_V3.Y;
+    declare Delay = Now + I * _DelayPerOption;
+
+    Control.RelativePosition_V3.X = -Control.Size.X - 1.0;
+
+    AnimMgr.Add(Control, "<control pos='0 "^Y^"' />", Delay, _Duration, CAnimManager::EAnimManagerEasing::QuintOut);
+  }
+}
+
+Void HorizonMenuOption_Show(CMlFrame _Frame) {
+  HorizonMenuOption_Show(_Frame, {{{HC::C_MenuOptionAnimDuration}}}, {{{HC::C_MenuOptionDelayPerOption}}});
+}
+
+Integer HorizonMenuOption_GetIndex(CMlFrame _Frame) {
+  return _Frame.Parent.Controls.keyof(_Frame);
+}
+
+  """;
+}
+
+HorizonFocus::K_FocusConfig GetFocusConfig() {
+  return HorizonFocus::K_FocusConfig {
+    ClassName = C_FocusClass,
+    ParentSelector = "return Event.Control.Parent;",
+    FocusCallback = "HorizonFocus_SetFocus((Control as CMlFrame), True);",
+    BlurCallback = "HorizonFocus_SetFocus((Control as CMlFrame), False);"
+  };
+}

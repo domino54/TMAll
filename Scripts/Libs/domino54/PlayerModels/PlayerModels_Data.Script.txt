@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Data.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-08-01
  */
 
-#Const Version      "2025-04-22"
+#Const Version      "2025-08-01"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt"
 
 #Include "MathLib" as ML
@@ -280,7 +280,7 @@ Void Private_AppendSkin(K_Skin _Skin, Text _BaseUrl) {
     }
 
     if (_Skin.SortIndex != 0) {
-      G_LibPlayerModels_SkinById[_Skin.Id].Rarity = _Skin.SortIndex;
+      G_LibPlayerModels_SkinById[_Skin.Id].SortIndex = _Skin.SortIndex;
     }
   }
   else {
@@ -927,6 +927,15 @@ Text GetModelAsset(Text _ModelId, Text _AssetId, Text _Fallback) {
 
   // Fallback to overlay base model.
   return GetModelAsset(G_LibPlayerModels_OverlayById[_ModelId].Extends, _AssetId, _Fallback);
+}
+
+Text GetSkinAsset(K_Skin _Skin, Text _AssetId, Text _Fallback) {
+  if (_Skin.Assets.existskey(_AssetId)) {
+    return _Skin.Assets[_AssetId];
+  }
+
+  // Fallback to model.
+  return GetModelAsset(_Skin.AppliesTo, _AssetId, _Fallback);
 }
 
 Text GetSkinAsset(Text _SkinId, Text _AssetId, Text _Fallback) {

@@ -1,0 +1,51 @@
+/**
+ * @name LB_SkinDebugMenu.Script.txt
+ * @author domino54
+ * @version 2025-05-13
+ */
+
+#Const Version      "2025-05-13"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinDebugMenu/LB_SkinDebugMenu.Script.txt"
+
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/"
+
+Text Build() {
+  declare MainFont = Font::GetFontName("Main");
+
+  return """
+<manialink version="3" name="L_SkinDebugMenu">
+
+<frame pos="90 54" hidden="1">
+  <quad size="60 0.25" bgcolor="FFF" />
+  <quad size="2.5 0.75" bgcolor="FFF" />
+  <quad size="0.75 2.5" bgcolor="FFF" />
+
+  <frame pos="0 0">
+    <quad pos="8 -8" halign="center" valign="center" size="11 11" keepratio="Fit" modulatecolor="FFF" image="{{{C_ImgBase}}}Buttons/File-icon.dds" />
+    <label pos="16 -6" halign="left" valign="center2" textfont="{{{MainFont}}}" textsize="3" textemboss="1" textcolor="FFF" text="Canyon Car" />
+    <label pos="16 -11" halign="left" valign="center2" size="60 4" style="StyleTextScriptEditor" textsize="1" textcolor="FFF" text="trackmania:canyoncar" />
+  </frame>
+
+  <framemodel id="FrameModel_Prop">
+    <quad pos="-3 0" size="44 0.25" valign="center" bgcolor="FFF" opacity="0.2" />
+
+    <label pos="0 -2.5" halign="left" valign="center2" textfont="{{{MainFont}}}" textsize="1" textprefix="$t" text="Name" />
+    <label pos="38 -2.5" halign="right" valign="center2" textfont="{{{MainFont}}}" textsize="1" text="Value" />
+  </framemodel>
+
+  <frameinstance modelid="FrameModel_Prop" pos="16 -16" />
+  <frameinstance modelid="FrameModel_Prop" pos="16 -21" />
+  <frameinstance modelid="FrameModel_Prop" pos="16 -26" />
+  <frameinstance modelid="FrameModel_Prop" pos="16 -31" />
+
+  <quad size="60 110" bgcolor="000" opacity="0.5" />
+</frame>
+
+<script><!--
+
+--></script>
+</manialink>
+  """;
+}

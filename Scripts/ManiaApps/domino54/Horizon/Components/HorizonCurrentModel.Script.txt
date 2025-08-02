@@ -1,0 +1,78 @@
+/**
+ * @name HorizonCurrentModel.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/Components/HorizonCurrentModel.Script.txt"
+
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+#Include "ManiaApps/domino54/Horizon/Components/HorizonDualFrame.Script.txt" as HorizonDualFrame
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text CreateCurrentModel(Text _Id, Vec2 _Size, Real _Margin) {
+  declare MainFont = Font::GetFontName("Main");
+  declare HalfMX = HC::C_MenuOptionMargin / 2;
+  declare HalfY = _Size.Y / -2;
+  declare AX = HC::C_MenuOptionArrowSize;
+  declare LabelWidth = _Size.X - HC::C_MenuOptionMargin - HC::C_MenuOptionMarginShort - _Margin;
+
+  declare Options = HorizonDualFrame::K_Options {
+    Width = _Size.X,
+    Height = _Size.Y,
+    RightWidth = _Margin,
+    Interactive = True
+  };
+
+  return HorizonDualFrame::CreateDualFrame(_Id, Options,
+    """
+      <quad id="Quad_Arrow" class="HF FG Colorize" halign="center" valign="center" pos="{{{HalfMX}}} {{{HalfY}}}" size="{{{AX}}} {{{AX}}}" image="{{{HC::C_ImgBase}}}Ingame/Arrow_v.dds" keepratio="fit" colorize="{{{HC::C_MenuOptionArrowColor}}}" />
+      <label id="Label_ModelName" class="HF FG" pos="{{{HC::C_MenuOptionMargin}}} {{{_Size.Y / -2}}}" halign="left" valign="center2" size="{{{LabelWidth}}} {{{_Size.Y}}}" textcolor="FFFFFF" textsize="3" textfont="{{{MainFont}}}" />
+    """,
+    """
+      <quad id="Quad_ModelImage" pos="{{{_Margin * 3/4}}} {{{_Size.Y / -2}}}" halign="center" valign="center" size="32 18" autoscale="0" />
+    """
+  );
+}
+
+Text CreateCurrentModel(Text _Id, Vec2 _Size) {
+  return CreateCurrentModel(_Id, _Size, HC::C_MenuOptionRightWidth);
+}
+
+Text CreateCurrentModel(Text _Id, Real _Width) {
+  return CreateCurrentModel(_Id, <_Width, HC::C_MenuOptionHeight>);
+}
+
+Text CreateCurrentModel(Text _Id) {
+  return CreateCurrentModel(_Id, HC::C_MenuOptionWidth);
+}
+
+Text InjectFunctions() {
+  return """// <script>
+
+Void HorizonCurrentModel_SetInfo(CMlFrame _Frame, Text _ModelName, Text _SkinName, Text _ImageUrl) {
+  declare Label_ModelName <=> (_Frame.GetFirstChild("Label_ModelName") as CMlLabel);
+  declare Quad_ModelImage <=> (_Frame.GetFirstChild("Quad_ModelImage") as CMlQuad);
+
+  declare ModelName = _ModelName;
+  declare SkinName = _SkinName;
+
+  if (ModelName == "") {
+    ModelName = _("|Modeler3D Layer Name|Unknown");
+  }
+
+  if (_SkinName == "") {
+    SkinName = _("|SkinName|Default");
+  }
+
+  Label_ModelName.SetText(TL::Compose("$<%1$> • $<%2$>", ModelName, SkinName));
+  Quad_ModelImage.ChangeImageUrl(_ImageUrl);
+}
+
+  """;
+}

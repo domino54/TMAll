@@ -1,0 +1,100 @@
+/**
+ * @name HorizonDualFrame.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/Components/HorizonDualFrame.Script.txt"
+
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+#Include "ManiaApps/domino54/Horizon/HorizonFocus.Script.txt" as HorizonFocus
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_FocusClass "DualFrame"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_Options {
+  Real Width;
+  Real Height;
+  Real RightWidth;
+  Boolean Interactive;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text CreateDualFrame(Text _Id, K_Options _Options, Text _ContentLeft, Text _ContentRight) {
+  declare X = HC::C_MenuOptionWidth;
+  declare Y = HC::C_MenuOptionHeight;
+  declare RightWidth = HC::C_MenuOptionRightWidth;
+
+  if (_Options.Width > 0) {
+    X = _Options.Width;
+  }
+
+  if (_Options.Height > 0) {
+    Y = _Options.Height;
+  }
+
+  if (_Options.RightWidth > 0) {
+    RightWidth = _Options.RightWidth;
+  }
+
+  declare LeftWidth = X - RightWidth;
+
+  return """
+<frame id="{{{_Id}}}" size="{{{X}}} {{{Y}}}" {{{HorizonFocus::SetClass(C_FocusClass)}}}>
+  <frame id="Frame_DualFrameAnim">
+    <frame size="{{{LeftWidth}}} {{{Y}}}">
+      {{{_ContentLeft}}}
+    </frame>
+
+    <frame pos="{{{LeftWidth}}} 0" size="{{{RightWidth}}} {{{Y}}}">
+      {{{_ContentRight}}}
+    </frame>
+
+    <quad pos="{{{LeftWidth}}} 0" size="{{{RightWidth}}} {{{Y}}}" style="Bgs1" substyle="BgDialogBlur" opacity="0.25" bluramount="0" />
+    <quad class="HF Visible" size="{{{X}}} {{{Y}}}" bgcolor="{{{HC::C_MenuOptionFocusBgColor}}}" opacity="{{{HC::C_MenuOptionCardOpacity}}}" hidden="1" />
+    <quad size="{{{LeftWidth}}} {{{Y}}}" style="Bgs1" substyle="BgDialogBlur" opacity="1" bluramount="0" />
+    <quad id="Quad_DualFrame" size="{{{X}}} {{{Y}}}" {{{HorizonFocus::SetClass(C_FocusClass)}}} scriptevents="1" hidden="{{{!_Options.Interactive}}}" />
+  </frame>
+</frame>
+  """;
+}
+
+Text CreateDualFrame(Text _Id, Real _Height, Text _ContentLeft, Text _ContentRight) {
+  return CreateDualFrame(_Id, K_Options { Height = _Height }, _ContentLeft, _ContentRight);
+}
+
+Text InjectFunctions() {
+  return """// <script>
+
+Void HorizonDualFrame_Show(CMlFrame _Frame) {
+  declare Frame_DualFrameAnim <=> (_Frame.GetFirstChild("Frame_DualFrameAnim") as CMlFrame);
+
+  AnimMgr.Flush(Frame_DualFrameAnim);
+
+  Frame_DualFrameAnim.RelativePosition_V3.X = -_Frame.Size.X;
+
+  AnimMgr.Add(Frame_DualFrameAnim, "<control pos='0 0' />", 400, CAnimManager::EAnimManagerEasing::QuintOut);
+}
+
+  """;
+}
+
+HorizonFocus::K_FocusConfig GetFocusConfig() {
+  return HorizonFocus::K_FocusConfig {
+    ClassName = C_FocusClass,
+    ParentSelector = "return Event.Control.Parent.Parent;",
+    FocusCallback = "HorizonFocus_SetFocus((Control as CMlFrame), True);",
+    BlurCallback = "HorizonFocus_SetFocus((Control as CMlFrame), False);"
+  };
+}

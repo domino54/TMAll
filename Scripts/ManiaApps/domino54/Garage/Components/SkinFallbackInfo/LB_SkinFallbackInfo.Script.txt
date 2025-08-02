@@ -1,15 +1,16 @@
 /**
  * @name LB_SkinFallbackInfo.Script.txt
  * @author domino54
- * @version 2025-05-21
+ * @version 2025-08-01
  */
 
-#Const Version      "2025-05-21"
+#Const Version      "2025-08-01"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinFallbackInfo/LB_SkinFallbackInfo.Script.txt"
 
 #Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
-#Include "ManiaApps/domino54/Common/HorizonElements/HorizonButton.Script.txt" as HorizonButton
+#Include "ManiaApps/domino54/Horizon/Components/HorizonButton.Script.txt" as HorizonButton
+#Include "ManiaApps/domino54/Horizon/Components/HorizonLine.Script.txt" as HorizonLine
 
 #Const C_LabelTitle         _("Fallback Skin")
 #Const C_LabelDescription   _("This skin will only be used in special circumstances, where the profile skin cannot normally work.\nYou can also opt in to use this skin everywhere instead, which will override your profile skin.")
@@ -55,8 +56,7 @@ Text Build() {
   </frame>
 
   <frame id="Frame_BottomDecorLine" pos="{{{HideOffset}}}">
-    <quad pos="0 0" size="{{{C_FrameWidth}}} 0.25" bgcolor="FFF" />
-    <quad pos="{{{C_FrameWidth}}} 0" halign="right" size="15 0.75" bgcolor="FFF" />
+    {{{HorizonLine::CreateLine("top", C_FrameWidth)}}}
   </frame>
 </frame>
 

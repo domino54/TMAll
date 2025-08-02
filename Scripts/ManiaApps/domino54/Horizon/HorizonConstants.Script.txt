@@ -1,0 +1,100 @@
+/**
+ * @name HorizonConstants.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ *
+ * Central configuration for Horizon components and views.
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt"
+
+#Include "MathLib" as ML
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+// Image base path
+
+#Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/"
+
+// Button
+
+#Const C_ButtonFilledCardColor        "FFFFFF"
+#Const C_ButtonFilledHoverColor       "FFFFFF44"
+#Const C_ButtonFilledTextColor        "444444"
+#Const C_ButtonFilledHoverMargin      1.0
+#Const C_ButtonOutlineColor           "FFFFFF"
+#Const C_ButtonOutlineWidth           0.375
+#Const C_ButtonToggleHeight           6.0
+#Const C_ButtonAnimDuration           250
+
+// Current Map
+
+#Const C_CurrentMapNameTextSizeMax    6.0
+
+// Header
+
+#Const C_HeaderFixedHeight            16.0
+#Const C_HeaderLineWidth              1.0
+#Const C_HeaderLabelMargin            4.0
+#Const C_HeaderTextColor              "FFFFFF"
+#Const C_HeaderTextSizeTitle          12.0
+#Const C_HeaderTextSizeSubtitle       6.0
+#Const C_HeaderAnimDuration           400
+
+// Line
+
+#Const C_LineDefaultColor             "FFFFFF"
+#Const C_LineDefaultThickness         0.25
+#Const C_LineDefaultMarginHeight      0.75
+#Const C_LineDefaultMarginCoef        0.2
+#Const C_LineDefaultOpacity           1.0
+#Const C_LineSubtleThickness          0.2
+#Const C_LineSubtleMarginHeight       0.7
+#Const C_LineSubtleMarginCoef         0.1
+#Const C_LineSubtleOpacity            0.5
+
+// Menu
+
+#Const C_MenuVerticalOffset           70.0
+
+// Menu Option
+
+#Const C_MenuOptionWidth              108.0
+#Const C_MenuOptionHeight             11.0
+#Const C_MenuOptionHeightProminent    40.0
+#Const C_MenuOptionMargin             18.0
+#Const C_MenuOptionMarginShort        12.0
+#Const C_MenuOptionRightWidth         24.0
+#Const C_MenuOptionSpacing            0.5
+#Const C_MenuOptionAnimDuration       400
+#Const C_MenuOptionDelayPerOption     50
+#Const C_MenuOptionArrowSize          3.0
+#Const C_MenuOptionArrowColor         "FF2222"
+#Const C_MenuOptionCardBgColor        "000000"
+#Const C_MenuOptionCardOpacity        0.6
+#Const C_MenuOptionTextColor          "FFFFFF"
+#Const C_MenuOptionFocusFgColor       "000000"
+#Const C_MenuOptionFocusBgColor       "FFFFFF"
+
+// Score Rows
+
+#Const C_ScoreRowsMinLines            2
+#Const C_ScoreRowsVerticalOffset      -28.0
+#Const C_ScoreRowsBorderThickness     0.3
+#Const C_ScoreRowsBorderOffset        1.0
+#Const C_ScoreRowsLineHeight          5.0
+#Const C_ScoreRowsTextColor           "FFFFFF"
+#Const C_ScoreRowsTextColorSpecial    "FFDD00"
+#Const C_ScoreRowsTextSizeLabel       2.5
+#Const C_ScoreRowsTextSizeValue       3.0
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Real GetButtonAutoTextSize(Real _ButtonHeight) {
+  return ML::NearestInteger(_ButtonHeight * 0.75 - 1) / 2.0;
+}

@@ -1,20 +1,22 @@
 /**
- * @name GarageIngameMetadata.Script.txt
+ * @name PlayerModelsIngame.Script.txt
  * @author domino54
  * @version 2025-05-21
  */
 
 #Const Version    "2025-05-21"
-#Const ScriptName "ManiaApps/domino54/Ingame/GarageIngameMetadata/GarageIngameMetadata.Script.txt"
+#Const ScriptName "ManiaApps/domino54/Ingame/PlayerModelsIngame/PlayerModelsIngame.Script.txt"
 
-#Include "ManiaApps/domino54/Ingame/GarageIngameMetadata/LB_GarageIngameMetadata.Script.txt" as LB
+#Include "ManiaApps/domino54/Ingame/PlayerModelsIngame/LB_PlayerModelsIngame.Script.txt" as LB
 #Include "ManiaApps/domino54/Layers.Script.txt" as Layers
 
 // ---------------------------------- //
 // Constants
 // ---------------------------------- //
 
-#Const C_ManialinkLayerId "L_GarageIngameMetadata"
+#Const C_ManialinkLayerId "L_PlayerModelsIngame"
+
+#Const LB::C_CustomEventType_PlayerUpdate as C_CustomEventType_PlayerUpdate
 
 // ---------------------------------- //
 // Public functions
@@ -27,6 +29,6 @@ Void Unload() {
 Void Load() {
   Unload();
 
-  Layers::Create(C_ManialinkLayerId, LB::Build());
+  Layers::Create(C_ManialinkLayerId, True, LB::Build());
   Layers::SetVisibility(C_ManialinkLayerId, False);
 }
