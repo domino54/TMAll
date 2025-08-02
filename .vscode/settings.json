@@ -1,9 +1,17 @@
 {
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
   "files.watcherExclude": {
     "**/.git/objects/**": true,
     "**/.git/subtree-cache/**": true,
     "**/node_modules/**": true
   },
+  "prettier.enable": true,
+  "prettier.requireConfig": true,
+  "remove-empty-lines.allowedNumberOfEmptyLines": 1,
+  "remove-empty-lines.runOnSave": true,
   "search.exclude": {
     "**/node_modules": true,
     "**/*.Gbx": true,

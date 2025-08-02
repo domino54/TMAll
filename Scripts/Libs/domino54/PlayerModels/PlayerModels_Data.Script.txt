@@ -1,10 +1,10 @@
 /**
  * @name PlayerModels_Data.Script.txt
  * @author domino54
- * @version 2025-08-01
+ * @version 2025-08-02
  */
 
-#Const Version      "2025-08-01"
+#Const Version      "2025-08-02"
 #Const ScriptName   "Libs/domino54/PlayerModels/PlayerModels_Data.Script.txt"
 
 #Include "MathLib" as ML
@@ -224,6 +224,10 @@ Text[Text] Private_AppendAssets(Text[Text] _Target, Text[Text] _Source, Text _Ba
  * Register a new model, or replace existing fields if a value is given.
  */
 Void Private_AppendModel(K_Model _Model, Text _BaseUrl) {
+  if (_Model.Id == "") {
+    return;
+  }
+
   if (G_LibPlayerModels_ModelById.existskey(_Model.Id)) {
     if (_Model.Name != "") {
       G_LibPlayerModels_ModelById[_Model.Id].Name = _Model.Name;
@@ -239,6 +243,10 @@ Void Private_AppendModel(K_Model _Model, Text _BaseUrl) {
 
     if (_Model.LoadAs != "") {
       G_LibPlayerModels_ModelById[_Model.Id].LoadAs = _Model.LoadAs;
+    }
+
+    if (_Model.SkinDirectories.count > 0) {
+      G_LibPlayerModels_ModelById[_Model.Id].SkinDirectories = _Model.SkinDirectories;
     }
 
     if (_Model.Author != "") {
@@ -258,6 +266,10 @@ Void Private_AppendModel(K_Model _Model, Text _BaseUrl) {
  * Register a new skin, or replace existing fields if a value is given.
  */
 Void Private_AppendSkin(K_Skin _Skin, Text _BaseUrl) {
+  if (_Skin.Id == "") {
+    return;
+  }
+
   if (G_LibPlayerModels_SkinById.existskey(_Skin.Id)) {
     if (_Skin.Name != "") {
       G_LibPlayerModels_SkinById[_Skin.Id].Name = _Skin.Name;
@@ -282,6 +294,10 @@ Void Private_AppendSkin(K_Skin _Skin, Text _BaseUrl) {
     if (_Skin.SortIndex != 0) {
       G_LibPlayerModels_SkinById[_Skin.Id].SortIndex = _Skin.SortIndex;
     }
+
+    if (_Skin.Categories.count > 0) {
+      G_LibPlayerModels_SkinById[_Skin.Id].Categories = _Skin.Categories;
+    }
   }
   else {
     G_LibPlayerModels_SkinById[_Skin.Id] = _Skin;
@@ -296,6 +312,10 @@ Void Private_AppendSkin(K_Skin _Skin, Text _BaseUrl) {
  * Register a new skin category, or replace existing fields if a value is given.
  */
 Void Private_AppendSkinCategory(K_SkinCategory _SkinCategory, Text _BaseUrl) {
+  if (_SkinCategory.Id == "") {
+    return;
+  }
+
   if (!G_LibPlayerModels_SkinCategoryById.existskey(_SkinCategory.Id)) {
     G_LibPlayerModels_SkinCategoryById[_SkinCategory.Id] = _SkinCategory;
   }
@@ -312,6 +332,10 @@ Void Private_AppendSkinCategory(K_SkinCategory _SkinCategory, Text _BaseUrl) {
  * Register a new gameplay overlay or replace existing fields if a value is given.
  */
 Void Private_AppendOverlay(K_Overlay _Overlay, Text _BaseUrl) {
+  if (_Overlay.Id == "") {
+    return;
+  }
+
   if (G_LibPlayerModels_OverlayById.existskey(_Overlay.Id)) {
     if (_Overlay.Name != "") {
       G_LibPlayerModels_OverlayById[_Overlay.Id].Name = _Overlay.Name;
@@ -431,6 +455,57 @@ Void Private_CreateOverlayAliases(K_Overlay[Text] _OverlayById) {
 }
 
 /**
+ * Validate fields in the loaded data.
+ */
+Void Private_ValidateLoadedData() {
+  foreach (Model in G_LibPlayerModels_ModelById) {
+    if (Model.Archetype == "") {
+      Log::Error("""Model "{{{Model.Id}}}" does not have an Archetype set""");
+    }
+
+    if (Model.ItemPath == "") {
+      Log::Error("""Model "{{{Model.Id}}}" does not have an ItemPath set""");
+    }
+
+    if (Model.LoadAs == "") {
+      Log::Error("""Model "{{{Model.Id}}}" does not have LoadAs set""");
+    }
+  }
+
+  foreach (Skin in G_LibPlayerModels_SkinById) {
+    if (Skin.AppliesTo == "") {
+      Log::Error("""Skin "{{{Skin.Id}}}" does not specify the parent model in AppliesTo field""");
+    }
+    else if (!G_LibPlayerModels_ModelById.existskey(Skin.AppliesTo) && Skin.AppliesTo != C_CarCommonWildcard) {
+      Log::Error("""Skin "{{{Skin.Id}}}" applies to model "{{{Skin.AppliesTo}}}", which is not defined""");
+    }
+
+    if (Skin.SkinPath == "") {
+      Log::Error("""Skin "{{{Skin.Id}}}" does not have a SkinPath set""");
+    }
+
+    foreach (SkinCategoryId in Skin.Categories) {
+      if (!G_LibPlayerModels_SkinCategoryById.existskey(SkinCategoryId)) {
+        Log::Error("""Skin "{{{Skin.Id}}}" is selectable within category "{{{SkinCategoryId}}}", which is not defined""");
+      }
+    }
+  }
+
+  foreach (Overlay in G_LibPlayerModels_OverlayById) {
+    if (Overlay.Extends == "") {
+      Log::Error("""Overlay "{{{Overlay.Id}}}" does not specify the parent model in Extends field""");
+    }
+    else if (!G_LibPlayerModels_ModelById.existskey(Overlay.Extends)) {
+      Log::Error("""Overlay "{{{Overlay.Id}}}" extends model "{{{Overlay.Extends}}}", which is not defined""");
+    }
+
+    if (Overlay.ItemPath == "") {
+      Log::Error("""Overlay "{{{Overlay.Id}}}" does not have an ItemPath set""");
+    }
+  }
+}
+
+/**
  * Once every source file has been loaded, load the data from all of them at once.
  */
 Void Private_ProcessSourceFiles(K_SourceFile[] _SourceFiles, Text[] _UserDirectorySkins) {
@@ -442,21 +517,18 @@ Void Private_ProcessSourceFiles(K_SourceFile[] _SourceFiles, Text[] _UserDirecto
   // We want to be absolutely sure that all base models are loaded before everything else.
   foreach (SourceFile in _SourceFiles) {
     foreach (Model in SourceFile.Models) {
-      if (Model.Id == "") {
-        continue;
-      }
-
-      foreach (SkinDirectory in Model.SkinDirectories) {
-        G_LibPlayerModels_ModelIdBySkinDirectory[SkinDirectory^"\\"] = Model.Id;
-      }
-
       Private_AppendModel(Model, SourceFile.BaseUrl);
+    }
 
-      if (Private_IsCharacter(Model.Archetype)) {
-        NbCharacters += 1;
-      } else {
-        NbVehicles += 1;
-      }
+    foreach (SkinCategory in SourceFile.SkinCategories) {
+      Private_AppendSkinCategory(SkinCategory, SourceFile.BaseUrl);
+    }
+  }
+
+  // Iterate models after reading them to
+  foreach (ModelId => Model in G_LibPlayerModels_ModelById) {
+    foreach (SkinDirectory in Model.SkinDirectories) {
+      G_LibPlayerModels_ModelIdBySkinDirectory[SkinDirectory^"\\"] = ModelId;
     }
   }
 
@@ -466,22 +538,10 @@ Void Private_ProcessSourceFiles(K_SourceFile[] _SourceFiles, Text[] _UserDirecto
   // Append skins and overlays.
   foreach (SourceFile in _SourceFiles) {
     foreach (Skin in SourceFile.Skins) {
-      if (Skin.Id == "" || (!G_LibPlayerModels_ModelById.existskey(Skin.AppliesTo) && Skin.Id != C_CarCommonWildcard)) {
-        continue;
-      }
-
       Private_AppendSkin(Skin, SourceFile.BaseUrl);
     }
 
-    foreach (SkinCategory in SourceFile.SkinCategories) {
-      Private_AppendSkinCategory(SkinCategory, SourceFile.BaseUrl);
-    }
-
     foreach (Overlay in SourceFile.Overlays) {
-      if (Overlay.Id == "" || !G_LibPlayerModels_ModelById.existskey(Overlay.Extends)) {
-        continue;
-      }
-
       Private_AppendOverlay(Overlay, SourceFile.BaseUrl);
     }
   }
@@ -490,12 +550,11 @@ Void Private_ProcessSourceFiles(K_SourceFile[] _SourceFiles, Text[] _UserDirecto
   foreach (File in _UserDirectorySkins) {
     declare Skin = Private_CreateSkinFromPath(File);
 
-    if (Skin.Id == "") {
-      continue;
-    }
-
     Private_AppendSkin(Skin, "");
   }
+
+  // Validate the data.
+  Private_ValidateLoadedData();
 
   // Create aliases.
   Private_CreateModelAliases(G_LibPlayerModels_ModelById);
@@ -546,6 +605,11 @@ Text Private_FetchFile(Text _Url) {
 
   // In 99% cases this will not wait any script frame, but will load synchronously instead.
   wait(Request.IsCompleted);
+
+  // Assert if failed to read.
+  if (Request.StatusCode != 200) {
+    Log::Error("""Failed to fetch {{{_Url}}} (status {{{Request.StatusCode}}})""");
+  }
 
   declare Result = Request.Result;
 
