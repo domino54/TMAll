@@ -1,0 +1,7 @@
+{
+  "$schema": "../PlayerModels.schema.json",
+  "Version": 1,
+  "Id": "tmsunrise:default",
+  "Name": "TrackMania Sunrise default skins",
+  "Skins": []
+}
