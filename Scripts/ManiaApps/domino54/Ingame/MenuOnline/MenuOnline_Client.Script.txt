@@ -1,13 +1,13 @@
 /**
  * @name MenuOnline_Client.Script.txt
  * @author domino54
- * @version 2025-01-14
+ * @version 2025-08-01
  */
 
-#Const Version    "2025-01-14"
+#Const Version    "2025-08-01"
 #Const ScriptName "ManiaApps/domino54/Ingame/MenuOnline/MenuOnline_Client.Script.txt"
 
-#Include "ManiaApps/domino54/Ingame/MenuOnline/LB_MenuOnline.Script.txt" as LB_MenuOnline
+#Include "ManiaApps/domino54/Ingame/MenuOnline/LB_MenuOnline.Script.txt" as LB
 #Include "ManiaApps/domino54/Layers.Script.txt" as Layers
 
 // ---------------------------------- //
@@ -27,6 +27,33 @@ Void Unload() {
 Void Load(Text _ModeName) {
   Unload();
 
-  Layers::Create(C_ManialinkLayerId, LB_MenuOnline::Build(_ModeName));
+  Layers::Create(C_ManialinkLayerId, LB::Build(_ModeName));
   Layers::SetType(C_ManialinkLayerId, CUILayer::EUILayerType::InGameMenu);
+}
+
+Void SetModelName(Text _ModelName) {
+  declare Layer = Layers::Get(C_ManialinkLayerId);
+  declare Text CurrentModelName for Layer.LocalPage;
+
+  CurrentModelName = _ModelName;
+
+  LayerCustomEvent(Layer, LB::C_CustomEventType_ModelUpdate, []);
+}
+
+Void SetSkinName(Text _SkinName) {
+  declare Layer = Layers::Get(C_ManialinkLayerId);
+  declare Text CurrentSkinName for Layer.LocalPage;
+
+  CurrentSkinName = _SkinName;
+
+  LayerCustomEvent(Layer, LB::C_CustomEventType_ModelUpdate, []);
+}
+
+Void SetModelImageUrl(Text _ModelImageUrl) {
+  declare Layer = Layers::Get(C_ManialinkLayerId);
+  declare Text CurrentModelImageUrl for Layer.LocalPage;
+
+  CurrentModelImageUrl = _ModelImageUrl;
+
+  LayerCustomEvent(Layer, LB::C_CustomEventType_ModelUpdate, []);
 }

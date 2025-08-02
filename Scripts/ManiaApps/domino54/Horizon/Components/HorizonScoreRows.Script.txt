@@ -1,0 +1,199 @@
+/**
+ * @name HorizonScoreRows.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ *
+ * Small vertically centered table for displaying player's score,
+ * for example Previous Time and Best Time in local play.
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/Components/HorizonScoreRows.Script.txt"
+
+#Include "MathLib" as ML
+#Include "TextLib" as TL
+#Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" as Colors
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+#Struct K_Options {
+  Vec2 Position;
+  Real Width;
+  Real LineHeight;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text CreateScoreRows(Text _Id, Integer _NbMaxLines, K_Options _Options) {
+  declare MainFont = Font::GetFontName("Main");
+  declare ChronoFont = Font::GetFontName("Chrono");
+  declare TotalWidth = _Options.Width;
+  declare LineHeight = _Options.LineHeight;
+
+  if (TotalWidth <= 0) {
+    TotalWidth = HC::C_MenuOptionWidth - HC::C_MenuOptionMargin - HC::C_MenuOptionMarginShort - HC::C_MenuOptionRightWidth;
+  }
+
+  if (LineHeight <= 0) {
+    LineHeight = HC::C_ScoreRowsLineHeight;
+  }
+
+  declare C_NameRatio = 0.6; // TODO const
+
+  declare Height = ML::Max(HC::C_ScoreRowsMinLines, _NbMaxLines) * LineHeight;
+  declare NameWidth = TotalWidth * C_NameRatio;
+  declare ScoreWidth = TotalWidth - NameWidth;
+  declare MedalHeight = LineHeight * 0.75;
+
+  declare Text LineInstances;
+  declare LinesOffset = 0.0;
+
+  for (I, 0, _NbMaxLines - 1) {
+    LineInstances ^= """<frameinstance modelid="FrameModel_ScoreRow" pos="0 {{{I * -LineHeight}}}" />""";
+  }
+
+  if (_NbMaxLines > 1) {
+    LinesOffset = (_NbMaxLines - 1) * (LineHeight / 2);
+  }
+
+  return """
+<frame id="{{{_Id}}}" pos="{{{_Options.Position.X}}} {{{_Options.Position.Y}}}">
+  <framemodel id="FrameModel_ScoreRow">
+    <quad id="Quad_PlayerMedal" pos="-1 {{{MedalHeight * 0.05}}}" halign="right" valign="center" size="{{{MedalHeight}}} {{{MedalHeight}}}" image="{{{HC::C_ImgBase}}}Ingame/Medal.dds" keepratio="fit" />
+    <label id="Label_PlayerName" class="HF FG" pos="0 0" halign="left" valign="center2" size="{{{NameWidth}}} {{{LineHeight}}}" textfont="{{{MainFont}}}" textsize="{{{HC::C_ScoreRowsTextSizeLabel}}}" textcolor="{{{HC::C_ScoreRowsTextColor}}}" text="PlayerName" />
+    <label id="Label_PlayerScore" class="HF FG" pos="{{{TotalWidth}}} -0.3" halign="right" valign="center2" size="{{{ScoreWidth}}} {{{LineHeight}}}" textfont="{{{ChronoFont}}}" textsize="{{{HC::C_ScoreRowsTextSizeValue}}}" textcolor="{{{HC::C_ScoreRowsTextColor}}}" text="0:00.000" />
+  </framemodel>
+
+  <quad id="Quad_TopLine" class="HF FG" pos="0 {{{Height / 2 + 1}}}" valign="bottom" size="{{{TotalWidth}}} {{{HC::C_ScoreRowsBorderThickness}}}" bgcolor="{{{HC::C_ScoreRowsTextColor}}}" />
+  <frame id="Frame_InstancesOffset" pos="0 {{{LinesOffset}}}">{{{LineInstances}}}</frame>
+  <quad id="Quad_BottomLine" class="HF FG" pos="0 {{{-(Height / 2 - 1)}}}" valign="top" size="{{{TotalWidth}}} {{{HC::C_ScoreRowsBorderThickness}}}" bgcolor="{{{HC::C_ScoreRowsTextColor}}}" />
+</frame>
+  """;
+}
+
+Text CreateScoreRows(Text _Id, Integer _NbMaxLines) {
+  return CreateScoreRows(_Id, _NbMaxLines, K_Options {
+    Position = <HC::C_MenuOptionMargin, HC::C_ScoreRowsVerticalOffset>
+  });
+}
+
+Text InjectFunctions() {
+  return """// <script>
+
+Void HorizonScoreRows_SetNbLines(CMlFrame _Frame, Integer _NbLines) {
+  declare Frame_InstancesOffset <=> (_Frame.GetFirstChild("Frame_InstancesOffset") as CMlFrame);
+  declare Quad_TopLine <=> (_Frame.GetFirstChild("Quad_TopLine") as CMlLabel);
+  declare Quad_BottomLine <=> (_Frame.GetFirstChild("Quad_BottomLine") as CMlLabel);
+
+  foreach (I => Control in Frame_InstancesOffset.Controls) {
+    Control.Visible = I < _NbLines;
+  }
+
+  declare LineHeight = (Frame_InstancesOffset.Controls[0] as CMlFrame).GetFirstChild("Label_PlayerName").Size.Y;
+  declare Height = ML::Max({{{HC::C_ScoreRowsMinLines}}}, _NbLines) * LineHeight;
+
+  Quad_TopLine.RelativePosition_V3.Y = Height / 2 + 1;
+  Quad_BottomLine.RelativePosition_V3.Y = Height / -2 - 1;
+
+  if (_NbLines <= 1) {
+    Frame_InstancesOffset.RelativePosition_V3.Y = 0.0;
+  } else {
+    Frame_InstancesOffset.RelativePosition_V3.Y = (_NbLines - 1) * (LineHeight / 2);
+  }
+}
+
+Vec3 HorizonScoreRows_GetMedalColor(Integer _Medal) {
+  switch (_Medal) {
+    case 1: return {{{dump(Colors::GetMedalColor(3))}}};
+    case 2: return {{{dump(Colors::GetMedalColor(2))}}};
+    case 3: return {{{dump(Colors::GetMedalColor(1))}}};
+    case 4: return {{{dump(Colors::GetMedalColor(0))}}};
+  }
+
+  return <0.0, 0.0, 0.0>;
+}
+
+Void HorizonScoreRows_SetScore(CMlFrame _Frame, Text _Name, Text _Score, Vec3 _MedalColor, Boolean _IsHighlighted) {
+  declare Quad_PlayerMedal <=> (_Frame.GetFirstChild("Quad_PlayerMedal") as CMlQuad);
+  declare Label_PlayerName <=> (_Frame.GetFirstChild("Label_PlayerName") as CMlLabel);
+  declare Label_PlayerScore <=> (_Frame.GetFirstChild("Label_PlayerScore") as CMlLabel);
+
+  Label_PlayerName.SetText(_Name);
+  Label_PlayerScore.SetText(_Score);
+  Quad_PlayerMedal.Visible = _MedalColor.X > 0 || _MedalColor.Y > 0 || _MedalColor.Z > 0;
+  Quad_PlayerMedal.Colorize = _MedalColor;
+
+  if (_IsHighlighted) {
+    Label_PlayerScore.TextColor = {{{dump(TL::ToColor(HC::C_ScoreRowsTextColorSpecial))}}};
+  } else {
+    Label_PlayerScore.TextColor = {{{dump(TL::ToColor(HC::C_ScoreRowsTextColor))}}};
+  }
+}
+
+Void HorizonScoreRows_SetScore(CMlFrame _Frame, Text _Name, Text _Score, Integer _Medal, Boolean _IsHighlighted) {
+  HorizonScoreRows_SetScore(_Frame, _Name, _Score, HorizonScoreRows_GetMedalColor(_Medal), _IsHighlighted);
+}
+
+Void HorizonScoreRows_SetScore(CMlFrame _Frame, Text _Name, Text _Score) {
+  HorizonScoreRows_SetScore(_Frame, _Name, _Score, -1, False);
+}
+
+Void HorizonScoreRows_SetScore(CMlFrame _Frame, Integer _Index, Text _Name, Text _Score, Vec3 _MedalColor, Boolean _IsHighlighted) {
+  declare Frame_InstancesOffset <=> (_Frame.GetFirstChild("Frame_InstancesOffset") as CMlFrame);
+  declare Frame <=> (Frame_InstancesOffset.Controls[_Index] as CMlFrame);
+
+  HorizonScoreRows_SetScore(Frame, _Name, _Score, _MedalColor, _IsHighlighted);
+}
+
+Void HorizonScoreRows_SetScore(CMlFrame _Frame, Integer _Index, Text _Name, Text _Score, Integer _Medal, Boolean _IsHighlighted) {
+  HorizonScoreRows_SetScore(_Frame, _Index, _Name, _Score, HorizonScoreRows_GetMedalColor(_Medal), _IsHighlighted);
+}
+
+Void HorizonScoreRows_SetScore(CMlFrame _Frame, Integer _Index, Text _Name, Text _Score) {
+  HorizonScoreRows_SetScore(_Frame, _Index, _Name, _Score, -1, False);
+}
+
+Void HorizonScoreRows_SetScores(CMlFrame _Frame, Text[] _Names, Text[] _Scores, Vec3[] _MedalColors, Boolean[] _Highlighted) {
+  HorizonScoreRows_SetNbLines(_Frame, _Names.count);
+
+  foreach (I => PlayerName in _Names) {
+    declare Text PlayerScore;
+    declare Vec3 MedalColor;
+    declare Boolean IsHighlighted;
+
+    if (_Scores.existskey(I)) {
+      PlayerScore = _Scores[I];
+    }
+    if (_MedalColors.existskey(I)) {
+      MedalColor = _MedalColors[I];
+    }
+    if (_Highlighted.existskey(I)) {
+      IsHighlighted = _Highlighted[I];
+    }
+
+    HorizonScoreRows_SetScore(_Frame, I, PlayerName, PlayerScore, MedalColor, IsHighlighted);
+  }
+}
+
+Void HorizonScoreRows_SetScores(CMlFrame _Frame, Text[] _Names, Text[] _Scores, Integer[] _Medals, Boolean[] _Highlighted) {
+  declare Vec3[] MedalColors;
+
+  foreach (Medal in _Medals) {
+    MedalColors.add(HorizonScoreRows_GetMedalColor(Medal));
+  }
+
+  HorizonScoreRows_SetScores(_Frame, _Names, _Scores, MedalColors, _Highlighted);
+}
+
+Void HorizonScoreRows_SetScores(CMlFrame _Frame, Text[] _Names, Text[] _Scores) {
+  HorizonScoreRows_SetScores(_Frame, _Names, _Scores, [], []);
+}
+
+  """;
+}

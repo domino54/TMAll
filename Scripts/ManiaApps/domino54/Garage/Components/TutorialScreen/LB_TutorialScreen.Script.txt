@@ -1,17 +1,18 @@
 /**
  * @name LB_TutorialScreen.Script.txt
  * @author domino54
- * @version 2025-05-21
+ * @version 2025-08-01
  */
 
-#Const Version      "2025-05-21"
+#Const Version      "2025-08-01"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/TutorialScreen/LB_TutorialScreen.Script.txt"
 
 #Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
 #Include "ManiaApps/domino54/Common/ButtonSounds.Script.txt" as ButtonSounds
-#Include "ManiaApps/domino54/Common/HorizonElements/HorizonButton.Script.txt" as HorizonButton
-#Include "ManiaApps/domino54/Common/HorizonElements/HorizonHeader.Script.txt" as HorizonHeader
+#Include "ManiaApps/domino54/Horizon/Components/HorizonButton.Script.txt" as HorizonButton
+#Include "ManiaApps/domino54/Horizon/Components/HorizonHeader.Script.txt" as HorizonHeader
+#Include "ManiaApps/domino54/Horizon/Components/HorizonLine.Script.txt" as HorizonLine
 
 #Const C_ImgBase "file://Media/MEDIABROWSER_HiddenResources/Common/Images/Menus/Buttons/"
 
@@ -55,8 +56,7 @@ Text Build() {
 
     <frame id="Frame_WindowHorizontalSlide" pos="0 0">
       <frame id="Frame_WindowTopLine" pos="0 0">
-        <quad pos="0 0" valign="bottom" size="{{{C_WindowSize.X}}} 0.25" bgcolor="FFF" />
-        <quad pos="{{{C_WindowSize.X}}} 0" halign="right" valign="bottom" size="{{{C_PageSwitchMargin}}} 0.75" bgcolor="FFF" />
+        {{{HorizonLine::CreateLine("bottom", C_WindowSize.X, C_PageSwitchMargin)}}}
       </frame>
 
       <frame id="Frame_WindowVerticalClip" pos="0 0" size="{{{C_WindowSize.X}}} {{{C_WindowSize.Y}}}">
@@ -90,8 +90,7 @@ Text Build() {
       </frame>
 
       <frame id="Frame_WindowBottomLine" pos="0 {{{-C_WindowSize.Y}}}">
-        <quad valign="top" size="{{{C_WindowSize.X}}} 0.25" bgcolor="FFF" />
-        <quad pos="{{{C_WindowSize.X}}} 0" halign="right" valign="top" size="{{{C_PageSwitchMargin}}} 0.75" bgcolor="FFF" />
+        {{{HorizonLine::CreateLine("top", C_WindowSize.X, C_PageSwitchMargin)}}}
       </frame>
 
       <frame pos="{{{C_WindowSize.X / 2 + C_ButtonSize.X / -2}}} {{{-C_WindowSize.Y - 5}}}">

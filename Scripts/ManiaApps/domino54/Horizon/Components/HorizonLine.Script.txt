@@ -1,0 +1,63 @@
+/**
+ * @name HorizonLine.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/Components/HorizonLine.Script.txt"
+
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+
+// ---------------------------------- //
+// Structs functions
+// ---------------------------------- //
+
+/**
+ * Options for creating a line.
+ */
+#Struct K_Options {
+  Text VAlign;
+  Real Length;
+  Real Thickness;
+  Vec2 Margin;
+  Text Color;
+  Real Opacity;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text CreateLine(K_Options _O) {
+  return """
+    <quad size="{{{_O.Length - _O.Margin.X}}} {{{_O.Thickness}}}" halign="left" valign="{{{_O.VAlign}}}" bgcolor="{{{_O.Color}}}" opacity="{{{_O.Opacity}}}" />
+    <quad pos="{{{_O.Length}}} 0" size="{{{_O.Margin.X}}} {{{_O.Margin.Y}}}" halign="right" valign="{{{_O.VAlign}}}" bgcolor="{{{_O.Color}}}" opacity="{{{_O.Opacity}}}" />
+  """;
+}
+
+Text CreateLine(Text _VAlign, Real _Length, Real _MarginX) {
+  return CreateLine(K_Options {
+    VAlign = _VAlign,
+    Length = _Length,
+    Thickness = HC::C_LineDefaultThickness,
+    Margin = <_MarginX, HC::C_LineDefaultMarginHeight>,
+    Color = HC::C_LineDefaultColor,
+    Opacity = HC::C_LineDefaultOpacity
+  });
+}
+
+Text CreateLine(Text _VAlign, Real _Length) {
+  return CreateLine(_VAlign, _Length, _Length * HC::C_LineDefaultMarginCoef);
+}
+
+Text CreateSubtleLine(Text _VAlign, Real _Length) {
+  return CreateLine(K_Options {
+    VAlign = _VAlign,
+    Length = _Length,
+    Thickness = HC::C_LineSubtleThickness,
+    Margin = <_Length * HC::C_LineSubtleMarginCoef, HC::C_LineSubtleMarginHeight>,
+    Color = HC::C_LineDefaultColor,
+    Opacity = HC::C_LineSubtleOpacity
+  });
+}

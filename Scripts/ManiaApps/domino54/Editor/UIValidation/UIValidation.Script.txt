@@ -1,0 +1,101 @@
+/**
+ * @name UIValidation.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+
+#Const Version    "2025-08-01"
+#Const ScriptName "ManiaApps/domino54/Editor/UIValidation/UIValidation.Script.txt"
+
+#Include "Libs/Nadeo/Common/Ingame/IngameLayers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Editor/UIValidation/LB_UIValidation.Script.txt" as LB
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_UIValidation"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+// ---------------------------------- //
+/** Set the times to display in the UI
+ *
+ * @param _BestTime The best validation time in ms
+ * @param _YourTime The last validation time in ms
+ * @param _AuthorTime The map author time in ms
+ */
+Void SetTime(Integer _BestTime, Integer _YourTime, Integer _AuthorTime) {
+  // TODO: More arbitrary configuration that accepts text scores (Platform, Stunts, etc.)
+
+  declare netwrite Integer Net_LibUIValidation_BestTime for Mode.Teams[0];
+  declare netwrite Integer Net_LibUIValidation_YourTime for Mode.Teams[0];
+  declare netwrite Integer Net_LibUIValidation_AuthorTime for Mode.Teams[0];
+
+  Net_LibUIValidation_BestTime = _BestTime;
+  Net_LibUIValidation_YourTime = _YourTime;
+  Net_LibUIValidation_AuthorTime = _AuthorTime;
+}
+
+Void SetVisibility(Boolean _Visible) {
+  Layers::SetVisibility(C_ManialinkLayerId, _Visible);
+}
+
+Void Show() {
+  SetVisibility(True);
+}
+
+Void Hide() {
+  SetVisibility(False);
+}
+
+// ---------------------------------- //
+/** Check the last time the answer was updated
+*
+* @return       The last time the answer was updated
+*/
+Integer GetAnswerUpdate() {
+  declare netread Net_LibUIValidation_AnswerUpdate for Mode.Teams[0] = -1;
+  return Net_LibUIValidation_AnswerUpdate;
+}
+
+// ---------------------------------- //
+/** Check if the player requests ending the validation
+ *
+ * @return       Stop validation
+ */
+Boolean IsAnswerStopValidation() {
+  declare netread Net_LibUIValidation_Answer for Mode.Teams[0] = "";
+  return Net_LibUIValidation_Answer != LB::C_UIAnswer_Improve;
+}
+
+// ---------------------------------- //
+/** Check if the result should be saved
+ *
+ * @return       Keep result
+ */
+Boolean IsAnswerKeepResult() {
+  declare netread Net_LibUIValidation_Answer for Mode.Teams[0] = "";
+  return Net_LibUIValidation_Answer == LB::C_UIAnswer_SaveAndExit;
+}
+
+// ---------------------------------- //
+/// Unload the library
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+// ---------------------------------- //
+/// Load the library
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB::Build());
+  Layers::Attach(C_ManialinkLayerId);
+  Layers::SetAnimationTypeOut(C_ManialinkLayerId, CUILayer::EUILayerAnimation::LeftFast);
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+
+  SetTime(0, 0, 0);
+}

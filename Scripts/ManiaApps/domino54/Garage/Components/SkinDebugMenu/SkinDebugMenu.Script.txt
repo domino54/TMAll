@@ -1,0 +1,40 @@
+/**
+ * @name SkinDebugMenu.Script.txt
+ * @author domino54
+ * @version 2025-04-22
+ */
+
+#Const Version      "2025-04-22"
+#Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinDebugMenu/SkinDebugMenu.Script.txt"
+
+#Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
+#Include "ManiaApps/domino54/Garage/Components/SkinDebugMenu/LB_SkinDebugMenu.Script.txt" as LB
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_ManialinkLayerId "L_SkinDebugMenu"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Void Unload() {
+  Layers::Destroy(C_ManialinkLayerId);
+}
+
+Void Load() {
+  Unload();
+
+  Layers::Create(C_ManialinkLayerId, LB::Build());
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}
+
+Void Show() {
+  Layers::SetVisibility(C_ManialinkLayerId, True);
+}
+
+Void Hide() {
+  Layers::SetVisibility(C_ManialinkLayerId, False);
+}

@@ -1,24 +1,14 @@
 /**
  * @name HorizonButtonToggle.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-08-01
  */
 
-#Const Version    "2025-04-22"
-#Const ScriptName "ManiaApps/domino54/Common/HorizonElements/HorizonButtonToggle.Script.txt"
+#Const Version    "2025-08-01"
+#Const ScriptName "ManiaApps/domino54/Horizon/Components/HorizonButtonToggle.Script.txt"
 
-#Include "MathLib" as ML
-#Include "Libs/domino54/TextLibExt.Script.txt" as TLX
 #Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
-
-// ---------------------------------- //
-// Constants
-// ---------------------------------- //
-
-#Const C_ButtonFillColor      "FFFFFF"
-#Const C_ButtonTextColor      "444444"
-#Const C_DefaultHeight        6.0
-#Const C_DefaultOutline       0.375
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
 
 // ---------------------------------- //
 // Structs
@@ -50,27 +40,27 @@ Text CreateModel(Text _Id, Integer _Budget, K_Options _Options) {
   declare TextSize = _Options.TextSize;
 
   if (Height <= 0) {
-    Height = C_DefaultHeight;
+    Height = HC::C_ButtonToggleHeight;
   }
 
   if (Outline <= 0) {
-    Outline = C_DefaultOutline;
+    Outline = HC::C_ButtonOutlineWidth;
   }
 
   if (TextSize <= 0) {
-    TextSize = ML::NearestInteger(Height * 0.75 - 1) / 2.0;
+    TextSize = HC::GetButtonAutoTextSize(Height);
   }
 
   return """
 <framemodel id="{{{_Id}}}" size="10 {{{Height}}}">
   <framemodel id="FrameModel_ActiveButton">
-    <label id="Label_ButtonToggleText" pos="0 {{{Height / -2}}}" halign="center" valign="center2" textcolor="{{{C_ButtonTextColor}}}" textsize="{{{TextSize}}}" textfont="{{{SubFont}}}" textprefix="$t" />
-    <quad id="Quad_ButtonToggleTrigger" pos="0 0" size="0 {{{Height}}}" bgcolor="FFFFFF" />
+    <label id="Label_ButtonToggleText" pos="0 {{{Height / -2}}}" halign="center" valign="center2" textcolor="{{{HC::C_ButtonFilledTextColor}}}" textsize="{{{TextSize}}}" textfont="{{{SubFont}}}" textprefix="$t" />
+    <quad id="Quad_ButtonToggleTrigger" pos="0 0" size="0 {{{Height}}}" bgcolor="{{{HC::C_ButtonFilledCardColor}}}" />
   </framemodel>
 
   <framemodel id="FrameModel_InactiveButton">
-    <label id="Label_ButtonToggleText" pos="0 {{{Height / -2}}}" halign="center" valign="center2" textcolor="{{{C_ButtonFillColor}}}" textsize="{{{TextSize}}}" textfont="{{{SubFont}}}" textprefix="$t" />
-    <quad id="Quad_ButtonToggleTrigger" pos="0 0" size="0 {{{Height}}}" bgcolor="00000000" bgcolorfocus="FFFFFF44" class="Focus" scriptevents="1" />
+    <label id="Label_ButtonToggleText" pos="0 {{{Height / -2}}}" halign="center" valign="center2" textcolor="{{{HC::C_ButtonOutlineColor}}}" textsize="{{{TextSize}}}" textfont="{{{SubFont}}}" textprefix="$t" />
+    <quad id="Quad_ButtonToggleTrigger" pos="0 0" size="0 {{{Height}}}" bgcolor="00000000" bgcolorfocus="{{{HC::C_ButtonFilledHoverColor}}}" class="Focus" scriptevents="1" />
   </framemodel>
 
   <frame id="Frame_ActiveButtons" size="0 {{{Height}}}">
@@ -83,10 +73,10 @@ Text CreateModel(Text _Id, Integer _Budget, K_Options _Options) {
     {{{InactiveButtons}}}
   </frame>
 
-  <quad id="Quad_EdgeT" pos="0 0" halign="left" valign="top" size="0 {{{Outline}}}" bgcolor="FFF" />
-  <quad id="Quad_EdgeL" pos="0 0" halign="left" valign="top" size="{{{Outline}}} {{{Height}}}" bgcolor="FFF" autoscale="0" />
-  <quad id="Quad_EdgeB" pos="0 {{{-Height}}}" halign="left" valign="bottom" size="0 {{{Outline}}}" bgcolor="FFF" />
-  <quad id="Quad_EdgeR" pos="0 0" halign="right" valign="top" size="{{{Outline}}} {{{Height}}}" bgcolor="FFF" autoscale="0" />
+  <quad id="Quad_EdgeT" pos="0 0" halign="left" valign="top" size="0 {{{Outline}}}" bgcolor="{{{HC::C_ButtonOutlineColor}}}" />
+  <quad id="Quad_EdgeL" pos="0 0" halign="left" valign="top" size="{{{Outline}}} {{{Height}}}" bgcolor="{{{HC::C_ButtonOutlineColor}}}" autoscale="0" />
+  <quad id="Quad_EdgeB" pos="0 {{{-Height}}}" halign="left" valign="bottom" size="0 {{{Outline}}}" bgcolor="{{{HC::C_ButtonOutlineColor}}}" />
+  <quad id="Quad_EdgeR" pos="0 0" halign="right" valign="top" size="{{{Outline}}} {{{Height}}}" bgcolor="{{{HC::C_ButtonOutlineColor}}}" autoscale="0" />
 </framemodel>
   """;
 }
@@ -96,7 +86,7 @@ Text CreateModel(Text _Id, Integer _Budget) {
 }
 
 Text InjectFunctions() {
-  return TLX::Script("""<script><!--
+  return """// <script>
 
 Void HorizonButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index, Integer _Duration) {
   declare Frame_ActiveButtons <=> (_Frame.GetFirstChild("Frame_ActiveButtons") as CMlFrame);
@@ -124,7 +114,7 @@ Void HorizonButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index, Integer _Dura
 }
 
 Void HorizonButtonToggle_SetIndex(CMlFrame _Frame, Integer _Index) {
-  HorizonButtonToggle_SetIndex(_Frame, _Index, 200);
+  HorizonButtonToggle_SetIndex(_Frame, _Index, {{{HC::C_ButtonAnimDuration}}});
 }
 
 Void HorizonButtonToggle_SetOptions(CMlFrame _Frame, Text[] _Options, Real _Width) {
@@ -182,5 +172,5 @@ Void HorizonButtonToggle_SetOptions(CMlFrame _Frame, Text[] _Options, Real _Widt
   HorizonButtonToggle_SetIndex(_Frame, 0, 0);
 }
 
---></script>""");
+  """;
 }

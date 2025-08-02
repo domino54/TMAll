@@ -3,17 +3,17 @@
  *
  * @name Race.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-08-01
  */
 
 #Extends "MapTypes/Base/MapTypeTMAll.Script.txt"
 
-#Const Version    "2025-04-22"
+#Const Version    "2025-08-01"
 #Const ScriptName "MapTypes/TrackMania/Race.Script.txt"
 
 #Include "Libs/Nadeo/Common/Ingame/MapType.Script.txt" as MapType
-#Include "Libs/TrackMania/Ingame/UI/UIValidation.Script.txt" as UI_Validation
 #Include "Libs/Trackmania/Ingame/Game.Script.txt" as Game
+#Include "ManiaApps/domino54/Editor/UIValidation/UIValidation.Script.txt" as UI_Validation
 
 // ---------------------------------- //
 // Global variables
@@ -137,10 +137,10 @@ TM_StartRace(Player, -1);
 InitUIIngame();
 
 Mode.CutOffTimeLimit = -1;
-G_BestTime = Map.TMObjective_AuthorTime;
+G_BestTime = -1;
 
 UI_Validation::Load();
-UI_Validation::SetTime(G_BestTime, -1);
+UI_Validation::SetTime(G_BestTime, -1, Map.TMObjective_AuthorTime);
 
 ValidationStartRace(Player, Mode.Now + Game::GetSpawnDuration());
 
@@ -179,7 +179,7 @@ foreach (Event in Mode.PendingEvents) {
   declare PlayerTime = Event.Player.Score.PrevRace.Time;
   declare Integer[] PlayerCheckpointsTimes;
 
-  UI_Validation::SetTime(G_BestTime, PlayerTime);
+  UI_Validation::SetTime(G_BestTime, PlayerTime, Map.TMObjective_AuthorTime);
 
   if (G_BestTime <= 0 && Event.Player.CurRace.Time > 0) {
     G_BestTime = Event.Player.CurRace.Time;
@@ -219,7 +219,7 @@ foreach (Event in Mode.PendingEvents) {
       continue;
     }
 
-    declare StopValidation = UI_Validation::GetAnswer();
+    declare StopValidation = UI_Validation::IsAnswerStopValidation();
 
     if (StopValidation)  {
       MTB_StopValidation();
@@ -230,7 +230,7 @@ foreach (Event in Mode.PendingEvents) {
     break;
   }
 
-  UI_Validation::SetTime(G_BestTime, PlayerTime);
+  UI_Validation::SetTime(G_BestTime, PlayerTime, Map.TMObjective_AuthorTime);
   UI_Validation::Hide();
 
   Audio.LimitSceneSoundVolumedB = 0.0;
@@ -246,10 +246,12 @@ foreach (Event in Mode.PendingEvents) {
 Game::WaitRace(Player);
 Game::Unload();
 
+declare KeepResult = UI_Validation::IsAnswerKeepResult();
+
 UI_Validation::Unload();
 
 // New best author time, save it.
-if (G_BestTime > 0 && (Map.TMObjective_AuthorTime <= 0 || G_BestTime < Map.TMObjective_AuthorTime)) {
+if (KeepResult && G_BestTime > 0 && (Map.TMObjective_AuthorTime <= 0 || G_BestTime < Map.TMObjective_AuthorTime)) {
   MapType::SetObjectivesFromAuthorTime(G_BestTime);
 }
 
@@ -266,7 +268,7 @@ if (Map.TMObjective_AuthorTime > 0) {
  * Initializes the game UI.
  */
 Void InitUIIngame() {
-  Game::Load(Mode, _("Validate the track"));
+  Game::Load(Mode, "");
   Game::SetNbLaps(Map.TMObjective_NbLaps, Map.TMObjective_IsLapRace);
   Game::SetOpposingTeamLabelsVisibility(CUIConfig::ELabelsVisibility::Never);
 }

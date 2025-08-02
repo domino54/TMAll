@@ -1,18 +1,24 @@
 /**
  * @name LB_MenuOnline.Script.txt
  * @author domino54
- * @version 2025-01-04
+ * @version 2025-08-01
  */
 
-#Const Version    "2025-01-04"
+#Const Version    "2025-08-01"
 #Const ScriptName "Libs/domino54/MenuOnline/LB_MenuOnline.Script.txt"
 
 #Include "Libs/domino54/TextLibExt.Script.txt" as TextLibExt
-#Include "Libs/Nadeo/Common/ManialinkTools/Manialink3WPrevAnims.Script.txt" as Manialink
-#Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" as Colors
-#Include "Libs/Nadeo/MP4/Common/DesignManialinks.Script.txt" as DesignManialinks
-#Include "Libs/Trackmania/Ingame/UI/Layers/Inject_QuadsSelector.Script.txt" as Inject_QuadsSelector
-#Include "Libs/Trackmania/Ingame/UI/Layers/Inject_SoloMapInfosBase.Script.txt" as Inject_SoloMapInfosBase
+#Include "ManiaApps/domino54/Horizon/Components/HorizonCurrentMap.Script.txt" as HorizonCurrentMap
+#Include "ManiaApps/domino54/Horizon/Components/HorizonCurrentModel.Script.txt" as HorizonCurrentModel
+#Include "ManiaApps/domino54/Horizon/Components/HorizonDualFrame.Script.txt" as HorizonDualFrame
+#Include "ManiaApps/domino54/Horizon/Components/HorizonHeader.Script.txt" as HorizonHeader
+#Include "ManiaApps/domino54/Horizon/Components/HorizonLine.Script.txt" as HorizonLine
+#Include "ManiaApps/domino54/Horizon/Components/HorizonMenuOption.Script.txt" as HorizonMenuOption
+#Include "ManiaApps/domino54/Horizon/Components/HorizonScoreRows.Script.txt" as HorizonScoreRows
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+#Include "ManiaApps/domino54/Horizon/HorizonFocus.Script.txt" as HorizonFocus
+
+#Const C_CustomEventType_ModelUpdate "menu_online:model_update"
 
 Text Private_InjectGetModeName(Text _ModeName) {
   declare ReturnValue = "Playground.ServerInfo.ModeName";
@@ -29,155 +35,153 @@ Text GetModeName() {
 }
 
 Text Build(Text _ModeName) {
-  declare Integer Count_InstancesY = 6;
-  declare Integer Count_InstancesX = 1;
+  declare WindowWidth = HC::C_MenuOptionWidth;
+  declare MenuOptionSize = <HC::C_MenuOptionWidth, HC::C_MenuOptionHeight>;
+  declare MarginRight = HC::C_MenuOptionRightWidth;
+
+  // TODO: Pass configuration from individual game modes
+  declare LeftMenuInsert = HorizonScoreRows::CreateScoreRows("Frame_ScoreRows", 2);
+  declare RightMenuInsert = "";
+
+  declare MenuOptionExtra = """
+    <quad id="Quad_Checkbox" class="HF FG Modulate" pos="{{{MenuOptionSize.X - (MarginRight / 2)}}} {{{MenuOptionSize.Y / -2}}}" halign="center" valign="center" size="6 6" modulatecolor="FFF" hidden="1" />
+  """;
 
   return """
 <manialink version="3" name="L_UIMenuOnline">
 <frame id="Frame_All" z-index="1000">
-  <frame id="Frame_Menu" pos="0 0" hidden="0">
-    <quad z-index="-4" pos="0 0" size="960 180" valign="center" halign="center" style="Bgs1" substyle="BgDialogBlur" opacity="1" bluramount="0"/>
-    {{{Inject_SoloMapInfosBase::InjectInManialink()}}}
-    {{{Inject_QuadsSelector::InjectInManialink(Count_InstancesY, Count_InstancesX)}}}
+  <frame id="Frame_MenuOnline" pos="{{{-WindowWidth}}} {{{HC::C_MenuVerticalOffset}}}">
+    {{{HorizonHeader::CreateHeader("Frame_MenuHeader", WindowWidth)}}}
+
+    <frame pos="0 -20">
+      {{{HorizonLine::CreateSubtleLine("bottom", WindowWidth)}}}
+    </frame>
+
+    <frame pos="0 -20">
+      {{{HorizonCurrentMap::CreateCurrentMap("Frame_MenuCurrentMap", LeftMenuInsert, RightMenuInsert)}}}
+    </frame>
+
+    <frame pos="0 -60.5">
+      {{{HorizonCurrentModel::CreateCurrentModel("Frame_MenuPlayerModel")}}}
+    </frame>
+
+    <frame pos="0 -74.5">
+      {{{HorizonMenuOption::CreateStack("Frame_MenuOptions", 7, MenuOptionExtra)}}}
+    </frame>
+
+    <frame pos="0 -146" id="Frame_BottomLine">
+      {{{HorizonLine::CreateSubtleLine("top", WindowWidth)}}}
+    </frame>
   </frame>
+
+  <quad pos="0 0" size="960 180" valign="center" halign="center" style="Bgs1" substyle="BgDialogBlur" opacity="1" bluramount="0" scriptevents="1" />
 </frame>
 
 <script><!--
 
-#Const C_QuadMedalImgColor [
-  0 => {{{Colors::GetColor("GreenMaster")}}},
-  1 => {{{Colors::GetColor("GoldShiny")}}},
-  2 => {{{Colors::GetColor("SilverShiny")}}},
-  3 => {{{Colors::GetColor("BronzeShiny")}}},
-  4 => <0.0, 0.0, 0.0>
-]
+#Include "MathLib" as ML
+#Include "TextLib" as TL
 
-#Const C_PredefiendModeNames [
-  "Chase" => _("Chase"),
-  "Cup" => _("Cup"),
-  "Laps" => _("Laps"),
-  "Rounds" => _("Rounds"),
-  "Team" => _("Team"),
-  "TimeAttack" => _("Time Attack")
-]
+#Const C_ButtonGarage         "GARAGE"
+#Const C_ButtonResume         "RESUME"
+#Const C_ButtonHelp           "HELP"
+#Const C_ButtonSpectator      "SPECTATOR"
+#Const C_ButtonChangeTeam     "TEAM"
+#Const C_ButtonAdvancedMenu   "ADVANCED"
+#Const C_ButtonServerSetting  "MANAGE"
+#Const C_ButtonQuit           "QUIT"
 
-{{{Manialink::GetIncludes()}}}
-{{{DesignManialinks::Includes()}}}
-
-{{{Manialink::Load()}}}
 {{{TextLibExt::InjectTimeToText()}}}
 
-declare Integer G_IgnoreInputsUntil;
+{{{HorizonCurrentMap::InjectFunctions()}}}
+{{{HorizonCurrentModel::InjectFunctions()}}}
+{{{HorizonDualFrame::InjectFunctions()}}}
+{{{HorizonFocus::InjectFunctions()}}}
+{{{HorizonHeader::InjectFunctions()}}}
+{{{HorizonMenuOption::InjectFunctions()}}}
+{{{HorizonScoreRows::InjectFunctions()}}}
 
-{{{DesignManialinks::Declares()}}}
-{{{Inject_SoloMapInfosBase::InjectInGlobal()}}}
+{{{HorizonFocus::InjectFocusAPI([
+  HorizonDualFrame::GetFocusConfig(),
+  HorizonMenuOption::GetFocusConfig()
+])}}}
 
-{{{Inject_QuadsSelector::InjectInFunction()}}}
-{{{Inject_SoloMapInfosBase::InjectInFunction()}}}
 {{{Private_InjectGetModeName(_ModeName)}}}
+
+Boolean CanDisplayMedals() {
+  if (Map == Null || !Map.TMObjective_IsLapRace) {
+    return True;
+  }
+
+  return !IndependantLaps && NbLaps == Map.TMObjective_NbLaps;
+}
 
 // TODO: Move this to Medals.Script.txt
 Integer GetMedalForTime(Integer _Time) {
-  if (_Time <= 0) return 4;
-  if (_Time <= Map.TMObjective_AuthorTime)  return 0;
-  if (_Time <= Map.TMObjective_GoldTime)    return 1;
+  if (_Time <= 0 || !CanDisplayMedals()) return 0;
+  if (_Time <= Map.TMObjective_AuthorTime)  return 4;
+  if (_Time <= Map.TMObjective_GoldTime)    return 3;
   if (_Time <= Map.TMObjective_SilverTime)  return 2;
-  if (_Time <= Map.TMObjective_BronzeTime)  return 3;
-  return 4;
+  if (_Time <= Map.TMObjective_BronzeTime)  return 1;
+  return 0;
 }
 
-Void SetBigMedal(Integer _Medal) {
-  declare Quad_Medal <=> (Page.MainFrame.GetFirstChild("Quad_Medal") as CMlQuad);
+Integer GetFastestTime(Integer[] _Times) {
+  declare FastestTime = -1;
 
-  Quad_Medal.Visible = _Medal < 4 && C_QuadMedalImgColor.existskey(_Medal);
-
-  if (Quad_Medal.Visible) {
-    Quad_Medal.Colorize = C_QuadMedalImgColor[_Medal];
+  foreach (Time in _Times) {
+    if (Time > 0 && (FastestTime <= 0 || Time < FastestTime)) {
+      FastestTime = Time;
+    }
   }
+
+  return FastestTime;
 }
 
 Void SetTime(Integer _LastTime, Integer _BestTime) {
+  declare Frame_MenuCurrentMap <=> (Page.GetFirstChild("Frame_MenuCurrentMap") as CMlFrame);
+  declare Frame_ScoreRows <=> (Page.GetFirstChild("Frame_ScoreRows") as CMlFrame);
+
   declare LastMedal = GetMedalForTime(_LastTime);
   declare BestMedal = GetMedalForTime(_BestTime);
+  declare FastestTime = GetFastestTime([_LastTime, _BestTime]);
 
-  declare PlayersName = [_("Last Time"), _("Best Time")];
-  declare PlayersTime = ["-:--.---", "-:--.---"];
-  declare PlayersColor = [C_QuadMedalImgColor[LastMedal], C_QuadMedalImgColor[BestMedal]];
+  declare PlayerNames = [_("Last Time"), _("Best Time")];
+  declare PlayerTimes = ["-:--.---", "-:--.---"];
+  declare PlayerMedals = [LastMedal, BestMedal];
+  declare Boolean[] PlayerHighlight;
 
   if (_LastTime > 0) {
-    PlayersTime[0] = TimeToText(_LastTime);
+    PlayerTimes[0] = TimeToText(_LastTime);
   }
 
   if (_BestTime > 0) {
-    PlayersTime[1] = TimeToText(_BestTime);
+    PlayerTimes[1] = TimeToText(_BestTime);
   }
 
-  SetBigMedal(BestMedal);
-  SetTimeInfo_SoloMapInfosBase(PlayersName, PlayersTime, PlayersColor);
+  PlayerHighlight.add(FastestTime > 0 && _LastTime == FastestTime);
+  PlayerHighlight.add(FastestTime > 0 && _BestTime == FastestTime);
+
+  HorizonCurrentMap_SetMedal(Frame_MenuCurrentMap, BestMedal);
+  HorizonScoreRows_SetScores(Frame_ScoreRows, PlayerNames, PlayerTimes, PlayerMedals, PlayerHighlight);
 }
 
-Void SetModeName(Text _ModeName, Text _ServerName) {
-  declare Label_Mode <=> (Page.MainFrame.GetFirstChild("Label_Mode") as CMlLabel);
-  declare Label_Mode2 <=> (Page.MainFrame.GetFirstChild("Label_Mode2") as CMlLabel);
-  declare Quad_Barre <=> (Page.MainFrame.GetFirstChild("Quad_Barre") as CMlQuad);
+Void SetSpectatorCheckbox(CMlFrame _Frame, Boolean _IsSpectating) {
+  declare Quad_Checkbox <=> (_Frame.GetFirstChild("Quad_Checkbox") as CMlQuad);
 
-  if (C_PredefiendModeNames.existskey(_ModeName)) {
-    Label_Mode.SetText(C_PredefiendModeNames[_ModeName]);
-  } else {
-    Label_Mode.SetText(_ModeName);
-  }
-
-  Label_Mode2.SetText(_ServerName);
-  Quad_Barre.Show();
-}
-
-Void SetMapInfo(Text _MapName, Text _AuthorName, Text _CountryFlagUrl) {
-  declare Label_TitleBody <=> (Page.GetFirstChild("Label_TitleBody") as CMlLabel);
-  declare Label_Author <=> (Page.GetFirstChild("Label_Author") as CMlLabel);
-  declare Quad_Flag <=> (Page.GetFirstChild("Quad_Flag") as CMlQuad);
-
-  declare AuthorNickName = TL::Compose(_("By %1"), _AuthorName);
-  declare LabelWidth = Label_Author.ComputeWidth(AuthorNickName);
-  declare Flag = _CountryFlagUrl;
-
-  if (Flag == "file://ZoneFlags/Path/") {
-    Flag = "file://ZoneFlags/Path/World";
-  }
-
-  Label_TitleBody.SetText(_MapName);
-  Label_Author.SetText(AuthorNickName);
-  Quad_Flag.RelativePosition.X = LabelWidth - 32.0;
-  Quad_Flag.ChangeImageUrl(Flag);
-}
-
-Void SendInfo(Boolean _IsSpectating) {
-  declare Text[] LabelMedals = [
-    _("Resume"),
-    _("Help"),
-    _("Spectator"),
-    _("Advanced options"),
-    _("Manage server"),
-    _("Quit")
-  ];
-
-  declare Text SpectatingIcon;
+  Quad_Checkbox.Visible = True;
 
   if (_IsSpectating) {
-    // This is known in the professional environment as "padding"
-    SpectatingIcon = "                       ";
+    Quad_Checkbox.ImageUrl = "{{{HC::C_ImgBase}}}Menus/Buttons/Checkbox_Closed.dds";
+  } else {
+    Quad_Checkbox.ImageUrl = "{{{HC::C_ImgBase}}}Menus/Buttons/Checkbox_Open.dds";
   }
-
-  SetButtons(LabelMedals, ["", "", SpectatingIcon], [], []);
-}
-
-Void Init() {
-  SendInfo(IsSpectatorClient);
 }
 
 Void SetUIHidden(Boolean _Hidden) {
   ClientUI.AltMenuNoDefaultScores = _Hidden;
   ClientUI.AltMenuNoCustomScores = _Hidden;
-  ClientUI.OverlayHideChat = _Hidden;
+  //ClientUI.OverlayHideChat = _Hidden;
 
   if (_Hidden) {
     ClientUI.ScoreTableVisibility = CUIConfig::EVisibility::ForcedHidden;
@@ -189,22 +193,26 @@ Void SetUIHidden(Boolean _Hidden) {
 Void ShowPage() {
   SetUIHidden(True);
 
-  // CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::Resume);
   EnableMenuNavigation(True, False, Null, 2);
 
-  G_IgnoreInputsUntil = Now + 100;
+  HorizonHeader_Show((Page.GetFirstChild("Frame_MenuHeader") as CMlFrame));
+  HorizonDualFrame_Show((Page.GetFirstChild("Frame_MenuCurrentMap") as CMlFrame));
+  HorizonDualFrame_Show((Page.GetFirstChild("Frame_MenuPlayerModel") as CMlFrame));
+  HorizonMenuOption_Show((Page.GetFirstChild("Frame_MenuOptions") as CMlFrame));
 
-  AnimShow_QuadSelect();
-  AnimShow_SoloMapInfosBase();
-
-  //ClearChoose();
-  FocusButton();
+  HorizonFocus_FocusInitial();
 }
 
 Void HidePage() {
   SetUIHidden(False);
 
   EnableMenuNavigation(False, False, Null, 0);
+}
+
+Void Button_Garage() {
+  // TODO: Have a const for the link
+  OpenLink("file://Media/ManiaApps/Garage.Script.txt", CMlScript::LinkType::ManialinkBrowser);
+  CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::Resume);
 }
 
 Void Button_Resume() {
@@ -219,6 +227,10 @@ Void Button_Spectator() {
   RequestSpectatorClient(!IsSpectatorClient);
 }
 
+Void Button_ChangeTeam() {
+  // TODO: Open team selection UI
+}
+
 Void Button_AdvancedMenu() {
   CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::AdvancedMenu);
 }
@@ -231,39 +243,110 @@ Void Button_Quit() {
   CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::Quit);
 }
 
-Void PressSelect() {
-  switch (G_ButtonFocus) {
-    case 0: {
+Void Button_NormalMenu() {
+  CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::NormalMenu);
+}
+
+Void PressSelect(Text _ButtonId) {
+  switch (_ButtonId) {
+    case C_ButtonGarage: {
+      Button_Garage();
+    }
+    case C_ButtonResume: {
       Button_Resume();
     }
-    case 1: {
+    case C_ButtonHelp: {
       Button_Help();
     }
-    case 2: {
+    case C_ButtonSpectator: {
       Button_Spectator();
     }
-    case 3: {
+    case C_ButtonChangeTeam: {
+      Button_ChangeTeam();
+    }
+    case C_ButtonAdvancedMenu: {
       Button_AdvancedMenu();
     }
-    case 4: {
+    case C_ButtonServerSetting: {
       Button_ServerSettings();
     }
-    case 5: {
+    case C_ButtonQuit: {
       Button_Quit();
     }
   }
 }
 
+Void SetButtons(Boolean _UseClans) {
+  declare Frame_MenuPlayerModel <=> (Page.GetFirstChild("Frame_MenuPlayerModel") as CMlFrame);
+  declare Frame_MenuOptions <=> (Page.GetFirstChild("Frame_MenuOptions") as CMlFrame);
+  declare Frame_BottomLine <=> (Page.GetFirstChild("Frame_BottomLine") as CMlFrame);
+
+  declare Text[] ButtonLabels;
+  declare Text[] MenuOptions;
+
+  ButtonLabels.add(_("Resume"));
+  MenuOptions.add(C_ButtonResume);
+
+  ButtonLabels.add(_("Help"));
+  MenuOptions.add(C_ButtonHelp);
+
+  ButtonLabels.add(_("Spectator"));
+  MenuOptions.add(C_ButtonSpectator);
+
+  if (_UseClans) {
+    ButtonLabels.add(_("Change team"));
+    MenuOptions.add(C_ButtonChangeTeam);
+  }
+
+  ButtonLabels.add(_("Advanced options"));
+  MenuOptions.add(C_ButtonAdvancedMenu);
+
+  ButtonLabels.add(_("Manage server"));
+  MenuOptions.add(C_ButtonServerSetting);
+
+  ButtonLabels.add(_("Quit"));
+  MenuOptions.add(C_ButtonQuit);
+
+  HorizonFocus_NavigationStackAdd(Frame_MenuPlayerModel, C_ButtonGarage);
+
+  foreach (I => Control in Frame_MenuOptions.Controls) {
+    Control.Visible = ButtonLabels.existskey(I);
+
+    if (!Control.Visible) {
+      continue;
+    }
+
+    HorizonFocus_NavigationStackAdd(Control, MenuOptions[I]);
+    HorizonMenuOption_SetText((Control as CMlFrame), ButtonLabels[I]);
+  }
+
+  HorizonFocus_SetInitialControl(Frame_MenuOptions.Controls[0]);
+
+  Frame_BottomLine.RelativePosition_V3.Y = -146.0;
+
+  if (_UseClans) {
+    Frame_BottomLine.RelativePosition_V3.Y -= {{{HC::C_MenuOptionHeight + HC::C_MenuOptionSpacing}}};
+  }
+}
+
 main() {
-  Init();
+  declare Frame_MenuHeader <=> (Page.GetFirstChild("Frame_MenuHeader") as CMlFrame);
+  declare Frame_MenuCurrentMap <=> (Page.GetFirstChild("Frame_MenuCurrentMap") as CMlFrame);
+  declare Frame_MenuPlayerModel <=> (Page.GetFirstChild("Frame_MenuPlayerModel") as CMlFrame);
+  declare Frame_MenuOptions <=> (Page.GetFirstChild("Frame_MenuOptions") as CMlFrame);
+  declare Frame_SpectatorOption <=> (Frame_MenuOptions.Controls[2] as CMlFrame);
 
-  // Fix rare crash due to map not being loaded in yet
-  wait(Map != Null);
+  declare Text CurrentModelName for Page;
+  declare Text CurrentSkinName for Page;
+  declare Text CurrentModelImageUrl for Page;
+  declare UpdatePlayerModel = False;
 
-  {{{Inject_SoloMapInfosBase::InjectInMain()}}}
+  HorizonCurrentModel_SetInfo(Frame_MenuPlayerModel, CurrentModelName, CurrentSkinName, CurrentModelImageUrl);
 
-  declare Boolean Prev_Visibility;
+  declare Boolean PrevIsPageVisible;
   declare Boolean Prev_IsSpectatorClient;
+
+  SetSpectatorCheckbox(Frame_SpectatorOption, IsSpectatorClient);
 
   declare PrevLastTime = -1;
   declare PrevBestTime = -1;
@@ -279,43 +362,43 @@ main() {
 
   SetTime(PrevLastTime, PrevBestTime);
 
-  declare Prev_ModeName = GetModeName();
-  declare Prev_ServerName = Playground.ServerInfo.ServerName;
+  declare PrevModeName = GetModeName();
+  declare PrevServerName = Playground.ServerInfo.ServerName;
 
-  SetModeName(Prev_ModeName, Prev_ServerName);
+  HorizonHeader_SetTitle(Frame_MenuHeader, PrevModeName);
+  HorizonHeader_SetSubtitle(Frame_MenuHeader, Playground.ServerInfo.ServerName);
 
-  declare Text Prev_MapUid;
+  declare Text PrevMapUid;
+  declare PrevCanChangeTeam = False;
 
-  if (Map != Null) {
-    Prev_MapUid = Map.MapInfo.MapUid;
+  SetButtons(False);
 
-    SetMapInfo(Map.MapName, Map.AuthorNickName, Map.AuthorZoneIconUrl);
-  }
+  +++Main+++
 
   while (True) {
-    yield;
+    {{{HorizonFocus::InjectLoop("PressSelect(Value);")}}}
 
-    if (Prev_Visibility != PageIsVisible) {
+    foreach (Event in PendingEvents) {
+      if (Event.Type != CMlScriptEvent::Type::PluginCustomEvent) continue;
+      if (Event.CustomEventType != {{{dump(C_CustomEventType_ModelUpdate)}}}) continue;
+
+      UpdatePlayerModel = True;
+    }
+
+    if (PrevIsPageVisible != PageIsVisible) {
       if (PageIsVisible) {
         ShowPage();
       } else {
         HidePage();
       }
 
-      Prev_Visibility = PageIsVisible;
+      PrevIsPageVisible = PageIsVisible;
     }
 
     if (!PageIsVisible) {
+      yield;
       continue;
     }
-
-    // Don't inject, it changes the big medal
-    // Inject_SoloMapInfosBase::InjectInWhile()
-
-    DesignManialinks_Loop();
-    LibManialink_AnimLoop();
-
-    {{{Inject_QuadsSelector::InjectInWhile("PressSelect();")}}}
 
     if (InputPlayer != Null && InputPlayer.Score != Null) {
       if (
@@ -332,54 +415,60 @@ main() {
     if (Prev_IsSpectatorClient != IsSpectatorClient) {
       Prev_IsSpectatorClient = IsSpectatorClient;
 
-      SendInfo(IsSpectatorClient);
+      SetSpectatorCheckbox(Frame_SpectatorOption, IsSpectatorClient);
     }
 
     // Map has changed
-    if (Map != Null && Prev_MapUid != Map.MapInfo.MapUid) {
-      Prev_MapUid = Map.MapInfo.MapUid;
+    if (Map != Null && PrevMapUid != Map.MapInfo.MapUid) {
+      PrevMapUid = Map.MapInfo.MapUid;
 
-      SetMapInfo(Map.MapName, Map.AuthorNickName, Map.AuthorZoneIconUrl);
+      HorizonCurrentMap_SetMapInfo(Frame_MenuCurrentMap, Map.MapName, Map.AuthorNickName, Map.AuthorZoneIconUrl);
     }
 
     // Should only be used on online servers
-    if (Prev_ModeName != GetModeName() || Prev_ServerName != Playground.ServerInfo.ServerName) {
-      Prev_ModeName = GetModeName();
-      Prev_ServerName = Playground.ServerInfo.ServerName;
+    if (PrevModeName != GetModeName()) {
+      PrevModeName = GetModeName();
 
-      SetModeName(Prev_ModeName, Prev_ServerName);
+      HorizonHeader_SetTitle(Frame_MenuHeader, PrevModeName);
+    }
+
+    if (PrevServerName != Playground.ServerInfo.ServerName) {
+      PrevServerName = Playground.ServerInfo.ServerName;
+
+      HorizonHeader_SetSubtitle(Frame_MenuHeader, Playground.ServerInfo.ServerName);
+    }
+
+    // Team change is possible
+    declare CanChangeTeam = !IsSpectator && UseClans && !UseForcedClans;
+
+    if (PrevCanChangeTeam != CanChangeTeam) {
+      PrevCanChangeTeam = CanChangeTeam;
+
+      SetButtons(CanChangeTeam);
+    }
+
+    if (UpdatePlayerModel) {
+      UpdatePlayerModel = False;
+
+      HorizonCurrentModel_SetInfo(Frame_MenuPlayerModel, CurrentModelName, CurrentSkinName, CurrentModelImageUrl);
     }
 
     foreach (Event in PendingEvents) {
-      switch (Event.Type) {
-        case CMlScriptEvent::Type::MenuNavigation: {
-          switch (Event.MenuNavAction) {
-            case CMlScriptEvent::EMenuNavAction::Cancel: {
-              Button_Resume();
-            }
-          }
-        }
+      if (Event.Type != CMlScriptEvent::Type::MenuNavigation) continue;
 
-        case CMlScriptEvent::Type::KeyPress: {
-          if (Event.KeyName == "F1") {
-            CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::NormalMenu);
-          }
-        }
-      }
-    }
-
-    foreach (Event in Input.PendingEvents) {
-      if (Now < G_IgnoreInputsUntil || Event.IsAutoRepeat) continue;
-
-      switch (Event.Button) {
-        case CInputEvent::EButton::Menu: {
+      switch (Event.MenuNavAction) {
+        case CMlScriptEvent::EMenuNavAction::Cancel: {
           Button_Resume();
         }
-        case CInputEvent::EButton::View: {
-          CloseInGameMenu(CMlScriptIngame::EInGameMenuResult::NormalMenu);
+        case CMlScriptEvent::EMenuNavAction::Action2: {
+          Button_NormalMenu();
         }
       }
     }
+
+    +++Yield+++
+
+    yield;
   }
 }
 --></script>

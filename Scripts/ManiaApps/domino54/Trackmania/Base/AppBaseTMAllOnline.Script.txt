@@ -1,0 +1,78 @@
+/**
+ * Base mania app for Trackmania² Multienvironment online UI.
+ *
+ * @name AppBaseTMAllOnline.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+#Extends "ManiaApps/domino54/TrackMania/Base/AppBaseTMAllCommon.Script.txt"
+
+#Const C_TMAll_Version      "2025-08-01"
+#Const C_TMAll_ScriptName   "ManiaApps/domino54/TrackMania/Base/AppBaseTMAllOnline.Script.txt"
+
+#Include "ManiaApps/domino54/Ingame/MenuOnline/MenuOnline_Client.Script.txt" as MenuOnline
+#Include "ManiaApps/domino54/Garage/Core/GarageConstants.Script.txt" as GC
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+#Include "ManiaApps/Nadeo/TrackMania/UI_Client.Script.txt" as UI
+
+// ---------------------------------- //
+// Load libraries
+// ---------------------------------- //
+***AB_LoadLibraries***
+***
+UI::Load();
+MenuOnline::Load("");
+
+// Chase compatibility.
++++LoadLibraries+++
+***
+
+// ---------------------------------- //
+// Log script versions
+// ---------------------------------- //
+***AB_LogVersions***
+***
+Log::RegisterScript(C_TMAll_Version, C_TMAll_ScriptName);
+Log::RegisterScript(MenuOnline::ScriptName, MenuOnline::Version);
+Log::RegisterScript(UI::ScriptName, UI::Version);
+***
+
+// ---------------------------------- //
+// Yield
+// ---------------------------------- //
+***AB_Yield***
+***
+UI::Yield();
+***
+
+// ---------------------------------- //
+// Unload libraries
+// ---------------------------------- //
+***AB_UnloadLibraries***
+***
+UI::Unload();
+MenuOnline::Unload();
+
+// Chase compatibility.
++++UnloadLibraries+++
+***
+
+// ---------------------------------- //
+// Spawned player model changed
+// ---------------------------------- //
+***TMAll_OnModelChange***
+***
+if (_SplitScreenNum == 0) {
+  declare Model = PlayerModels_Data::GetModelById(_ModelId);
+  declare Skin = PlayerModels_Data::GetSkinById(_SkinId);
+  declare ImageUrl = PlayerModels_Data::GetSkinAsset(_SkinId, GC::C_GarageAssetId_SkinCardIcon, "");
+
+  if (ImageUrl == "") {
+    ImageUrl = PlayerModels_Data::GetModelAsset(_ModelId, GC::C_GarageAssetId_SkinCardIcon, HC::C_ImgBase^GC::C_DefaultSkinCardIconUrl);
+  }
+
+  MenuOnline::SetModelName(Model.Name);
+  MenuOnline::SetSkinName(Skin.Name);
+  MenuOnline::SetModelImageUrl(ImageUrl);
+}
+***

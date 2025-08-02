@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "title": "An index file for loading player models. This is the central and sole definition of all models and skins present in the title pack. The file must be located in the directory corresponding to path `file://Media/Data/PlayerModels/index.json`.",
+  "title": "The \"index file\" for loading player models. This is the central and sole repository of all models, skins, skin categories, and overlays present in the title pack. This file must be located in the directory corresponding to the path `file://Media/Data/PlayerModels/index.json`.",
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -9,8 +9,8 @@
     },
     "SourceUrls": {
       "type": "array",
-      "title": "List of all definition files to load, in the given order, with every file having priority over the previous ones. Optimally, the listed files should be structured as `file://Media/Data/PlayerModels/<namespace>/<namespace>.json`, where the <namespace> folder also contains subdirectories or a flat list of all image assets related to the defined models.",
-      "minItems": 1,
+      "title": "Paths to all .json \"source files\" to load. Paths can be relative to this file, and if so, must start with `./`. Files are processed in the order they are listed here.",
+      "description": "These files contain individual definitions for models, skins, skin categories, and overlays, grouped thematically (by game, vehicle, skin pack, etc.). The order in which the files are listed is important, as objects in each subsequent file have priority over the previous ones and can depend on previously defined objects. It is recommended that the files listed here follow the convention `file://Media/Data/PlayerModels/{namespace}/{namespace}.json`, where `{namespace}` is a unique name related to the contents. The `{namespace}` folder should also group image, sound, and text assets into subdirectories named according to the `Assets` specified within the source file.",
       "uniqueItems": true,
       "items": {
         "type": "string"
@@ -18,8 +18,7 @@
     },
     "SortOverrides": {
       "type": "array",
-      "title": "Optional sorting override, which defines the order in which the player models appear in the skin selection interface. Any models not listed here will appear at the end, in order as they are were loaded by the source files.",
-      "minItems": 1,
+      "title": "Optional sorting override for models. This does not modify the loading behavior. It defines the order in which the models will appear in the skin selection interfaces. Any models not listed here will appear at the end, in the exact order in which they were originally loaded from the source files.",
       "items": {
         "type": "string",
         "pattern": "^[a-z0-9_]+:[a-z0-9_]+$"

@@ -1,14 +1,14 @@
 /**
  * @name LB_SkinCategorySwitch.Script.txt
  * @author domino54
- * @version 2025-05-21
+ * @version 2025-08-01
  */
 
-#Const Version      "2025-05-21"
+#Const Version      "2025-08-01"
 #Const ScriptName   "ManiaApps/domino54/Garage/Components/SkinCategorySwitch/LB_SkinCategorySwitch.Script.txt"
 
 #Include "Libs/domino54/MouseExt.Script.txt" as MouseExt
-#Include "ManiaApps/domino54/Common/HorizonElements/HorizonButtonToggle.Script.txt" as HorizonButtonToggle
+#Include "ManiaApps/domino54/Horizon/Components/HorizonButtonToggle.Script.txt" as HorizonButtonToggle
 
 #Const C_CustomEventType_UpdateCategories "category_switch:set_category"
 

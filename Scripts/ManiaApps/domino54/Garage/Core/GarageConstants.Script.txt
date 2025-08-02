@@ -1,0 +1,21 @@
+/**
+ * @name GarageConstants.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Garage/Core/GarageConstants.Script.txt"
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_GarageAssetId_ModelAliasName   "garage:name"
+#Const C_GarageAssetId_ModelTabIcon     "garage:tab_icon"
+#Const C_GarageAssetId_SkinCardIcon     "garage:card"
+#Const C_GarageAssetId_SkinPreview      "garage:preview"
+
+#Const C_DefaultModelTabIconUrl         "Menus/Garage/TabIcon_Default.webp"
+#Const C_DefaultSkinCardIconUrl         "Menus/Garage/SkinCard_Default.webp"
+#Const C_DefaultSkinPreviewUrl          "Menus/Garage/Preview_Default.webp"

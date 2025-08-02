@@ -1,0 +1,124 @@
+/**
+ * @name HorizonCurrentMap.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/Components/HorizonCurrentMap.Script.txt"
+
+#Include "Libs/Nadeo/MP4/Common/ManialinkTools/FontManager.Script.txt" as Font
+#Include "ManiaApps/domino54/Horizon/Components/HorizonDualFrame.Script.txt" as HorizonDualFrame
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+#Include "Libs/Nadeo/MP4/Common/Colors.Script.txt" as Colors
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text CreateCurrentMap(Text _Id, Vec2 _Size, Real _Margin, Text _LeftInsert, Text _RightInsert) {
+  declare MainFont = Font::GetFontName("Main");
+  declare MedalHeight = _Size.Y - 3.0;
+  declare MapNameWidth = _Size.X - _Margin - HC::C_MenuOptionMargin - HC::C_MenuOptionMarginShort;
+
+  declare Options = HorizonDualFrame::K_Options {
+    Width = _Size.X,
+    Height = _Size.Y,
+    RightWidth = _Margin
+  };
+
+  return HorizonDualFrame::CreateDualFrame(_Id, Options, """
+    {{{_LeftInsert}}}
+
+    <frame pos="{{{HC::C_MenuOptionMargin}}} 0" size="{{{MapNameWidth}}} {{{_Size.Y}}}">
+      <label id="Label_MapName" class="HF FG" pos="0 -8" valign="center2" size="{{{MapNameWidth}}}" textsize="{{{HC::C_CurrentMapNameTextSizeMax}}}" textcolor="FFF" textfont="{{{MainFont}}}" text="Map Name is Here" />
+      <label id="Label_MapAuthor" class="HF FG" pos="0 -14" valign="center2" size="{{{MapNameWidth - 6}}}" textsize="1.5" textcolor="FFF" textfont="{{{MainFont}}}" text="By Author" />
+      <quad id="Quad_MapAuthorZone" pos="0 -14" valign="center" size="5 5" bgcolor="F00" keepratio="fit" />
+
+      <quad size="{{{MapNameWidth}}} {{{_Size.Y}}}" bgcolor="FFF4" hidden="1" />
+    </frame>
+  """, """
+    {{{_RightInsert}}}
+
+    <quad id="Quad_CurrentMedal" pos="0 {{{_Size.Y / -2}}}" halign="left" valign="center" size="{{{MedalHeight}}} {{{MedalHeight}}}" image="{{{HC::C_ImgBase}}}Ingame/Medal.dds" keepratio="fit" hidden="1" />
+    <quad id="Quad_MedalBackground" pos="0 {{{_Size.Y / -2}}}" halign="left" valign="center" size="{{{MedalHeight}}} {{{MedalHeight}}}" image="{{{HC::C_ImgBase}}}Ingame/MedalEmpty.dds" keepratio="fit" opacity="0.2" />
+  """
+  );
+}
+
+Text CreateCurrentMap(Text _Id, Vec2 _Size, Text _LeftInsert, Text _RightInsert) {
+  return CreateCurrentMap(_Id, _Size, HC::C_MenuOptionRightWidth, _LeftInsert, _RightInsert);
+}
+
+Text CreateCurrentMap(Text _Id, Real _Width, Text _LeftInsert, Text _RightInsert) {
+  return CreateCurrentMap(_Id, <_Width, HC::C_MenuOptionHeightProminent>, _LeftInsert, _RightInsert);
+}
+
+Text CreateCurrentMap(Text _Id, Text _LeftInsert, Text _RightInsert) {
+  return CreateCurrentMap(_Id, HC::C_MenuOptionWidth, _LeftInsert, _RightInsert);
+}
+
+Text InjectFunctions() {
+  return """// <script>
+
+Void HorizonCurrentMap_SetMapInfo(CMlFrame _Frame, Text _MapName, Text _AuthorName, Text _CountryFlagUrl) {
+  declare Label_MapName <=> (_Frame.GetFirstChild("Label_MapName") as CMlLabel);
+  declare Label_MapAuthor <=> (_Frame.GetFirstChild("Label_MapAuthor") as CMlLabel);
+  declare Quad_MapAuthorZone <=> (_Frame.GetFirstChild("Quad_MapAuthorZone") as CMlQuad);
+
+  declare AuthorNickName = TL::Compose(_("By %1"), _AuthorName);
+  declare LabelWidth = ML::Min(Label_MapAuthor.Size.X, Label_MapAuthor.ComputeWidth(AuthorNickName));
+  declare Flag = _CountryFlagUrl;
+
+  if (Flag == "file://ZoneFlags/Path/") {
+    Flag = "file://ZoneFlags/Path/World";
+  }
+
+  Label_MapName.TextSizeReal = {{{HC::C_CurrentMapNameTextSizeMax}}};
+
+  while (Label_MapName.ComputeWidth(_MapName) > (Label_MapName.Size.X * 1.25)) {
+    Label_MapName.TextSizeReal -= 0.25;
+  }
+
+  Label_MapName.SetText(_MapName);
+  Label_MapAuthor.SetText(AuthorNickName);
+  Quad_MapAuthorZone.RelativePosition_V3.X = LabelWidth + 1.0;
+  Quad_MapAuthorZone.ChangeImageUrl(Flag);
+}
+
+Void HorizonCurrentMap_SetMedal(CMlFrame _Frame, Boolean _Visible, Vec3 _Color) {
+  declare Quad_CurrentMedal <=> (_Frame.GetFirstChild("Quad_CurrentMedal") as CMlQuad);
+  declare Quad_MedalBackground <=> (_Frame.GetFirstChild("Quad_MedalBackground") as CMlQuad);
+
+  Quad_CurrentMedal.Visible = _Visible && (_Color.X > 0 || _Color.Y > 0 || _Color.Z > 0);
+  Quad_MedalBackground.Visible = _Visible && !Quad_CurrentMedal.Visible;
+
+  if (Quad_CurrentMedal.Visible) {
+    Quad_CurrentMedal.Colorize = _Color;
+  }
+}
+
+Void HorizonCurrentMap_SetMedal(CMlFrame _Frame, Boolean _Visible) {
+  HorizonCurrentMap_SetMedal(_Frame, _Visible, <0.0, 0.0, 0.0>);
+}
+
+Void HorizonCurrentMap_SetMedal(CMlFrame _Frame, Vec3 _Color) {
+  HorizonCurrentMap_SetMedal(_Frame, True, _Color);
+}
+
+Void HorizonCurrentMap_SetMedal(CMlFrame _Frame, Integer _Medal) {
+  declare Color = <0.0, 0.0, 0.0>;
+
+  switch (_Medal) {
+    case 1: Color = {{{Colors::GetMedalColor(3)}}};
+    case 2: Color = {{{Colors::GetMedalColor(2)}}};
+    case 3: Color = {{{Colors::GetMedalColor(1)}}};
+    case 4: Color = {{{Colors::GetMedalColor(0)}}};
+  }
+
+  HorizonCurrentMap_SetMedal(_Frame, _Medal >= 0, Color);
+}
+
+  """;
+}
+

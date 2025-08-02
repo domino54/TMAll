@@ -1,7 +1,7 @@
 /**
  * @name Layers.Script.txt
  * @author domino54
- * @version 2025-04-22
+ * @version 2025-08-01
  *
  * Library meant as a seamless extension for Nadeo's Layers library within playground ManiaApps.
  * Adds an optional parameter to create separate instances of the layer for each split screen viewport.
@@ -12,7 +12,7 @@
  * the layer on that screen, even if the layer is globally hidden and later shown on all screens at once.
  */
 
-#Const Version    "2025-04-22"
+#Const Version    "2025-08-01"
 #Const ScriptName "ManiaApps/domino54/Layers.Script.txt"
 
 #Include "ManiaApps/Nadeo/Layers.Script.txt" as Layers
@@ -335,7 +335,7 @@ Void SetVisibility(Text _LayerName, Boolean _IsVisible) {
   foreach (ScreenNum => SubLayerName in G_LayerGroups[_LayerName]) {
     declare IsSubLayerVisible = !G_SubLayerVisibility.existskey(_LayerName) || !G_SubLayerVisibility[_LayerName].existskey(ScreenNum) || G_SubLayerVisibility[_LayerName][ScreenNum];
 
-    Layers::SetVisibility(SubLayerName, IsSubLayerVisible);
+    Layers::SetVisibility(SubLayerName, _IsVisible && IsSubLayerVisible);
   }
 }
 

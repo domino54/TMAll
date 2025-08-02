@@ -1,0 +1,589 @@
+/**
+ * @name HorizonFocus.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ *
+ * This library can insert functions inside a manialink layer to automatically
+ * manage mouse/keyboard/controller navigation between a set of controls.
+ *
+ * Library also contains injection of a generic `HorizonFocus_SetFocus` function
+ * for consumer components. Elements inside a frame passed to this method
+ * can have effects applied to them by assigning specific classes to them:
+ *
+ * - "HF" - Enables processing of the control focus state by Horizon Focus.
+ * - "Visible" - Simply makes the control visible when focused and hidden when not.
+ * - "FG" - Colors label text or changes quad background color to the focus foreground color.
+ * - "BG" - Colors label text or changes quad background color to the focus background color.
+ * - "Colorize" - `Colorize` attribute of a quad is used to change the color.
+ * - "ModulateColor" - `ModulateColor` attribute of a quad is used to change the color.
+ *
+ * @example
+ * ```xml
+ * <!-- This quad will be colorized to the foreground color when parent is focused -->
+ * <quad class="FH FG Colorize" size="6 6" image="file://Media/Button.dds" colorize="FFF" />
+ * ```
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt"
+
+#Include "TextLib" as TL
+#Include "ManiaApps/domino54/Horizon/HorizonConstants.Script.txt" as HC
+
+// ---------------------------------- //
+// Constants
+// ---------------------------------- //
+
+#Const C_HorizonClassAttribute "HorizonClass"
+
+// ---------------------------------- //
+// Structs
+// ---------------------------------- //
+
+/**
+ * Configuration for automatic focus management.
+ * Code inside those blocks will be called
+ */
+#Struct K_FocusConfig {
+  /**
+   * Corresponds to `data-{{{C_HorizonClassAttribute}}}`.
+   * The frame that contains the component body should have a class data field.
+   * The element with `scriptevents="1"` inside the component frame should also have a class data field.
+   * This distinguishes the script calls between different component frames that can receive focus.
+   * Can be set on an element using the {@link SetClass}.
+   */
+  Text ClassName;
+
+  /**
+   * Selects the parent control to use for focus/blur calls from the mouse event.
+   * Event can be accessed through the context variable `Event`.
+   *
+   * @example
+   * return Event.Control.Parent;
+   */
+  Text ParentSelector;
+
+  /**
+   * Called when the component is clicked.
+   * Used only as a supplement effect when selecting an option.
+   * Component control can be accessed through the context variable `Control`.
+   *
+   * @example
+   * Audio.PlaySoundEvent(CAudioManager::ELibSound::Valid, 0, 0.0);
+   */
+  Text SelectCallback;
+
+  /**
+   * Called when the component should receive focus.
+   * Component control can be accessed through the context variable `Control`.
+   *
+   * @example
+   * HorizonCustomElement_Focus(Control);
+   */
+  Text FocusCallback;
+
+  /**
+   * Called when the component should be blurred (lose focus).
+   * Component control can be accessed through the context variable `Control`.
+   *
+   * @example
+   * HorizonCustomElement_Blur(Control);
+   */
+  Text BlurCallback;
+}
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+/**
+ * Creates a data attribute text to place on a manialink element
+ * to mark it as being supported by the HorizonFocus library.
+ */
+Text SetClass(Text _ClassName) {
+  return """ data-{{{C_HorizonClassAttribute}}}="{{{TL::MLEncode(_ClassName)}}}" """;
+}
+
+/**
+ * Injects common focus functions to alter the appearance of a frame.
+ */
+Text InjectFunctions() {
+  return """// <script>
+
+Vec3 HorizonFocus_GetFocusColor(CMlControl _Control) {
+  if (_Control.HasClass("FG")) {
+    return {{{TL::ToColor(HC::C_MenuOptionFocusFgColor)}}};
+  }
+
+  if (_Control.HasClass("BG")) {
+    return {{{TL::ToColor(HC::C_MenuOptionFocusBgColor)}}};
+  }
+
+  return <1.0, 0.0, 0.0>; // Missing color class "error"
+}
+
+Void HorizonFocus_ModifyControl(CMlControl _Control, Boolean _IsFocused) {
+  if (_Control.HasClass("Visible")) {
+    _Control.Visible = _IsFocused;
+    return;
+  }
+
+  declare Vec3 HorizonFocus_OriginalColor for _Control;
+  declare FocusColor = HorizonFocus_GetFocusColor(_Control);
+
+  if (_Control is CMlLabel) {
+    declare Label <=> (_Control as CMlLabel);
+
+    if (_IsFocused) {
+      HorizonFocus_OriginalColor = Label.TextColor;
+      Label.TextColor = FocusColor;
+    } else if (Label.TextColor == FocusColor) {
+      Label.TextColor = HorizonFocus_OriginalColor;
+    }
+
+    return;
+  }
+
+  if (!(_Control is CMlQuad)) {
+    return;
+  }
+
+  declare Quad <=> (_Control as CMlQuad);
+
+  if (_Control.HasClass("Colorize")) {
+    if (_IsFocused) {
+      HorizonFocus_OriginalColor = Quad.Colorize;
+      Quad.Colorize = FocusColor;
+    } else if (Quad.Colorize == FocusColor) {
+      Quad.Colorize = HorizonFocus_OriginalColor;
+    }
+
+    return;
+  }
+
+  if (_Control.HasClass("Modulate")) {
+    if (_IsFocused) {
+      HorizonFocus_OriginalColor = Quad.ModulateColor;
+      Quad.ModulateColor = FocusColor;
+    } else if (Quad.ModulateColor == FocusColor) {
+      Quad.ModulateColor = HorizonFocus_OriginalColor;
+    }
+
+    return;
+  }
+
+  if (_IsFocused) {
+    HorizonFocus_OriginalColor = Quad.BgColor;
+    Quad.BgColor = FocusColor;
+  } else if (Quad.BgColor == FocusColor) {
+    Quad.BgColor = HorizonFocus_OriginalColor;
+  }
+}
+
+Void HorizonFocus_SetFocus(CMlFrame _Frame, Boolean _IsFocused) {
+  declare Boolean HorizonFocus_IsFocused for _Frame;
+
+  if (HorizonFocus_IsFocused == _IsFocused) {
+    return;
+  }
+
+  HorizonFocus_IsFocused = _IsFocused;
+
+  Page.GetClassChildren("HF", _Frame, True);
+
+  foreach (Control in Page.GetClassChildren_Result) {
+    HorizonFocus_ModifyControl(Control, _IsFocused);
+  }
+}
+
+  """;
+}
+
+/**
+ * Injects the HorizonFocus API for automatic focus management into a manialink script.
+ *
+ * @param _Configs - An array of {@link K_FocusConfig} structs, each describing the focus behavior of a specific component class.
+ */
+Text InjectFocusAPI(K_FocusConfig[] _Configs) {
+  declare Text ParentSelectorCases;
+  declare Text SelectCallbackCases;
+  declare Text FocusCallbackCases;
+  declare Text BlurCallbackCases;
+
+  foreach (Config in _Configs) {
+    declare EscapedClassName = dump(Config.ClassName);
+
+    ParentSelectorCases ^= """
+      case {{{EscapedClassName}}}: {
+        {{{Config.ParentSelector}}}
+      }
+    """;
+
+    if (Config.SelectCallback != "") {
+      SelectCallbackCases ^= """
+        case {{{EscapedClassName}}}: {
+          {{{Config.SelectCallback}}}
+        }
+      """;
+    }
+
+    if (Config.FocusCallback != "") {
+      FocusCallbackCases ^= """
+        case {{{EscapedClassName}}}: {
+          {{{Config.FocusCallback}}}
+          }
+      """;
+    }
+
+    if (Config.BlurCallback != "") {
+      BlurCallbackCases ^= """
+        case {{{EscapedClassName}}}: {
+          {{{Config.BlurCallback}}}
+        }
+      """;
+    }
+  }
+
+  return """
+// <script><!--
+
+Text HorizonFocus_GetClass(CMlControl _Control) {
+  if (_Control == Null) {
+    return "";
+  }
+
+  return _Control.DataAttributeGet("{{{C_HorizonClassAttribute}}}");
+}
+
+CMlControl HorizonFocus_GetInitialControl() {
+  declare CMlControl HorizonFocus_InitialControl for Page;
+
+  return HorizonFocus_InitialControl;
+}
+
+Void HorizonFocus_SetInitialControl(CMlControl _Control) {
+  declare CMlControl HorizonFocus_InitialControl for Page;
+
+  HorizonFocus_InitialControl = _Control;
+}
+
+CMlControl HorizonFocus_GetCurrentControl() {
+  declare CMlControl HorizonFocus_CurrentControl for Page;
+
+  return HorizonFocus_CurrentControl;
+}
+
+Void HorizonFocus_SetCurrentControl(CMlControl _Control) {
+  declare CMlControl HorizonFocus_CurrentControl for Page;
+
+  HorizonFocus_CurrentControl = _Control;
+}
+
+Boolean HorizonFocus_IsManaged(CMlControl _Control) {
+  declare Text[CMlControl] HorizonFocus_StackControls for Page;
+
+  return HorizonFocus_StackControls.existskey(_Control);
+}
+
+Void HorizonFocus_NavigationStackClear() {
+  declare Text[CMlControl] HorizonFocus_StackControls for Page;
+
+  HorizonFocus_StackControls.clear();
+}
+
+Void HorizonFocus_NavigationStackAdd(CMlControl _Control, Text _Value) {
+  declare Text[CMlControl] HorizonFocus_StackControls for Page;
+
+  HorizonFocus_StackControls[_Control] = _Value;
+}
+
+Void HorizonFocus_NavigationStackAddControls(CMlFrame _Frame, Text[Integer] _Values) {
+  foreach (I => Value in _Values) {
+    if (_Frame.Controls.existskey(I)) {
+      HorizonFocus_NavigationStackAdd(_Frame.Controls[I], Value);
+    }
+  }
+}
+
+Text HorizonFocus_GetStackValue(CMlControl _Control) {
+  declare Text[CMlControl] HorizonFocus_StackControls for Page;
+
+  if (!HorizonFocus_StackControls.existskey(_Control)) {
+    return "";
+  }
+
+  return HorizonFocus_StackControls[_Control];
+}
+
+CMlControl[] HorizonFocus_GetStackControls() {
+  declare Text[CMlControl] HorizonFocus_StackControls for Page;
+  declare CMlControl[] Result;
+
+  foreach (Control => __ in HorizonFocus_StackControls) {
+    Result.add(Control);
+  }
+
+  return Result;
+}
+
+CMlControl HorizonFocus_GetParentControl(CMlScriptEvent _Event, Text _HorizonClass) {
+  declare Event <=> _Event; // Alias for external API
+
+  switch (_HorizonClass) {
+    {{{ParentSelectorCases}}}
+    default: {}
+  }
+
+  return Null;
+}
+
+Void HorizonFocus_SelectControl(CMlControl _Control, Text _HorizonClass) {
+  declare Control = _Control; // Alias for external API
+
+  switch (_HorizonClass) {
+    {{{SelectCallbackCases}}}
+    default: {}
+  }
+}
+
+Void HorizonFocus_SelectControl(CMlControl _Control) {
+  declare HorizonClass = HorizonFocus_GetClass(_Control);
+
+  HorizonFocus_SelectControl(_Control, HorizonClass);
+}
+
+Void HorizonFocus_BlurControl(CMlControl _Control, Text _HorizonClass) {
+  declare Control = _Control; // Alias for external API
+
+  switch (_HorizonClass) {
+    {{{BlurCallbackCases}}}
+    default: {}
+  }
+
+  if (Control == HorizonFocus_GetCurrentControl()) {
+    HorizonFocus_SetCurrentControl(Null);
+  }
+}
+
+Void HorizonFocus_BlurControl(CMlControl _Control) {
+  declare HorizonClass = HorizonFocus_GetClass(_Control);
+
+  HorizonFocus_BlurControl(_Control, HorizonClass);
+}
+
+Void HorizonFocus_FocusControl(CMlControl _Control, Text _HorizonClass) {
+  declare CurrentControl = HorizonFocus_GetCurrentControl();
+  declare Control = _Control; // Alias for external API
+
+  // TODO: Check disabled state
+
+  if (Control == CurrentControl) {
+    return;
+  }
+
+  switch (_HorizonClass) {
+    {{{FocusCallbackCases}}}
+    default: {}
+  }
+
+  if (!HorizonFocus_IsManaged(Control)) {
+    return;
+  }
+
+  if (CurrentControl != Null && CurrentControl != Control) {
+    HorizonFocus_BlurControl(CurrentControl);
+  }
+
+  HorizonFocus_SetCurrentControl(Control);
+}
+
+Void HorizonFocus_FocusControl(CMlControl _Control) {
+  declare HorizonClass = HorizonFocus_GetClass(_Control);
+
+  HorizonFocus_FocusControl(_Control, HorizonClass);
+}
+
+Void HorizonFocus_FocusInitial() {
+  declare CMlControl HorizonFocus_InitialControl for Page;
+
+  if (HorizonFocus_InitialControl == Null) {
+    return;
+  }
+
+  HorizonFocus_FocusControl(HorizonFocus_InitialControl);
+}
+
+Void HorizonFocus_OnMouseOverOut(CMlScriptEvent _Event) {
+  declare HorizonClass = HorizonFocus_GetClass(_Event.Control);
+
+  if (HorizonClass == "") {
+    return;
+  }
+
+  declare Event <=> _Event; // Alias for external API
+  declare Control = HorizonFocus_GetParentControl(Event, HorizonClass);
+
+  if (Control == Null) {
+    return;
+  }
+
+  switch (_Event.Type) {
+    case CMlScriptEvent::Type::MouseOut: {
+      HorizonFocus_BlurControl(Control, HorizonClass);
+    }
+    case CMlScriptEvent::Type::MouseOver: {
+      HorizonFocus_FocusControl(Control, HorizonClass);
+    }
+  }
+}
+
+Boolean HorizonFocus_OnStackNavigation(CMlScriptEvent _Event) {
+  if (_Event.MenuNavAction != CMlScriptEvent::EMenuNavAction::Up && _Event.MenuNavAction != CMlScriptEvent::EMenuNavAction::Down) {
+    return False;
+  }
+
+  declare StackControls = HorizonFocus_GetStackControls();
+
+  if (StackControls.count <= 0) {
+    return False;
+  }
+
+  declare CurrentControl = HorizonFocus_GetCurrentControl();
+
+  if (CurrentControl == Null) {
+    CurrentControl = HorizonFocus_GetInitialControl();
+  }
+
+  declare Index = StackControls.keyof(CurrentControl);
+  declare IndexChange = -1;
+
+  if (_Event.MenuNavAction == CMlScriptEvent::EMenuNavAction::Down) {
+    IndexChange = 1;
+  }
+
+  if (Index < 0) {
+    Index = 0;
+  }
+
+  if (CurrentControl == Null) {
+    CurrentControl = StackControls[0]; // Prevents infinite loop
+  }
+
+  declare CMlControl NextControl;
+
+  // Seek for next enabled control
+  while (True) {
+    Index += IndexChange;
+
+    if (Index >= StackControls.count) {
+      Index = 0;
+    }
+    if (Index < 0) {
+      Index = StackControls.count - 1;
+    }
+
+    declare Control = StackControls[Index];
+
+    if (Control == CurrentControl) {
+      break;
+    }
+
+    // TODO: Check disabled state
+    // if (Disabled) {
+    //   continue;
+    // }
+
+    NextControl = Control;
+    break;
+  }
+
+  if (NextControl != Null && NextControl != CurrentControl) {
+    if (CurrentControl != Null) {
+      HorizonFocus_BlurControl(CurrentControl);
+    }
+
+    HorizonFocus_FocusControl(NextControl);
+  }
+
+  return True;
+}
+
+Boolean HorizonFocus_OnMenuNavigation(CMlScriptEvent _Event) {
+  return HorizonFocus_OnStackNavigation(_Event);
+}
+
+  """;
+}
+
+/**
+ * Injects a loop that processes menu navigation events.
+ *
+ * @param _SelectCallback - The callback code to execute when a navigable option is selected (Enter/A).
+ * @return - The script code containing the event loop.
+ *
+ * @remarks
+ * Callback can use the context variables:
+ * - `Control` - The selected control.
+ * - `Value` - Text value associated with the control.
+ */
+Text InjectLoop(Text _SelectCallback) {
+  return """
+
+foreach (Event in PendingEvents) {
+  if (Event.Type == CMlScriptEvent::Type::MouseOut) {
+    HorizonFocus_OnMouseOverOut(Event);
+  }
+
+  if (!PageIsVisible) {
+    continue;
+  }
+
+  if (Event.Type == CMlScriptEvent::Type::MouseOver) {
+    HorizonFocus_OnMouseOverOut(Event);
+  }
+
+  else if (Event.Type == CMlScriptEvent::Type::MouseClick) {
+    declare HorizonClass = HorizonFocus_GetClass(Event.Control);
+
+    if (HorizonClass == "") {
+      continue;
+    }
+
+    declare Control = HorizonFocus_GetParentControl(Event, HorizonClass);
+
+    if (!HorizonFocus_IsManaged(Control)) {
+      continue;
+    }
+
+    declare Value = HorizonFocus_GetStackValue(Control);
+
+    {{{_SelectCallback}}}
+
+    HorizonFocus_SelectControl(Control, HorizonClass);
+  }
+
+  else if (Event.Type == CMlScriptEvent::Type::MenuNavigation) {
+    if (HorizonFocus_OnMenuNavigation(Event)) {
+      continue;
+    }
+
+    if (Event.MenuNavAction != CMlScriptEvent::EMenuNavAction::Select) {
+      continue;
+    }
+
+    declare Control = HorizonFocus_GetCurrentControl();
+
+    if (Control == Null) {
+      continue;
+    }
+
+    declare Value = HorizonFocus_GetStackValue(Control);
+
+    {{{_SelectCallback}}}
+
+    HorizonFocus_SelectControl(Control);
+  }
+}
+
+  """;
+}

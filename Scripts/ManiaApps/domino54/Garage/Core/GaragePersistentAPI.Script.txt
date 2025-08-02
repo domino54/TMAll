@@ -1,0 +1,36 @@
+/**
+ * @name GaragePersistentAPI.Script.txt
+ * @author domino54
+ * @version 2025-08-01
+ */
+
+#Const Version      "2025-08-01"
+#Const ScriptName   "ManiaApps/domino54/Garage/Core/GaragePersistentAPI.Script.txt"
+
+// ---------------------------------- //
+// Public functions
+// ---------------------------------- //
+
+Text GetLastModelId() {
+  declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
+
+  return Persistent_Garage_LastPlayerModelId;
+}
+
+Void SetLastModelId(Text _ModelId) {
+  declare persistent Text Persistent_Garage_LastPlayerModelId for LocalUser;
+
+  Persistent_Garage_LastPlayerModelId = _ModelId;
+}
+
+Text GetLastSkinCategoryId() {
+  declare persistent Text Persistent_Garage_LastSkinCategoryId for LocalUser;
+
+  return Persistent_Garage_LastSkinCategoryId;
+}
+
+Void SetLastSkinCategoryId(Text _SkinCategoryId) {
+  declare persistent Text Persistent_Garage_LastSkinCategoryId for LocalUser;
+
+  Persistent_Garage_LastSkinCategoryId = _SkinCategoryId;
+}

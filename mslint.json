@@ -8,10 +8,14 @@
     "Scripts/Modes/Base/**"
   ],
   "linter": [
+    {
+      "msApiGame": "maniaplanet"
+    },
     "mslint:recommended",
     {
-      "msApiGame": "maniaplanet",
-      "ignores": ["**/Nadeo/**"],
+      "ignores": ["**/Nadeo/**"]
+    },
+    {
       "rules": {
         "format-real": [
           "error",
