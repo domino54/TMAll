@@ -2,6 +2,8 @@
   "recommendations": [
     "aessi.vscode-maniascript-language",
     "aessi.vscode-mslint",
-    "EditorConfig.EditorConfig"
+    "esbenp.prettier-vscode",
+    "EditorConfig.EditorConfig",
+    "usernamehw.remove-empty-lines"
   ]
 }

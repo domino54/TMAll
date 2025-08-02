@@ -4,10 +4,5 @@
       "name": "TM All Maker",
       "path": "./"
     }
-  ],
-  "settings": {
-    "files.trimTrailingWhitespace": false,
-    "editor.tabSize": 2,
-    "editor.detectIndentation": true
-  }
+  ]
 }
